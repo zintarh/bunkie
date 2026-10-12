@@ -1,0 +1,36 @@
+.top { height: 60px; padding: 8px 12px 0 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.viewport { flex: 1; overflow: hidden; touch-action: pan-y; }
+.track { display: flex; height: 100%; transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.slide { flex: 0 0 100%; padding: 16px 20px 0; display: flex; flex-direction: column; gap: 32px; }
+.art { height: min(380px, 48dvh); border-radius: 32px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.green { background: radial-gradient(90% 70% at 85% 10%, #5be6a0 0%, rgba(91, 230, 160, 0) 60%), linear-gradient(160deg, #26c878, #129a57); box-shadow: 0 20px 40px rgba(23, 168, 98, 0.28); }
+.dark { background: radial-gradient(80% 60% at 20% 0%, #24493a 0%, rgba(36, 73, 58, 0) 70%), linear-gradient(160deg, #163126, #0c1a14); box-shadow: 0 20px 40px rgba(16, 35, 27, 0.28); }
+.amber { background: radial-gradient(80% 60% at 80% 0%, #fff4d9 0%, rgba(255, 244, 217, 0) 70%), linear-gradient(160deg, #fbd98b, #f5b83d); box-shadow: 0 20px 40px rgba(245, 184, 61, 0.35); }
+.spark { position: absolute; width: 14px; height: 14px; background: #f5b83d; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: tw 2.4s ease-in-out infinite; }
+@keyframes tw { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.fchip { position: absolute; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: #fff; color: #10231b; font-weight: 800; font-size: 13px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18); z-index: 2; }
+.bob { animation: bob 3s ease-in-out infinite; }
+.bob2 { animation: bob 3s ease-in-out 0.5s infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.bunk { position: absolute; left: 66px; right: 66px; top: 56px; bottom: 46px; }
+.postL, .postR { position: absolute; top: 0; bottom: 0; width: 12px; border-radius: 6px; background: #f5b83d; }
+.postL { left: 0; }
+.postR { right: 0; }
+.rail { position: absolute; left: 0; right: 0; height: 10px; border-radius: 5px; background: #f5b83d; }
+.mattress { position: absolute; left: 18px; right: 18px; height: 26px; border-radius: 10px; background: #fff; }
+.face { position: absolute; width: 52px; height: 52px; border-radius: 999px; color: #10231b; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; }
+.profile { width: 220px; background: #fff; border-radius: 24px; padding: 14px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35); display: flex; flex-direction: column; gap: 12px; }
+.line { height: 9px; border-radius: 5px; background: #e3e8e1; display: block; }
+.seal { position: absolute; right: 58px; top: 86px; width: 60px; height: 60px; border-radius: 999px; background: #f5b83d; color: #10231b; display: flex; align-items: center; justify-content: center; }
+.zero { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #fff; border-radius: 28px; padding: 30px 44px; box-shadow: 0 20px 40px rgba(122, 82, 0, 0.25); }
+.bottom { flex-shrink: 0; padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 20px; }
+.dots { display: flex; justify-content: center; gap: 6px; }
+.dot { height: 8px; border: 0; border-radius: 999px; padding: 0; transition: width 0.3s ease, background-color 0.3s ease; }
+.splash {
+  position: absolute; inset: 0; z-index: 10; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: radial-gradient(70% 50% at 50% 35%, #5be6a0 0%, rgba(91, 230, 160, 0) 70%), linear-gradient(170deg, #26c878, #11924f);
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+.logo { width: 84px; height: 84px; border-radius: 26px; background: #f5b83d; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); color: #10231b; display: flex; align-items: center; justify-content: center; animation: logo 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.logoText { font-family: var(--display); font-weight: 800; font-size: 34px; letter-spacing: -0.02em; color: #fff; animation: logo 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes logo { 0% { opacity: 0; transform: scale(0.7); } 100% { opacity: 1; transform: scale(1); } }

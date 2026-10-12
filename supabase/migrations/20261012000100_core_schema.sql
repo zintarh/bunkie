@@ -85,6 +85,9 @@ create table public.profile_private (
   updated_at timestamptz not null default now()
 );
 
+-- One state code per account.
+create unique index profile_private_state_code_key on public.profile_private (state_code) where state_code is not null;
+
 -- The five bunkie questions. Answers are indexes into the option lists in the app.
 create table public.bunkie_answers (
   user_id uuid primary key references public.profiles (id) on delete cascade,
@@ -233,6 +236,7 @@ create table public.bookings (
   move_out date not null,
   stay daterange generated always as (daterange(move_in, move_out)) stored,
   monthly_total int not null,
+  message text check (char_length(message) <= 500),
   deadline_at timestamptz,
   offered_slots timestamptz[] not null default '{}',
   viewing_mode public.viewing_mode,

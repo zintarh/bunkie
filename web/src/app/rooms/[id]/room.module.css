@@ -1,0 +1,14 @@
+.sec { padding: 20px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.tapL, .tapR { position: absolute; top: 64px; bottom: 56px; width: 45%; border: 0; background: transparent; }
+.tapL { left: 0; }
+.tapR { right: 0; }
+.dot { width: 6px; height: 6px; border-radius: 999px; display: block; }
+.fact { background: var(--white); box-shadow: var(--shadow-card); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.fact b { font-size: 17px; }
+.fact span { font-size: 13px; color: var(--muted); }
+.rr { display: flex; align-items: center; gap: 12px; min-height: 40px; }
+.map { height: 150px; border-radius: 14px; background: #e2e7de; position: relative; overflow: hidden; }
+.roadH { position: absolute; left: 0; right: 0; top: 60px; height: 14px; background: #fff; }
+.roadV { position: absolute; top: 0; bottom: 0; left: 30%; width: 14px; background: #fff; }
+.roadV2 { position: absolute; top: 0; bottom: 0; left: 70%; width: 20px; background: #f7e3a6; }
+.area { position: absolute; left: calc(50% - 48px); top: 30px; width: 96px; height: 96px; border-radius: 999px; background: rgba(23, 168, 98, 0.18); border: 2px solid var(--green); }

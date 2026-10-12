@@ -178,7 +178,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- request_room: the tenant's first step.
 -- ---------------------------------------------------------------------------
-create or replace function public.request_room(p_listing uuid, p_move_in date, p_months int)
+create or replace function public.request_room(p_listing uuid, p_move_in date, p_months int, p_message text default null)
 returns public.bookings
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -249,9 +249,10 @@ begin
                        and status in ('accepted', 'viewing_booked', 'viewed', 'host_confirmed', 'agreed'));
 
   insert into public.bookings (listing_id, tenant_id, host_id, is_camp_booking, move_in, months, move_out,
-                               monthly_total, deadline_at)
+                               monthly_total, message, deadline_at)
   values (p_listing, v_uid, v_l.host_id, coalesce(v_me.nysc_stage = 'in_camp', false), p_move_in, p_months,
           (p_move_in + make_interval(months => p_months))::date, v_l.monthly_total,
+          nullif(left(trim(p_message), 500), ''),
           case when v_in_lane then null
                else now() + make_interval(hours => private.setting_int('host_reply_hours', 12)) end)
   returning * into v_row;
@@ -759,9 +760,9 @@ grant execute on function
   public.sys_record_verification(uuid, text, boolean, text, text, text, public.gender, jsonb)
 to service_role;
 
-revoke execute on function public.request_room(uuid, date, int), public.booking_action(uuid, text, int, jsonb),
+revoke execute on function public.request_room(uuid, date, int, text), public.booking_action(uuid, text, int, jsonb),
   public.start_payment(uuid), public.my_verification(), public.room_address(uuid)
 from public, anon;
-grant execute on function public.request_room(uuid, date, int), public.booking_action(uuid, text, int, jsonb),
+grant execute on function public.request_room(uuid, date, int, text), public.booking_action(uuid, text, int, jsonb),
   public.start_payment(uuid), public.my_verification(), public.room_address(uuid)
 to authenticated;

@@ -1,0 +1,91 @@
+import "server-only";
+import { DEMO_ROOMS } from "./demo";
+import { estimateMinutes } from "./estimate";
+import { ZONES } from "./places";
+import { supabasePublic } from "./supabase/server";
+import type { RoomCard, RoomDetail, SearchParams } from "./types";
+
+const CENTRE = { lat: 9.0579, lng: 7.4951 };
+
+const estimate = estimateMinutes;
+
+export async function searchRooms(p: SearchParams): Promise<RoomCard[]> {
+  const db = supabasePublic();
+  if (!db) return searchDemo(p);
+  const { data, error } = await db.rpc("search_rooms", {
+    p_mode: p.mode,
+    p_move_in: p.moveIn ?? null,
+    p_zone: p.zone ?? null,
+    p_price_min: p.priceMin ?? 0,
+    p_price_max: p.priceMax ?? 10_000_000,
+    p_pref: p.pref ?? "mixed_ok",
+    p_room: p.room ?? null,
+    p_stay: p.stay ?? "any",
+    p_max_minutes: p.maxMinutes ?? null,
+    p_limit: 40,
+  });
+  if (error) throw new Error(error.message);
+  return data as RoomCard[];
+}
+
+function searchDemo(p: SearchParams): RoomCard[] {
+  const zone = p.zone ? ZONES.find((z) => z.id === p.zone) : undefined;
+  return DEMO_ROOMS.map((r) => ({
+    ...r,
+    commute_min: zone ? estimate(r.area_lat!, r.area_lng!, zone.lat, zone.lng) : null,
+    ease_min: estimate(r.area_lat!, r.area_lng!, CENTRE.lat, CENTRE.lng),
+  }))
+    .filter((r) => r.monthly_total >= (p.priceMin ?? 0) && r.monthly_total <= (p.priceMax ?? Infinity))
+    .filter((r) => !p.room || r.room_kind === p.room)
+    .filter((r) => !p.pref || p.pref === "mixed_ok" || (p.pref === "women_only" ? r.household === "women" : r.household === "men"))
+    .filter((r) => !p.stay || p.stay === "any" || (p.stay === "short" ? r.min_months <= 3 : r.max_months >= 6))
+    .filter((r) => p.mode !== "camp" || (r.open_to_camp && r.min_months <= 3))
+    .filter((r) => !p.moveIn || !r.available_from || r.available_from <= p.moveIn)
+    .filter((r) => !p.maxMinutes || r.commute_min == null || r.commute_min <= p.maxMinutes)
+    .sort((a, b) =>
+      p.mode === "camp" ? a.ease_min! - b.ease_min! : p.mode === "ppa" ? (a.commute_min ?? 0) - (b.commute_min ?? 0) : 0,
+    );
+}
+
+export async function getRoom(id: string): Promise<RoomDetail | null> {
+  const db = supabasePublic();
+  if (!db) return DEMO_ROOMS.find((r) => r.id === id) ?? null;
+  if (!/^[0-9a-f-]{36}$/.test(id)) return null;
+
+  const { data: l } = await db
+    .from("listings")
+    .select(
+      `id, area_name, area_lat, area_lng, room_kind, bath_kind, furnished, household, open_to_camp, min_months, max_months,
+       available_from, rent_monthly, monthly_total, total_varies, deposit, pay_schedule, photo_count, cover_path, published_at,
+       early_leave_notice_days, redeploy_refund, ask_leave_notice_days, host_id,
+       host:profiles!listings_host_id_fkey(first_name, photo_path, is_verified),
+       listing_photos(path, shot, taken_at, position),
+       listing_costs(name, amount, tenant_pays, varies, position),
+       house_rules(topic, choice, consequence, position)`,
+    )
+    .eq("id", id)
+    .eq("status", "live")
+    .maybeSingle();
+  if (!l) return null;
+
+  const { data: answers } = await db
+    .from("bunkie_answers")
+    .select("sleep, guests, cooking, cleaning, noise, approved_at")
+    .eq("user_id", l.host_id)
+    .maybeSingle();
+
+  const host = (Array.isArray(l.host) ? l.host[0] : l.host) as { first_name: string; photo_path: string | null; is_verified: boolean };
+  const byPos = <T extends { position: number }>(xs: T[]) => [...xs].sort((a, b) => a.position - b.position);
+  return {
+    ...(l as unknown as RoomDetail),
+    host_first_name: host?.first_name ?? "",
+    host_photo_path: host?.photo_path ?? null,
+    host_verified: host?.is_verified ?? false,
+    host_answers: answers?.approved_at ? { sleep: answers.sleep, guests: answers.guests, cooking: answers.cooking, cleaning: answers.cleaning, noise: answers.noise } : null,
+    commute_min: null,
+    ease_min: l.area_lat ? estimate(l.area_lat, l.area_lng!, CENTRE.lat, CENTRE.lng) : null,
+    photos: byPos(l.listing_photos ?? []),
+    costs: byPos(l.listing_costs ?? []),
+    rules: byPos(l.house_rules ?? []),
+  };
+}
