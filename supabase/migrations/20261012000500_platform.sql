@@ -57,3 +57,6 @@ $$);
 select cron.schedule('prune-jobs', '17 3 * * *', $$
   delete from private.jobs where done_at < now() - interval '14 days'
 $$);
+
+-- Live updates on the booking screen (only that screen subscribes).
+alter publication supabase_realtime add table public.bookings;

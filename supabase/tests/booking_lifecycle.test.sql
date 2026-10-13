@@ -191,6 +191,8 @@ end $$;
 -- ---------------------------------------------------------------------------
 set role authenticated;
 select t.as_user('00000000-0000-0000-0000-0000000000b1');
+select t.expect_error($$ select public.booking_action((select id from b1), 'plan_arrival', null, '{"window": "midnight"}') $$, '%arrival_window%');
+select public.booking_action((select id from b1), 'plan_arrival', null, '{"window": "midday"}');
 select public.booking_action((select id from b1), 'check_in', null, '{"as_listed": true}');
 reset role;
 do $$ begin

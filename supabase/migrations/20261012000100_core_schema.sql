@@ -243,6 +243,7 @@ create table public.bookings (
   viewing_at timestamptz,
   reschedules smallint not null default 0,
   tenant_matched_at timestamptz,
+  arrival_window text check (arrival_window in ('morning', 'midday', 'afternoon', 'evening')),
   close_reason text,
   closed_at timestamptz,
   version int not null default 1,

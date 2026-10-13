@@ -408,6 +408,15 @@ begin
     perform private.notify(b.tenant_id, 'pay_now', b.id);
     return b;
 
+  -- Paid: tenant picks an arrival window for move-in day.
+  elsif p_action = 'plan_arrival' and v_tenant and b.status = 'paid' then
+    update public.bookings set arrival_window = p_payload ->> 'window', version = version + 1
+    where id = b.id returning * into b;
+    insert into public.booking_events (booking_id, actor_id, action, from_status, to_status, payload)
+    values (b.id, v_uid, 'plan_arrival', b.status, b.status, p_payload);
+    perform private.notify(b.host_id, 'arrival_planned', b.id, p_payload);
+    return b;
+
   -- Paid: host cancels -> full refund, standing lowered.
   elsif p_action = 'host_cancel' and v_host and b.status = 'paid' then
     perform private.lower_standing(v_uid, 25);
