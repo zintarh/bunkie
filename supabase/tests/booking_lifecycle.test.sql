@@ -73,6 +73,11 @@ from ids, unnest(array['bedroom', 'bathroom', 'kitchen', 'meter', 'entrance']) w
 insert into public.bunkie_answers (user_id, sleep, guests, cooking, cleaning, noise, pledged_at, approved_at)
 values (auth.uid(), 1, 1, 1, 0, 0, now(), now());
 
+-- No house rules blocks publishing.
+select t.expect_error($$ select public.publish_listing((select listing_id from ids)) $$, '%rules%');
+insert into public.house_rules (listing_id, topic, choice, consequence, is_custom, position)
+select listing_id, 'Noise', 'Quiet after 10pm', 'warning_then_notice', false, 0 from ids;
+
 -- Missing payout account blocks publishing.
 select t.expect_error($$ select public.publish_listing((select listing_id from ids)) $$, '%payout%');
 reset role;

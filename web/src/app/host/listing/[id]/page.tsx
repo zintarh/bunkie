@@ -2,7 +2,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { RequireAuth } from "@/components/auth";
-import { Progress } from "@/components/ui";
+import { STEP_LABEL, stepsDone } from "@/lib/hosting";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { CostsStep, ExitSave, LocationStep, RefundsStep, RoomStep, RulesStep, STEPS, type Listing } from "./steps";
 import { PhotosStep } from "./PhotosStep";
@@ -30,33 +30,33 @@ function Wizard() {
   const n = STEPS.indexOf(step as (typeof STEPS)[number]);
   const go = (s: Step) => router.push(`/host/listing/${id}?step=${s}`);
 
-  // Remember the furthest finished step, so the host feed and home can show progress and reopen here.
-  const markDone = async () => {
-    const db = supabaseBrowser();
-    if (!db || !listing || n < 0 || listing.draft_step >= n + 1) return;
-    await db.from("listings").update({ draft_step: n + 1 }).eq("id", id);
-    setListing({ ...listing, draft_step: n + 1 });
-  };
-  const next = async () => {
-    await markDone();
-    go(n >= 0 && n < STEPS.length - 1 ? STEPS[n + 1] : "review");
-  };
+  const next = async () => go(n >= 0 && n < STEPS.length - 1 ? STEPS[n + 1] : "review");
   const back = () => (n > 0 ? go(STEPS[n - 1]) : router.push("/host"));
+  // Leaving the open step (Save & exit, or a tap on the step bar) keeps its changes when it's complete.
+  const saveOpenStep = async () => {
+    try {
+      if (exitSave.current) await exitSave.current();
+    } catch {
+      // Leave anyway; what was saved before stays saved.
+    }
+  };
   const saveAndExit = async () => {
     setExiting(true);
-    try {
-      if (exitSave.current) {
-        await exitSave.current();
-        await markDone();
-      }
-    } catch {
-      // Leave anyway; the steps finished before this one are already saved.
-    }
+    await saveOpenStep();
     router.push("/host");
+  };
+  const jump = async (s: Step) => {
+    if (s === step) return;
+    setExiting(true);
+    await saveOpenStep();
+    await reload();
+    setExiting(false);
+    go(s);
   };
 
   if (!listing) return <main className="screen" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></main>;
   const props = { listing, reload, next, back };
+  const done = stepsDone(listing);
 
   return (
     <ExitSave.Provider value={exitSave}>
@@ -64,10 +64,17 @@ function Wizard() {
       {step !== "review" && (
         <>
           <div className="topbar" style={{ padding: "0 16px", justifyContent: "space-between" }}>
-            <span className="lbl">Step {n + 1} of {STEPS.length}</span>
+            <span className="lbl">Step {n + 1} of {STEPS.length} · {STEP_LABEL[STEPS[n]]}</span>
             <button className="pill" onClick={saveAndExit} disabled={exiting}>{exiting ? <span className="spin dark" /> : "Save & exit"}</button>
           </div>
-          <Progress value={(n + 1) / STEPS.length} />
+          <nav className="stepbar" aria-label="Listing steps">
+            {STEPS.map((s, i) => (
+              <button key={s} className={[done.has(s) ? "done" : "", i === n ? "on" : ""].join(" ")} disabled={exiting}
+                onClick={() => jump(s)} aria-label={`${STEP_LABEL[s]}${done.has(s) ? ", done" : ""}`} aria-current={i === n ? "step" : undefined}>
+                <span />
+              </button>
+            ))}
+          </nav>
         </>
       )}
       {step === "location" && <LocationStep {...props} />}

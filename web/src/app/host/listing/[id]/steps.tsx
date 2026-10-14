@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState, type MutableRefObject, type ReactNode } from "react";
 import { LocateFixed, Plus, X } from "lucide-react";
-import { MapImage } from "@/components/MapImage";
+import { PinMap } from "@/components/PinMap";
 import { PlaceSearch, placeAt, type Place } from "@/components/PlaceSearch";
 import { Chips, Seg, Stepper, Switch } from "@/components/ui";
 import { errorText } from "@/lib/auth";
@@ -16,7 +16,7 @@ import type { BathKind, Household, PaySchedule, PhotoShot, RoomKind } from "@/li
 export const STEPS = HOST_STEPS;
 
 export type Listing = {
-  id: string; status: string; draft_step: number; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
+  id: string; status: string; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
   household: Household | null; open_to_camp: boolean; min_months: number; max_months: number; pay_schedule: PaySchedule;
   available_from: string | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
   early_leave_notice_days: number; redeploy_refund: "all_unused" | "unused_minus_2w"; ask_leave_notice_days: number; allowed_to_share: boolean;
@@ -45,6 +45,7 @@ export function StepShell({ title, children, canNext, onSave, back, next, nextLa
     };
   });
   const go = async () => {
+    if (!canNext) return next();
     setBusy(true);
     setError(null);
     try {
@@ -65,7 +66,7 @@ export function StepShell({ title, children, canNext, onSave, back, next, nextLa
       </div>
       <div className="foot split">
         <button className="link" onClick={back}>Back</button>
-        <button className="next" disabled={!canNext || busy} onClick={go}>{busy ? <span className="spin" /> : nextLabel}</button>
+        <button className={canNext ? "next" : "next skip"} disabled={busy} onClick={go}>{busy ? <span className="spin" /> : canNext ? nextLabel : "Skip"}</button>
       </div>
     </>
   );
@@ -141,9 +142,9 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
         </>
       ) : (
         <>
-          <MapImage lat={pin.lat} lng={pin.lng} mode="pin" label={`Map of ${address || area}`} />
+          <PinMap lat={pin.lat} lng={pin.lng} onMove={setPin} label={`Map of ${address || area}. Drag the map to move the pin.`} />
           <div className="between">
-            <span className="small" style={{ fontSize: 14 }}>Only shown to a bunkie once a viewing is booked.</span>
+            <span className="small" style={{ fontSize: 14 }}>Drag the map so the pin is on the room. Only shown to a bunkie once a viewing is booked.</span>
             <button className="link" onClick={() => setPin(null)}>Change</button>
           </div>
           <div className="stack">
@@ -301,7 +302,7 @@ export function RulesStep({ listing, reload, next, back }: StepProps) {
   const customs = rules.filter((r) => r.is_custom);
 
   return (
-    <StepShell title="House rules" back={back} next={next} canNext={customs.every((c) => c.choice.trim())}
+    <StepShell title="House rules" back={back} next={next} canNext={rules.length > 0 && customs.every((c) => c.choice.trim())}
       onSave={async () => {
         const c = db();
         const del = await c.from("house_rules").delete().eq("listing_id", listing.id);

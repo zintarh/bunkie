@@ -8,11 +8,11 @@ import { Progress, TabBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 import { naira } from "@/lib/format";
-import { draftLabel, draftProgress, resumeHref } from "@/lib/hosting";
+import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, type ProgressFields } from "@/lib/hosting";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-type MyListing = { id: string; status: string; draft_step: number; area_name: string; monthly_total: number; cover_path: string | null; photo_count: number };
+type MyListing = ProgressFields & { status: string; area_name: string; monthly_total: number; cover_path: string | null };
 const STATUS: Record<string, [string, string]> = {
   draft: ["Draft", "grey"], live: ["Live", "green"], paused: ["Paused", "amber"], flagged: ["In review", "amber"], archived: ["Archived", "grey"],
 };
@@ -29,8 +29,8 @@ export default function HostHome() {
   useEffect(() => {
     const db = supabaseBrowser();
     if (!me || !db) return;
-    db.from("listings").select("id, status, draft_step, area_name, monthly_total, cover_path, photo_count").eq("host_id", me.user.id).order("created_at", { ascending: false })
-      .then(({ data }) => setListings((data ?? []) as MyListing[]));
+    db.from("listings").select(`status, area_name, monthly_total, cover_path, ${LISTING_PROGRESS}`).eq("host_id", me.user.id).order("created_at", { ascending: false })
+      .then(({ data }) => setListings((data ?? []) as unknown as MyListing[]));
     fetchMyBookings("host").then(setBookings, () => setBookings([]));
     db.from("payouts").select("amount_kobo, status").then(({ data }) => setPayouts(data ?? []));
   }, [me]);

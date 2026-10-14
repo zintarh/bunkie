@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { ChevronRight, House } from "lucide-react";
 import { Progress } from "@/components/ui";
 import { useMe } from "@/lib/auth";
-import { draftLabel, draftProgress, resumeHref } from "@/lib/hosting";
+import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, type ProgressFields } from "@/lib/hosting";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-type Draft = { id: string; draft_step: number; area_name: string; cover_path: string | null };
+type Draft = ProgressFields & { area_name: string; cover_path: string | null };
 
 /** The host's most recent unfinished listing, with progress and a way back in. Renders nothing otherwise. */
 export function ContinueHosting({ style }: { style?: React.CSSProperties }) {
@@ -18,9 +18,9 @@ export function ContinueHosting({ style }: { style?: React.CSSProperties }) {
   useEffect(() => {
     const db = supabaseBrowser();
     if (!me || !db) return setDraft(null);
-    db.from("listings").select("id, draft_step, area_name, cover_path").eq("host_id", me.user.id).eq("status", "draft")
+    db.from("listings").select(`area_name, cover_path, ${LISTING_PROGRESS}`).eq("host_id", me.user.id).eq("status", "draft")
       .order("updated_at", { ascending: false }).limit(1).maybeSingle()
-      .then(({ data }) => setDraft(data as Draft | null));
+      .then(({ data }) => setDraft(data as unknown as Draft | null));
   }, [me]);
 
   if (!draft) return null;

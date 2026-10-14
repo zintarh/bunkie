@@ -101,6 +101,13 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
   background: linear-gradient(180deg, #2ecc7f 0%, #17a862 100%); color: var(--white);
   font-weight: 700; font-size: 16px; display: flex; align-items: center; box-shadow: var(--shadow-green);
 }
+.next.skip { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1.5px #d5ddd8; }
+/* Listing editor: one tappable segment per step; green when filled in, ringed when open. */
+.stepbar { display: flex; gap: 4px; padding: 0 16px 10px; }
+.stepbar button { flex: 1; height: 24px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; }
+.stepbar button span { display: block; width: 100%; height: 5px; border-radius: 999px; background: var(--line); transition: background 0.2s ease, height 0.2s ease; }
+.stepbar button.done span { background: var(--green); }
+.stepbar button.on span { height: 8px; box-shadow: 0 0 0 2px var(--white), 0 0 0 3.5px var(--ink); }
 .link { height: 44px; border: 0; background: transparent; color: var(--ink); font-weight: 700; font-size: 15px; text-decoration: underline; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; }
 .ib { width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; display: flex; align-items: center; justify-content: center; color: var(--ink); flex-shrink: 0; }
 .fab { width: 40px; height: 40px; border: 0; border-radius: 999px; background: var(--white); display: flex; align-items: center; justify-content: center; color: var(--ink); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
@@ -250,3 +257,7 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .map .road-v2 { position: absolute; top: 0; bottom: 0; left: 70%; width: 20px; background: #f7e3a6; }
 .map .ring { position: absolute; left: 50%; top: 50%; width: 110px; height: 110px; transform: translate(-50%, -50%); border-radius: 999px; background: rgba(23, 168, 98, 0.18); border: 2px solid var(--green); }
 .map .dot { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); border-radius: 999px; background: var(--green); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(16, 35, 27, 0.3); }
+/* Fixed pin in the middle of a live map (PinMap); lifts while the map is dragged. */
+.map .center-pin { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -26px 0 0 -13px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--green); border: 3px solid #fff; box-shadow: 0 3px 8px rgba(16, 35, 27, 0.35); pointer-events: none; transition: margin 0.15s ease; z-index: 1; }
+.map .center-pin.up { margin-top: -34px; }
+.map .center-pin::after { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 999px; background: #fff; }

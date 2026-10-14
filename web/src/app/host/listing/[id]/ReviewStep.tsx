@@ -18,6 +18,7 @@ const FIX: Record<string, { label: string; href: (id: string) => string }> = {
   room_kind: { label: "Room type", href: (id) => `/host/listing/${id}?step=room` },
   household: { label: "Household", href: (id) => `/host/listing/${id}?step=room` },
   available_from: { label: "Available from", href: (id) => `/host/listing/${id}?step=room` },
+  rules: { label: "House rules", href: (id) => `/host/listing/${id}?step=rules` },
   permission: { label: "Permission to share", href: (id) => `/host/listing/${id}?step=refunds` },
   bunkie_questions: { label: "Bunkie questions", href: (id) => `/questions?next=${qs(`/host/listing/${id}?step=review`)}` },
   verification: { label: "Verify you", href: (id) => `/verify?as=host&next=${qs(`/host/listing/${id}?step=review`)}` },
