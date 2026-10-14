@@ -101,9 +101,9 @@ export default function Explore() {
             <span style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>View by video call from camp. Free switch once you get your PPA.</span>
           </div>
         )}
-        <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
+        {ranked?.length !== 0 && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
           {ranked == null && !error ? "Finding apartments…" : ranked ? `${ranked.length} ${ranked.length === 1 ? "apartment" : "apartments"}${inCamp ? " free on your camp exit day" : ""}` : ""}
-        </span>
+        </span>}
         {error && <p className="err" role="alert">{error}</p>}
         {ranked == null && !error && <Skeletons />}
         {ranked && ranked.length > 0 && (
