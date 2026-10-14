@@ -102,7 +102,7 @@ export default function Explore() {
           </div>
         )}
         <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
-          {ranked == null && !error ? "Finding rooms…" : ranked ? `${ranked.length} ${ranked.length === 1 ? "room" : "rooms"}${inCamp ? " free on your camp exit day" : ""}` : ""}
+          {ranked == null && !error ? "Finding apartments…" : ranked ? `${ranked.length} ${ranked.length === 1 ? "apartment" : "apartments"}${inCamp ? " free on your camp exit day" : ""}` : ""}
         </span>
         {error && <p className="err" role="alert">{error}</p>}
         {ranked == null && !error && <Skeletons />}
@@ -116,7 +116,7 @@ export default function Explore() {
         )}
         {ranked && ranked.length === 0 && (
           <div className="stack" style={{ padding: "40px 8px", alignItems: "center", textAlign: "center", gap: 12 }}>
-            <span className="h2">No rooms match</span>
+            <span className="h2">No apartments match</span>
             <button className="pill" style={{ height: 44 }} onClick={() => setShowFilters(true)}>Change filters</button>
           </div>
         )}
