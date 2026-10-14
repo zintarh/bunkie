@@ -60,11 +60,16 @@ export default function Explore() {
     };
   }, [query, ready, prefs.stage]);
 
-  // Once the person has answered the bunkie questions, closer fits rise to the top.
+  // Corper hosts stay first (search already puts them there). Once the person has answered the
+  // bunkie questions, closer fits rise to the top within each group.
   const ranked = useMemo(() => {
     if (!rooms) return null;
     const withFit = rooms.map((r) => ({ r, fit: fit(myAnswers, r.host_answers)?.score ?? null }));
-    if (myAnswers) withFit.sort((a, b) => (b.fit ?? 0) - (a.fit ?? 0) + ((a.r.commute_min ?? 0) - (b.r.commute_min ?? 0)) / 4);
+    const corper = (r: Room) => (r.host_corper === "serving" || r.host_corper === "served" ? 0 : 1);
+    if (myAnswers) {
+      withFit.sort((a, b) => corper(a.r) - corper(b.r)
+        || (b.fit ?? 0) - (a.fit ?? 0) + ((a.r.commute_min ?? 0) - (b.r.commute_min ?? 0)) / 4);
+    }
     return withFit;
   }, [rooms, myAnswers]);
 
