@@ -29,8 +29,9 @@ function Login() {
       if (/confirm/i.test(error.message)) return router.push(`/signup/code?email=${qs(email)}&next=${qs(next)}`);
       return setError("Email or password is wrong. Try again or reset your password.");
     }
-    await refreshMe();
-    router.replace(next);
+    const me = await refreshMe();
+    // Accounts that never finished sign-up (no name yet) pick up where they left off.
+    router.replace(me && !me.profile.first_name ? `/signup/name?next=${qs(next)}` : next);
   };
 
   return (
