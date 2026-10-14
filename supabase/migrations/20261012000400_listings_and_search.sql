@@ -174,3 +174,15 @@ grant execute on function public.start_listing(), public.listing_missing(uuid), 
   public.pause_listing(uuid, boolean) to authenticated;
 grant execute on function public.search_rooms(text, date, smallint, double precision, double precision, int, int,
   public.share_pref, public.room_kind, text, int, int, int) to anon, authenticated;
+
+-- Corpers posted outside Abuja leave an email to hear when Bunkie reaches their state.
+create table public.waitlist (
+  id bigint generated always as identity primary key,
+  email text not null check (email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' and char_length(email) <= 200),
+  state text not null check (char_length(state) between 2 and 40),
+  created_at timestamptz not null default now(),
+  unique (email, state)
+);
+alter table public.waitlist enable row level security;
+grant insert (email, state) on public.waitlist to anon, authenticated;
+create policy "join" on public.waitlist for insert to anon, authenticated with check (true);

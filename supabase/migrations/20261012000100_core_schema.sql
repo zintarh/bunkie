@@ -304,7 +304,7 @@ create table public.host_payout_accounts (
   bank_name text not null,
   account_last4 text not null check (account_last4 ~ '^[0-9]{4}$'),
   account_name text not null,
-  subaccount_code text,
+  recipient_code text,
   name_matches_nin boolean not null default false,
   created_at timestamptz not null default now()
 );

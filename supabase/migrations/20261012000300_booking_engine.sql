@@ -665,9 +665,9 @@ end $$;
 
 -- Payouts and refunds the worker settles with Paystack.
 create or replace function public.sys_payout_ready(p_payment uuid)
-returns table (payout_id uuid, amount_kobo bigint, subaccount_code text, booking_status public.booking_status, release_after timestamptz)
+returns table (payout_id uuid, amount_kobo bigint, recipient_code text, booking_status public.booking_status, release_after timestamptz)
 language sql security definer set search_path = '' as $$
-  select po.id, po.amount_kobo, a.subaccount_code, b.status, po.release_after
+  select po.id, po.amount_kobo, a.recipient_code, b.status, po.release_after
   from public.payouts po
   join public.bookings b on b.id = po.booking_id
   left join public.host_payout_accounts a on a.host_id = po.host_id
@@ -688,6 +688,17 @@ begin
     raise exception 'bad table';
   end if;
 end $$;
+
+-- Host bank account, after Paystack resolved it and created a transfer recipient.
+create or replace function public.sys_save_payout_account(
+  p_host uuid, p_bank_code text, p_bank_name text, p_last4 text, p_account_name text, p_recipient text, p_matches boolean
+) returns void language sql security definer set search_path = '' as $$
+  insert into public.host_payout_accounts (host_id, bank_code, bank_name, account_last4, account_name, recipient_code, name_matches_nin)
+  values (p_host, p_bank_code, p_bank_name, p_last4, p_account_name, p_recipient, p_matches)
+  on conflict (host_id) do update set bank_code = excluded.bank_code, bank_name = excluded.bank_name,
+    account_last4 = excluded.account_last4, account_name = excluded.account_name,
+    recipient_code = excluded.recipient_code, name_matches_nin = excluded.name_matches_nin, created_at = now()
+$$;
 
 -- Verification outcomes from the provider webhook.
 create or replace function public.sys_record_verification(
@@ -755,6 +766,7 @@ revoke execute on function
   public.sys_finish_job(bigint, text),
   public.sys_payout_ready(uuid),
   public.sys_set_money_status(text, uuid, public.money_move_status, text, text),
+  public.sys_save_payout_account(uuid, text, text, text, text, text, boolean),
   public.sys_record_verification(uuid, text, boolean, text, text, text, public.gender, jsonb)
 from public, anon, authenticated;
 
@@ -766,6 +778,7 @@ grant execute on function
   public.sys_finish_job(bigint, text),
   public.sys_payout_ready(uuid),
   public.sys_set_money_status(text, uuid, public.money_move_status, text, text),
+  public.sys_save_payout_account(uuid, text, text, text, text, text, boolean),
   public.sys_record_verification(uuid, text, boolean, text, text, text, public.gender, jsonb)
 to service_role;
 

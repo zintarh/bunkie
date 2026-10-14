@@ -49,7 +49,10 @@ function searchDemo(p: SearchParams): RoomCard[] {
 
 export async function getRoom(id: string): Promise<RoomDetail | null> {
   const db = supabasePublic();
-  if (!db) return DEMO_ROOMS.find((r) => r.id === id) ?? null;
+  if (!db) {
+    const r = DEMO_ROOMS.find((x) => x.id === id);
+    return r ? { ...r, ease_min: estimate(r.area_lat!, r.area_lng!, CENTRE.lat, CENTRE.lng) } : null;
+  }
   if (!/^[0-9a-f-]{36}$/.test(id)) return null;
 
   const { data: l } = await db

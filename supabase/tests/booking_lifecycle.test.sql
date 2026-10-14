@@ -76,7 +76,7 @@ values (auth.uid(), 1, 1, 1, 0, 0, now(), now());
 -- Missing payout account blocks publishing.
 select t.expect_error($$ select public.publish_listing((select listing_id from ids)) $$, '%payout%');
 reset role;
-insert into public.host_payout_accounts (host_id, bank_code, bank_name, account_last4, account_name, subaccount_code, name_matches_nin)
+insert into public.host_payout_accounts (host_id, bank_code, bank_name, account_last4, account_name, recipient_code, name_matches_nin)
 values ('00000000-0000-0000-0000-0000000000a1', '058', 'GTBank', '1234', 'TOLU ADE', 'ACCT_test', true);
 set role authenticated;
 select public.publish_listing((select listing_id from ids));

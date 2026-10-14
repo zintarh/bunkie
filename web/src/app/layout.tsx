@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-bricolage", display: "swap" });
@@ -8,7 +9,6 @@ const figtree = Figtree({ subsets: ["latin"], weight: ["400", "500", "600", "700
 export const metadata: Metadata = {
   title: { default: "Bunkie", template: "%s · Bunkie" },
   description: "Leave camp with a place to stay. Verified shared rooms for corp members in Abuja.",
-  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Bunkie", statusBarStyle: "default" },
   icons: { icon: "/icons/icon.svg", apple: "/icons/icon-192.png" },
 };
@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-NG" className={`${bricolage.variable} ${figtree.variable}`}>
       <body>
         <div className="app">{children}</div>
+        <ServiceWorker />
       </body>
     </html>
   );

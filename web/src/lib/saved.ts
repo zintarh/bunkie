@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMe } from "./auth";
 import { setPrefs, usePrefs } from "./prefs";
 import { supabaseBrowser } from "./supabase/client";
@@ -31,7 +31,7 @@ export function useSaved(): [Set<string>, (id: string) => void] {
     };
   }, [me]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const ids = remote ?? new Set(prefs.saved);
+  const ids = useMemo(() => remote ?? new Set(prefs.saved), [remote, prefs.saved]);
 
   const toggle = useCallback(
     (id: string) => {

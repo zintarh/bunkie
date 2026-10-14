@@ -1,0 +1,31 @@
+# Supabase CLI settings for the Bunkie project. Only the non-default settings are listed.
+project_id = "bunkie"
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback", "https://bunkie.ng/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_confirmations = true
+
+[auth.sms]
+# Phone is only added in verification (updateUser + verifyOtp 'phone_change'), never used to sign in.
+enable_signup = false
+enable_confirmations = true
+
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+
+[db.seed]
+sql_paths = ["./seed.sql"]
+
+# Paystack calls this without a Supabase token; it checks Paystack's signature instead.
+[functions.paystack-webhook]
+verify_jwt = false
+
+# pg_cron calls this with the service key; the function checks it itself.
+[functions.worker]
+verify_jwt = false
