@@ -25,6 +25,12 @@ on conflict (key) do nothing;
 
 -- Camp exit dates per batch and stream. [TBD] confirm each batch from the NYSC calendar.
 insert into public.nysc_batches (id, year, batch, stream, camp_end) values
+  ('2025-A1', 2025, 'A', 1, '2025-05-26'),
+  ('2025-A2', 2025, 'A', 2, '2025-06-30'),
+  ('2025-B1', 2025, 'B', 1, '2025-10-20'),
+  ('2025-B2', 2025, 'B', 2, '2025-10-31'),
+  ('2025-C1', 2025, 'C', 1, '2026-02-16'),
+  ('2025-C2', 2025, 'C', 2, '2026-03-23'),
   ('2026-A1', 2026, 'A', 1, '2026-05-26'),
   ('2026-A2', 2026, 'A', 2, '2026-06-30'),
   ('2026-B1', 2026, 'B', 1, '2026-10-20'),

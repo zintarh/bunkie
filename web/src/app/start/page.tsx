@@ -36,7 +36,9 @@ export default function Start() {
     if (b) setBatch(b);
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const years = [...new Set(BATCHES.map((b) => b.year))];
+  // People in camp now: only batches whose camp hasn't ended (older batches are for serving hosts).
+  const today = new Date().toISOString().slice(0, 10);
+  const years = [...new Set(BATCHES.filter((b) => b.campEnd >= today || b.id === batch.id).map((b) => b.year))];
   const pick = (letter: string, stream: number, year = batch.year) =>
     setBatch(BATCHES.find((b) => b.year === year && b.batch === letter && b.stream === stream) ?? batch);
 

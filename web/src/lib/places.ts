@@ -36,6 +36,12 @@ export const ZONES: Zone[] = [
 
 export type Batch = { id: string; year: number; batch: "A" | "B" | "C"; stream: 1 | 2; campEnd: string };
 export const BATCHES: Batch[] = [
+  { id: "2025-A1", year: 2025, batch: "A", stream: 1, campEnd: "2025-05-26" },
+  { id: "2025-A2", year: 2025, batch: "A", stream: 2, campEnd: "2025-06-30" },
+  { id: "2025-B1", year: 2025, batch: "B", stream: 1, campEnd: "2025-10-20" },
+  { id: "2025-B2", year: 2025, batch: "B", stream: 2, campEnd: "2025-10-31" },
+  { id: "2025-C1", year: 2025, batch: "C", stream: 1, campEnd: "2026-02-16" },
+  { id: "2025-C2", year: 2025, batch: "C", stream: 2, campEnd: "2026-03-23" },
   { id: "2026-A1", year: 2026, batch: "A", stream: 1, campEnd: "2026-05-26" },
   { id: "2026-A2", year: 2026, batch: "A", stream: 2, campEnd: "2026-06-30" },
   { id: "2026-B1", year: 2026, batch: "B", stream: 1, campEnd: "2026-10-20" },
@@ -53,4 +59,10 @@ export function nearestZone(lat: number, lng: number): Zone {
     if (d < bestD) { bestD = d; best = z; }
   }
   return best;
+}
+
+/** The batch a state code belongs to, e.g. FC/26B/1234 -> 2026 Batch B (stream isn't in the code). */
+export function batchFromStateCode(code: string): { year: number; batch: "A" | "B" | "C" } | null {
+  const m = code.match(/^[A-Z]{2}\/(\d{2})([ABC])\/\d{3,5}$/);
+  return m ? { year: 2000 + Number(m[1]), batch: m[2] as "A" | "B" | "C" } : null;
 }

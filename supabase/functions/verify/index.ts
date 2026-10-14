@@ -6,6 +6,7 @@
 //   call_up          { path, state_code }     call-up letter already uploaded
 //   address          { kind, value }          host proof of address (meter number, bill or receipt path)
 //   discharge        { path, certificate_number }  NYSC certificate, for hosts who served before
+//   serving_corper   { state_code, batch_id, call_up_path, ppa_path }  hosts serving now
 import { HttpError, admin, json, requireUser, serve } from "../_shared/clients.ts";
 import { identity } from "../_shared/identity.ts";
 
@@ -81,6 +82,32 @@ serve(async (req) => {
       const r = await p.proofOfAddress(kind, value, user.id);
       await record(user.id, "proof_of_address", r.passed, p.name, r.ref, { result: { kind } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "We couldn't confirm that address.");
+      return json({ ok: true });
+    }
+
+    case "serving_corper": {
+      const code = String(body.state_code ?? "").toUpperCase().trim();
+      const m = code.match(/^[A-Z]{2}\/(\d{2})([ABC])\/\d{3,5}$/);
+      if (!m) throw new HttpError(400, "State codes look like FC/26B/1234.");
+      const batchId = String(body.batch_id ?? "");
+      const { data: batch } = await admin.from("nysc_batches").select("id, year, batch").eq("id", batchId).maybeSingle();
+      if (!batch) throw new HttpError(400, "Pick your batch.");
+      if (batch.year % 100 !== Number(m[1]) || batch.batch !== m[2]) throw new HttpError(400, "Your batch doesn't match your state code.");
+      if (!ownPath(body.call_up_path)) throw new HttpError(400, "Add your call-up letter.");
+      if (!ownPath(body.ppa_path)) throw new HttpError(400, "Add your PPA acceptance letter.");
+
+      const { count } = await admin.from("profile_private").select("user_id", { count: "exact", head: true })
+        .eq("state_code", code).neq("user_id", user.id);
+      if (count) throw new HttpError(409, "That state code is already on another account. Get help if it's yours.");
+      await admin.from("profile_private").update({ state_code: code, batch_id: batch.id }).eq("user_id", user.id);
+
+      const p = identity();
+      const callUp = await p.callUpLetter(body.call_up_path, code, user.id);
+      await record(user.id, "call_up", callUp.passed, p.name, callUp.ref, { result: { reason: callUp.reason ?? null } });
+      if (!callUp.passed) throw new HttpError(400, callUp.reason ?? "The name on the call-up letter must match your NIN.");
+      const ppa = await p.ppaLetter(body.ppa_path, code, user.id);
+      await record(user.id, "ppa_letter", ppa.passed, p.name, ppa.ref, { result: { reason: ppa.reason ?? null } });
+      if (!ppa.passed) throw new HttpError(400, ppa.reason ?? "We couldn't confirm your PPA acceptance letter.");
       return json({ ok: true });
     }
 

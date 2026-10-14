@@ -46,11 +46,30 @@ do $$ begin
   assert not (select corper_verified from public.profiles where id = '00000000-0000-0000-0000-0000000000c1'), 'serving needs call-up';
 end $$;
 
+-- Serving needs the call-up letter AND the PPA acceptance letter, with a batch still in service.
+update public.profile_private set batch_id = '2026-B1' where user_id = '00000000-0000-0000-0000-0000000000c1';
 set role service_role;
 select public.sys_record_verification('00000000-0000-0000-0000-0000000000c1', 'call_up', true, 'test', 'ref');
 reset role;
 do $$ begin
+  assert not (select corper_verified from public.profiles where id = '00000000-0000-0000-0000-0000000000c1'), 'call-up alone is not enough';
+end $$;
+
+set role service_role;
+select public.sys_record_verification('00000000-0000-0000-0000-0000000000c1', 'ppa_letter', true, 'test', 'ref');
+reset role;
+do $$ begin
   assert (select corper_verified from public.profiles where id = '00000000-0000-0000-0000-0000000000c1'), 'serving verified';
+end $$;
+
+-- When the batch's service year is over, the daily job turns "serving" into a verified "served".
+update public.profile_private set batch_id = '2025-A1' where user_id = '00000000-0000-0000-0000-0000000000c1';
+set role service_role;
+select public.sys_end_service();
+reset role;
+do $$ begin
+  assert (select corper_status = 'served' and corper_verified from public.profiles
+          where id = '00000000-0000-0000-0000-0000000000c1'), 'service ended -> ex-corper, still verified';
 end $$;
 
 -- "Not a corp member" never shows a badge.
