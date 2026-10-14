@@ -65,7 +65,6 @@ export default function HostHome() {
       <main className="screen">
         <div className="body">
           <div className="hero phero" style={{ margin: "-4px -20px 0" }}><h1 className="h1">Share your room</h1></div>
-          <p className="sub" style={{ marginTop: 4 }}>6 steps · about 10 minutes</p>
           <div className="lrows">
             {steps.map(([label, Icon, tile]) => (
               <div key={label} className="lrow"><span className={`tile ${tile}`}><Icon size={20} /></span><span style={{ fontWeight: 600 }}>{label}</span></div>
