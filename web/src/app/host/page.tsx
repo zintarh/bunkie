@@ -45,8 +45,18 @@ export default function HostHome() {
     router.push(`/host/listing/${data}?step=location`);
   };
 
+  // Wait until we know whether they host, so the dashboard doesn't flash before "Share your room".
+  if (loading || (me && listings === null)) {
+    return (
+      <main className="screen">
+        <div className="body" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></div>
+        <TabBar />
+      </main>
+    );
+  }
+
   // Not hosting yet: the 6 steps, then start.
-  if (!loading && (!me || (listings && listings.length === 0))) {
+  if (!me || listings?.length === 0) {
     const steps = [
       ["Location", MapPin, "t-mint"], ["Room photos", Camera, "t-amber"], ["Room and stay", House, "t-sky"],
       ["Costs", CircleDollarSign, "t-lilac"], ["House rules", ScrollText, "t-coral"], ["Refunds", Undo2, "t-mint"],
