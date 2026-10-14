@@ -158,7 +158,7 @@ export function PhotosStep({ listing, reload, next, back }: StepProps) {
       </div>
       <div className="foot split">
         <button className="link" onClick={back}>Back</button>
-        <button className={missing.length ? "next skip" : "next"} onClick={next}>{missing.length ? "Skip" : "Next"}</button>
+        <button className="next" disabled={missing.length > 0} onClick={next}>Next</button>
       </div>
     </>
   );

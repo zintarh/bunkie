@@ -45,7 +45,6 @@ export function StepShell({ title, children, canNext, onSave, back, next, nextLa
     };
   });
   const go = async () => {
-    if (!canNext) return next();
     setBusy(true);
     setError(null);
     try {
@@ -66,7 +65,7 @@ export function StepShell({ title, children, canNext, onSave, back, next, nextLa
       </div>
       <div className="foot split">
         <button className="link" onClick={back}>Back</button>
-        <button className={canNext ? "next" : "next skip"} disabled={busy} onClick={go}>{busy ? <span className="spin" /> : canNext ? nextLabel : "Skip"}</button>
+        <button className="next" disabled={!canNext || busy} onClick={go}>{busy ? <span className="spin" /> : nextLabel}</button>
       </div>
     </>
   );
