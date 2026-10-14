@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, SlidersHorizontal, Tent, Video } from "lucide-react";
+import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { RoomCard } from "@/components/RoomCard";
 import { TabBar, Wordmark } from "@/components/ui";
@@ -95,6 +96,7 @@ export default function Explore() {
       </div>
 
       <div className="body" style={{ padding: "4px 16px 24px", gap: 0 }}>
+        <ContinueHosting style={{ marginTop: 14 }} />
         {inCamp && (
           <div className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18 }}>
             <span className="tile t-amber"><Video size={20} strokeWidth={2.2} /></span>

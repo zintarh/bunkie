@@ -1,20 +1,21 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type MutableRefObject, type ReactNode } from "react";
 import { LocateFixed, Plus, X } from "lucide-react";
 import { MapImage } from "@/components/MapImage";
 import { PlaceSearch, placeAt, type Place } from "@/components/PlaceSearch";
 import { Chips, Seg, Stepper, Switch } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { isoDay, months as monthsLabel, naira } from "@/lib/format";
+import { HOST_STEPS } from "@/lib/hosting";
 import { position } from "@/lib/image";
 import { ZONES, nearestZone } from "@/lib/places";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { BathKind, Household, PaySchedule, PhotoShot, RoomKind } from "@/lib/types";
 
-export const STEPS = ["location", "photos", "room", "costs", "rules", "refunds"] as const;
+export const STEPS = HOST_STEPS;
 
 export type Listing = {
-  id: string; status: string; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
+  id: string; status: string; draft_step: number; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
   household: Household | null; open_to_camp: boolean; min_months: number; max_months: number; pay_schedule: PaySchedule;
   available_from: string | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
   early_leave_notice_days: number; redeploy_refund: "all_unused" | "unused_minus_2w"; ask_leave_notice_days: number; allowed_to_share: boolean;
@@ -23,20 +24,31 @@ export type Listing = {
   listing_costs: { id: string; name: string; amount: number; tenant_pays: boolean; varies: boolean; position: number }[];
   house_rules: { id: string; topic: string; choice: string; consequence: string; is_custom: boolean; position: number }[];
 };
-export type StepProps = { listing: Listing; reload: () => Promise<void>; next: () => void; back: () => void };
+export type StepProps = { listing: Listing; reload: () => Promise<void>; next: () => Promise<void>; back: () => void };
 
 /** Footer with Back and Next; Next saves first and only moves on if saving worked. */
+/** "Save & exit" saves the open step through this, when the step is complete enough to save. */
+export const ExitSave = createContext<MutableRefObject<(() => Promise<void>) | null> | null>(null);
+
 export function StepShell({ title, children, canNext, onSave, back, next, nextLabel = "Next" }: {
-  title: string; children: ReactNode; canNext: boolean; onSave: () => Promise<void>; back: () => void; next: () => void; nextLabel?: string;
+  title: string; children: ReactNode; canNext: boolean; onSave: () => Promise<void>; back: () => void; next: () => void | Promise<void>; nextLabel?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const exitSave = useContext(ExitSave);
+  useEffect(() => {
+    if (!exitSave) return;
+    exitSave.current = canNext ? onSave : null;
+    return () => {
+      exitSave.current = null;
+    };
+  });
   const go = async () => {
     setBusy(true);
     setError(null);
     try {
       await onSave();
-      next();
+      await next();
     } catch (e) {
       setError(errorText(e));
     } finally {

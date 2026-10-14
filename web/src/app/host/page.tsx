@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Camera, ChevronRight, CircleDollarSign, House, MapPin, Plus, ReceiptText, ScrollText, Undo2, Wallet } from "lucide-react";
 import { BookingRow } from "@/components/BookingRow";
-import { TabBar, useToast } from "@/components/ui";
+import { Progress, TabBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 import { naira } from "@/lib/format";
+import { draftLabel, draftProgress, resumeHref } from "@/lib/hosting";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-type MyListing = { id: string; status: string; area_name: string; monthly_total: number; cover_path: string | null; photo_count: number };
+type MyListing = { id: string; status: string; draft_step: number; area_name: string; monthly_total: number; cover_path: string | null; photo_count: number };
 const STATUS: Record<string, [string, string]> = {
   draft: ["Draft", "grey"], live: ["Live", "green"], paused: ["Paused", "amber"], flagged: ["In review", "amber"], archived: ["Archived", "grey"],
 };
@@ -28,7 +29,7 @@ export default function HostHome() {
   useEffect(() => {
     const db = supabaseBrowser();
     if (!me || !db) return;
-    db.from("listings").select("id, status, area_name, monthly_total, cover_path, photo_count").eq("host_id", me.user.id).order("created_at", { ascending: false })
+    db.from("listings").select("id, status, draft_step, area_name, monthly_total, cover_path, photo_count").eq("host_id", me.user.id).order("created_at", { ascending: false })
       .then(({ data }) => setListings((data ?? []) as MyListing[]));
     void fetchMyBookings("host").then(setBookings);
     db.from("payouts").select("amount_kobo, status").then(({ data }) => setPayouts(data ?? []));
@@ -103,12 +104,17 @@ export default function HostHome() {
         <section className="stack" style={{ gap: 10 }}>
           <div className="between"><span className="h2">Your rooms</span><button className="pill" onClick={start} disabled={busy}><Plus size={16} />Add</button></div>
           {(listings ?? []).map((l) => (
-            <Link key={l.id} href={l.status === "draft" ? `/host/listing/${l.id}?step=location` : `/host/listing/${l.id}?step=review`} className="card row" style={{ padding: 10, color: "var(--ink)" }}>
+            <Link key={l.id} href={l.status === "draft" ? resumeHref(l) : `/host/listing/${l.id}?step=review`} className="card row" style={{ padding: 10, color: "var(--ink)" }}>
               <span className="photo" style={{ width: 64, height: 64, borderRadius: 14, flexShrink: 0, backgroundImage: l.cover_path ? `url(${photoUrl(l.cover_path)})` : undefined }} />
               <span className="stack" style={{ gap: 2, flex: 1 }}>
-                <b>{l.area_name || "New room"}</b>
-                <span className="small">{l.monthly_total ? `${naira(l.monthly_total)} a month` : `${l.photo_count} photos`}</span>
-                <span className={`badge ${STATUS[l.status]?.[1] ?? "grey"}`} style={{ alignSelf: "flex-start" }}>{STATUS[l.status]?.[0] ?? l.status}</span>
+                <b>{l.status === "draft" ? `Finish your listing${l.area_name ? ` in ${l.area_name}` : ""}` : l.area_name}</b>
+                {l.status !== "draft" && <span className="small">{naira(l.monthly_total)} a month</span>}
+                {l.status === "draft" ? (
+                  <span className="stack" style={{ gap: 6, marginTop: 2 }}>
+                    <span className="small" style={{ fontWeight: 600 }}>{draftLabel(l)}</span>
+                    <span style={{ borderRadius: 999, overflow: "hidden", display: "flex" }}><Progress value={Math.max(0.04, draftProgress(l))} /></span>
+                  </span>
+                ) : <span className={`badge ${STATUS[l.status]?.[1] ?? "grey"}`} style={{ alignSelf: "flex-start" }}>{STATUS[l.status]?.[0] ?? l.status}</span>}
               </span>
               <ChevronRight size={18} color="var(--muted)" />
             </Link>
