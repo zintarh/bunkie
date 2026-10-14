@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { qs } from "@/lib/url";
 
 // Google sign-in and password-reset links land here with a one-time code.
 export async function GET(req: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
       // First Google sign-in: ask for the name on the NIN before going on.
       const { data: profile } = await db.from("profiles").select("first_name").eq("id", data.user.id).single();
       if (!profile?.first_name && next !== "/account/password") {
-        return NextResponse.redirect(new URL(`/signup/name?next=${encodeURIComponent(next)}`, url.origin));
+        return NextResponse.redirect(new URL(`/signup/name?next=${qs(next)}`, url.origin));
       }
       return NextResponse.redirect(new URL(next, url.origin));
     }

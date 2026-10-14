@@ -9,6 +9,7 @@ import { naira } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { StepProps } from "./steps";
+import { qs } from "@/lib/url";
 
 const FIX: Record<string, { label: string; href: (id: string) => string }> = {
   location: { label: "Location", href: (id) => `/host/listing/${id}?step=location` },
@@ -18,9 +19,9 @@ const FIX: Record<string, { label: string; href: (id: string) => string }> = {
   household: { label: "Household", href: (id) => `/host/listing/${id}?step=room` },
   available_from: { label: "Available from", href: (id) => `/host/listing/${id}?step=room` },
   permission: { label: "Permission to share", href: (id) => `/host/listing/${id}?step=refunds` },
-  bunkie_questions: { label: "Bunkie questions", href: (id) => `/questions?next=${encodeURIComponent(`/host/listing/${id}?step=review`)}` },
-  verification: { label: "Verify you", href: (id) => `/verify?as=host&next=${encodeURIComponent(`/host/listing/${id}?step=review`)}` },
-  payout: { label: "Get paid: bank account", href: (id) => `/host/payout?next=${encodeURIComponent(`/host/listing/${id}?step=review`)}` },
+  bunkie_questions: { label: "Bunkie questions", href: (id) => `/questions?next=${qs(`/host/listing/${id}?step=review`)}` },
+  verification: { label: "Verify you", href: (id) => `/verify?as=host&next=${qs(`/host/listing/${id}?step=review`)}` },
+  payout: { label: "Get paid: bank account", href: (id) => `/host/payout?next=${qs(`/host/listing/${id}?step=review`)}` },
 };
 
 export function ReviewStep({ listing, reload }: StepProps) {

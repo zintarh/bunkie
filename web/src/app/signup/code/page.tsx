@@ -6,6 +6,7 @@ import { safeNext } from "@/components/auth";
 import { TopBar } from "@/components/ui";
 import { errorText, refreshMe } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { qs } from "@/lib/url";
 
 function Code() {
   const router = useRouter();
@@ -27,12 +28,12 @@ function Code() {
     setBusy(false);
     if (error) return setError(/expired|invalid/i.test(error.message) ? "That code is wrong or expired. Check the email or send a new one." : errorText(error));
     await refreshMe();
-    router.replace(`/signup/name?next=${encodeURIComponent(next)}`);
+    router.replace(`/signup/name?next=${qs(next)}`);
   };
 
   return (
     <main className="screen">
-      <TopBar back={`/signup?next=${encodeURIComponent(next)}`} />
+      <TopBar back={`/signup?next=${qs(next)}`} />
       <div className="body">
         <div className="stack" style={{ gap: 6 }}>
           <h1 className="h1">Check your email</h1>
@@ -60,7 +61,7 @@ function Code() {
             await supabaseBrowser()?.auth.resend({ type: "signup", email });
             setResent(true);
           }}>{resent ? "Code sent again" : "Resend code"}</button>
-          <Link className="link" href={`/signup?next=${encodeURIComponent(next)}`}>Change email</Link>
+          <Link className="link" href={`/signup?next=${qs(next)}`}>Change email</Link>
         </div>
       </div>
       <div className="foot">

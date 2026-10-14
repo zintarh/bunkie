@@ -6,6 +6,7 @@ import { useMe } from "@/lib/auth";
 import { getPrefs } from "@/lib/prefs";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { hasGoogle, hasSupabase } from "@/lib/supabase/config";
+import { qs } from "@/lib/url";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -24,7 +25,7 @@ export function GoogleButton({ next }: { next: string }) {
       setBusy(true);
       await supabaseBrowser()?.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+        options: { redirectTo: `${window.location.origin}/auth/callback?next=${qs(next)}` },
       });
     }}>
       <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
@@ -87,7 +88,7 @@ export function RequireAuth({ children }: { children: ReactNode; next?: string }
   useEffect(() => {
     // Come back to exactly this page, query string included.
     const here = window.location.pathname + window.location.search;
-    if (!loading && !me) router.replace(`/signup?next=${encodeURIComponent(here)}`);
+    if (!loading && !me) router.replace(`/signup?next=${qs(here)}`);
   }, [loading, me, router]);
   if (!me) {
     return (

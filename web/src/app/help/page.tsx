@@ -5,6 +5,7 @@ import { Phone, Siren } from "lucide-react";
 import { TopBar } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { qs } from "@/lib/url";
 
 const KINDS = [
   { value: "danger", label: "I'm not safe" }, { value: "not_as_listed", label: "Room isn't as listed" },
@@ -26,7 +27,7 @@ function Help() {
 
   const send = async () => {
     const db = supabaseBrowser();
-    if (!me || !db) return router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    if (!me || !db) return router.push(`/login?next=${qs(window.location.pathname + window.location.search)}`);
     setBusy(true);
     setError(null);
     const { error } = await db.from("reports").insert({

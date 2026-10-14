@@ -6,6 +6,7 @@ import { EMAIL_RE, GoogleButton, NeedsSupabase, PasswordField, safeNext } from "
 import { TopBar } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { qs } from "@/lib/url";
 
 function SignUp() {
   const router = useRouter();
@@ -26,7 +27,7 @@ function SignUp() {
     const { error } = await db.auth.signUp({ email, password: pw });
     setBusy(false);
     if (error) return setError(/registered/i.test(error.message) ? "That email already has an account. Sign in instead." : errorText(error));
-    router.push(`/signup/code?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`);
+    router.push(`/signup/code?email=${qs(email)}&next=${qs(next)}`);
   };
 
   return (
@@ -57,7 +58,7 @@ function SignUp() {
         <p className="small">By continuing you agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy policy</Link>.</p>
         <div className="stack" style={{ marginTop: "auto", gap: 8 }}>
           <button className="btn" type="submit" disabled={!ok || busy}>{busy ? <span className="spin" /> : "Create account"}</button>
-          <p className="small" style={{ textAlign: "center" }}>Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`} style={{ fontWeight: 700 }}>Sign in</Link></p>
+          <p className="small" style={{ textAlign: "center" }}>Already have an account? <Link href={`/login?next=${qs(next)}`} style={{ fontWeight: 700 }}>Sign in</Link></p>
         </div>
       </form>
     </main>

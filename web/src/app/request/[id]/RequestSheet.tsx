@@ -9,6 +9,7 @@ import { addMonths, dayLabel, dayParts, isoDay, months as monthsLabel, naira, pa
 import { BATCHES } from "@/lib/places";
 import { usePrefs } from "@/lib/prefs";
 import type { RoomDetail } from "@/lib/types";
+import { qs } from "@/lib/url";
 
 export function RequestSheet({ room }: { room: RoomDetail }) {
   const router = useRouter();
@@ -48,7 +49,7 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
   const go = () => {
     saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, message });
     const next = `/request/${room.id}/send`;
-    router.push(me ? next : `/signup?next=${encodeURIComponent(next)}`);
+    router.push(me ? next : `/signup?next=${qs(next)}`);
   };
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 import { useState, type ReactNode } from "react";
-import { Check, LocateFixed, Plus, X } from "lucide-react";
+import { LocateFixed, Plus, X } from "lucide-react";
 import { MapImage } from "@/components/MapImage";
 import { PlaceSearch, placeAt, type Place } from "@/components/PlaceSearch";
 import { Chips, Seg, Stepper, Switch } from "@/components/ui";
@@ -78,7 +78,7 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const use = (p: Place) => {
+  const applyPlace = (p: Place) => {
     setPin({ lat: p.lat, lng: p.lng });
     setAddress(p.address);
     setArea(p.area);
@@ -95,7 +95,7 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
     }
     try {
       const place = await placeAt(p.lat, p.lng);
-      if (place) use(place);
+      if (place) applyPlace(place);
       else {
         setPin(p);
         if (!area) setArea(nearestZone(p.lat, p.lng).name);
@@ -116,12 +116,12 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
       }}>
       {!pin ? (
         <>
-          <PlaceSearch placeholder="Search the street or building" onPick={use} />
+          <PlaceSearch placeholder="Search the street or building" onPick={applyPlace} />
           <button className="opt" onClick={here} disabled={locating}>
             <span className="ico"><LocateFixed size={20} /></span>
             <span className="stack" style={{ gap: 2 }}>
               <span>{locating ? "Finding you…" : "I'm at the room now"}</span>
-              <span className="small" style={{ fontWeight: 400 }}>Uses your phone's location</span>
+              <span className="small" style={{ fontWeight: 400 }}>Uses your phone&apos;s location</span>
             </span>
           </button>
         </>

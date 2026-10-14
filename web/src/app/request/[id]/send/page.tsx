@@ -9,6 +9,7 @@ import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { clearDraft, loadDraft, type RequestDraft } from "@/lib/draft";
 import { addMonths, dayLabel, months, parseDay } from "@/lib/format";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { qs } from "@/lib/url";
 
 /**
  * Last stop before a request goes out. Sends the person through whatever is still missing
@@ -35,12 +36,12 @@ function Send() {
     if (!db || !me || !draft) return;
     (async () => {
       const { data: answers } = await db.from("bunkie_answers").select("approved_at").eq("user_id", me.user.id).maybeSingle();
-      if (!answers?.approved_at) return router.replace(`/questions?next=${encodeURIComponent(here)}`);
+      if (!answers?.approved_at) return router.replace(`/questions?next=${qs(here)}`);
       const fresh = await refreshMe();
       // Testing mode (settings.require_verification_to_request = false) skips ID checks.
       const { data: rule } = await db.from("settings").select("value").eq("key", "require_verification_to_request").maybeSingle();
       const mustVerify = rule?.value !== false;
-      if (mustVerify && !fresh?.profile.is_verified) return router.replace(`/verify?next=${encodeURIComponent(here)}`);
+      if (mustVerify && !fresh?.profile.is_verified) return router.replace(`/verify?next=${qs(here)}`);
       setChecking(false);
     })();
   }, [me, draft, here, router]);
