@@ -40,7 +40,7 @@ export default function Intro() {
         <span className="wordmark" style={{ gap: 8 }}>
           <i style={{ background: "var(--green)", color: "var(--amber)", borderRadius: 8 }}><BunkMark /></i>bunkie
         </span>
-        {last ? <Link className="link" href="/login">Log in</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
+        {last ? <Link className="link" href="/signup">Sign up</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
       </div>
 
       <div className={styles.viewport}

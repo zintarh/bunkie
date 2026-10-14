@@ -50,7 +50,7 @@ function Login() {
         {error && <p className="err" role="alert">{error}</p>}
         <Link className="link" href="/reset" style={{ alignSelf: "flex-start" }}>Forgot password?</Link>
         <div className="stack" style={{ marginTop: "auto", gap: 8 }}>
-          <button className="btn" type="submit" disabled={!ok || busy}>{busy ? <span className="spin" /> : "Log in"}</button>
+          <button className="btn" type="submit" disabled={!ok || busy}>{busy ? <span className="spin" /> : "Sign in"}</button>
           <p className="small" style={{ textAlign: "center" }}>New to Bunkie? <Link href={`/signup?next=${encodeURIComponent(next)}`} style={{ fontWeight: 700 }}>Create account</Link></p>
         </div>
       </form>

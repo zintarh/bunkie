@@ -29,9 +29,9 @@ export default function Profile() {
 
         {!loading && !me && (
           <div className="card stack" style={{ gap: 14 }}>
-            <span style={{ fontWeight: 700, fontSize: 17 }}>Log in to request and book</span>
-            <Link className="btn" href="/signup?next=/profile">Create account</Link>
-            <Link className="link" href="/login?next=/profile">Log in</Link>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Sign up to request and book</span>
+            <Link className="btn" href="/signup?next=/profile">Sign up</Link>
+            <Link className="link" href="/login?next=/profile">I have an account</Link>
           </div>
         )}
         {me && (

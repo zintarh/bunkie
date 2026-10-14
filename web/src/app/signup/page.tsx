@@ -25,7 +25,7 @@ function SignUp() {
     setError(null);
     const { error } = await db.auth.signUp({ email, password: pw });
     setBusy(false);
-    if (error) return setError(/registered/i.test(error.message) ? "That email already has an account. Log in instead." : errorText(error));
+    if (error) return setError(/registered/i.test(error.message) ? "That email already has an account. Sign in instead." : errorText(error));
     router.push(`/signup/code?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`);
   };
 
@@ -57,7 +57,7 @@ function SignUp() {
         <p className="small">By continuing you agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy policy</Link>.</p>
         <div className="stack" style={{ marginTop: "auto", gap: 8 }}>
           <button className="btn" type="submit" disabled={!ok || busy}>{busy ? <span className="spin" /> : "Create account"}</button>
-          <p className="small" style={{ textAlign: "center" }}>Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`} style={{ fontWeight: 700 }}>Log in</Link></p>
+          <p className="small" style={{ textAlign: "center" }}>Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`} style={{ fontWeight: 700 }}>Sign in</Link></p>
         </div>
       </form>
     </main>
