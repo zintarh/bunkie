@@ -16,12 +16,12 @@ export function safeNext(next: string | null | undefined, fallback = "/explore")
 }
 
 /** "Continue with Google" plus the "or" divider; renders nothing until Google is enabled. */
-export function GoogleButton({ next }: { next: string }) {
+export function GoogleButton({ next, disabled }: { next: string; disabled?: boolean }) {
   const [busy, setBusy] = useState(false);
   if (!hasGoogle) return null;
   return (
     <>
-    <button type="button" className="btn ghost" disabled={busy} onClick={async () => {
+    <button type="button" className="btn ghost" disabled={busy || disabled} onClick={async () => {
       setBusy(true);
       await supabaseBrowser()?.auth.signInWithOAuth({
         provider: "google",

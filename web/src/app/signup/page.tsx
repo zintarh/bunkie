@@ -8,15 +8,19 @@ import { errorText } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
 
+/** Bump when the Terms or Privacy policy change, so accounts record which version they accepted. */
+const TERMS_VERSION = "2026-10-14";
+
 function SignUp() {
   const router = useRouter();
   const next = safeNext(useSearchParams().get("next"));
   const [email, setEmail] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const emailBad = email.includes("@") && email.length > 6 && !EMAIL_RE.test(email);
-  const ok = EMAIL_RE.test(email) && pw.length >= 8;
+  const ok = EMAIL_RE.test(email) && pw.length >= 8 && agreed;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +28,11 @@ function SignUp() {
     if (!ok || !db) return;
     setBusy(true);
     setError(null);
-    const { error } = await db.auth.signUp({ email, password: pw });
+    const { error } = await db.auth.signUp({
+      email, password: pw,
+      // Kept on the account as a record of what they accepted and when.
+      options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION } },
+    });
     setBusy(false);
     if (error) return setError(/registered/i.test(error.message) ? "That email already has an account. Sign in instead." : errorText(error));
     router.push(`/signup/code?email=${qs(email)}&next=${qs(next)}`);
@@ -39,7 +47,7 @@ function SignUp() {
           <p className="sub">To send requests and save rooms.</p>
         </div>
         <NeedsSupabase />
-        <GoogleButton next={next} />
+        <GoogleButton next={next} disabled={!agreed} />
         <div className="stack">
           <label className="lbl" htmlFor="email">Email</label>
           <label className="field" style={emailBad ? { borderColor: "var(--red)" } : undefined}>
@@ -55,7 +63,10 @@ function SignUp() {
           </span>
         </div>
         {error && <p className="err" role="alert">{error}</p>}
-        <p className="small">By continuing you agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy policy</Link>.</p>
+        <label className="check" style={{ fontSize: 14, alignItems: "flex-start" }}>
+          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 1 }} />
+          <span>I agree to the <Link href="/terms" target="_blank" style={{ fontWeight: 700 }}>Terms</Link> and <Link href="/privacy" target="_blank" style={{ fontWeight: 700 }}>Privacy policy</Link></span>
+        </label>
         <div className="stack" style={{ marginTop: "auto", gap: 8 }}>
           <button className="btn" type="submit" disabled={!ok || busy}>{busy ? <span className="spin" /> : "Create account"}</button>
           <p className="small" style={{ textAlign: "center" }}>Already have an account? <Link href={`/login?next=${qs(next)}`} style={{ fontWeight: 700 }}>Sign in</Link></p>
