@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { EMAIL_RE, GoogleButton, NeedsSupabase, Or, PasswordField, safeNext } from "@/components/auth";
+import { EMAIL_RE, GoogleButton, NeedsSupabase, PasswordField, safeNext } from "@/components/auth";
 import { TopBar } from "@/components/ui";
 import { refreshMe } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -39,7 +39,6 @@ function Login() {
         <h1 className="h1">Welcome back</h1>
         <NeedsSupabase />
         <GoogleButton next={next} />
-        <Or />
         <div className="stack">
           <label className="lbl" htmlFor="email">Email</label>
           <label className="field"><input id="email" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => { setEmail(e.target.value.trim()); setError(null); }} /></label>

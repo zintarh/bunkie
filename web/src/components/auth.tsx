@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useMe } from "@/lib/auth";
 import { getPrefs } from "@/lib/prefs";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { hasSupabase } from "@/lib/supabase/config";
+import { hasGoogle, hasSupabase } from "@/lib/supabase/config";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -14,10 +14,13 @@ export function safeNext(next: string | null | undefined, fallback = "/explore")
   return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
 }
 
+/** "Continue with Google" plus the "or" divider; renders nothing until Google is enabled. */
 export function GoogleButton({ next }: { next: string }) {
   const [busy, setBusy] = useState(false);
+  if (!hasGoogle) return null;
   return (
-    <button className="btn ghost" disabled={busy || !hasSupabase} onClick={async () => {
+    <>
+    <button type="button" className="btn ghost" disabled={busy} onClick={async () => {
       setBusy(true);
       await supabaseBrowser()?.auth.signInWithOAuth({
         provider: "google",
@@ -32,6 +35,8 @@ export function GoogleButton({ next }: { next: string }) {
       </svg>
       Continue with Google
     </button>
+    <Or />
+    </>
   );
 }
 

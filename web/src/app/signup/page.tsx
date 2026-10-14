@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { EMAIL_RE, GoogleButton, NeedsSupabase, Or, PasswordField, safeNext } from "@/components/auth";
+import { EMAIL_RE, GoogleButton, NeedsSupabase, PasswordField, safeNext } from "@/components/auth";
 import { TopBar } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -39,7 +39,6 @@ function SignUp() {
         </div>
         <NeedsSupabase />
         <GoogleButton next={next} />
-        <Or />
         <div className="stack">
           <label className="lbl" htmlFor="email">Email</label>
           <label className="field" style={emailBad ? { borderColor: "var(--red)" } : undefined}>
