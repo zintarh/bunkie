@@ -10,6 +10,8 @@ enable_signup = true
 enable_confirmations = true
 otp_length = 6
 otp_expiry = 3600
+# Changing a password needs a sign-in from the last 24 hours (the app re-checks the current password first).
+secure_password_change = true
 
 [auth.email.template.confirmation]
 subject = "Your Bunkie code"
@@ -21,6 +23,8 @@ enable_signup = false
 enable_confirmations = true
 otp_length = 6
 otp_expiry = 3600
+# Changing a password needs a sign-in from the last 24 hours (the app re-checks the current password first).
+secure_password_change = true
 
 # Turn on once the Google OAuth client exists.
 [auth.external.google]
