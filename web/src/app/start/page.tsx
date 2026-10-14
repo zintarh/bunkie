@@ -46,6 +46,8 @@ export default function Start() {
     router.push(stage === "in_camp" ? "/explore" : "/ppa");
   };
 
+  if (!ready) return <main className="screen" />;
+
   return (
     <main className="screen">
       <TopBar back="/" />

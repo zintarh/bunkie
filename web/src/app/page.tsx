@@ -30,6 +30,8 @@ export default function Intro() {
     return () => clearTimeout(t);
   }, []);
 
+  if (!ready || (prefs.introSeen && prefs.stage)) return <main className="screen" style={{ background: "#fff" }} />;
+
   const last = i === SLIDES.length - 1;
   const go = (n: number) => setI(Math.max(0, Math.min(SLIDES.length - 1, n)));
   const finish = () => setPrefs({ introSeen: true });

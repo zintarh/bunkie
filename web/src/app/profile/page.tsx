@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BadgeCheck, ChevronRight, CircleHelp, FileText, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
-import { TabBar } from "@/components/ui";
+import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
 import { initial } from "@/lib/format";
 import { avatarUrl } from "@/lib/photos";
@@ -21,6 +21,8 @@ export default function Profile() {
     { href: "/terms", label: "Terms", Icon: FileText, tile: "t-mint", show: true },
     { href: "/account/password", label: "Change password", Icon: KeyRound, tile: "t-amber", show: !!me },
   ];
+
+  if (loading) return <Loading tabs />;
 
   return (
     <main className="screen">

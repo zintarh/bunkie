@@ -5,9 +5,10 @@ import { setPrefs, usePrefs } from "./prefs";
 import { supabaseBrowser } from "./supabase/client";
 
 /** Saved rooms: on the phone when signed out, in the account when signed in (phone saves are copied up once). */
-export function useSaved(): [Set<string>, (id: string) => void] {
-  const [me] = useMe();
-  const [prefs] = usePrefs();
+/** [saved ids, toggle, ready]. ready is false until we know whose saves to show (phone or account). */
+export function useSaved(): [Set<string>, (id: string) => void, boolean] {
+  const [me, meLoading] = useMe();
+  const [prefs, prefsReady] = usePrefs();
   const [remote, setRemote] = useState<Set<string> | null>(null);
 
   useEffect(() => {
@@ -52,5 +53,6 @@ export function useSaved(): [Set<string>, (id: string) => void] {
     },
     [ids, me, remote],
   );
-  return [ids, toggle];
+  const ready = prefsReady && !meLoading && (!me || remote !== null);
+  return [ids, toggle, ready];
 }

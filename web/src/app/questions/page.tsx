@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, Pencil, X } from "lucide-react";
 import { RequireAuth, safeNext } from "@/components/auth";
-import { Progress } from "@/components/ui";
+import { Loading, Progress } from "@/components/ui";
 import { QUESTIONS } from "@/lib/bunkie";
 import { errorText, useMe } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -29,12 +29,13 @@ function Questions() {
   const [editing, setEditing] = useState<keyof Answers | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Returning to edit: start from the saved answers on the review screen.
   useEffect(() => {
     const db = supabaseBrowser();
-    if (!db || !me) return;
+    if (!db || !me) return setLoaded(true);
     db.from("bunkie_answers").select("sleep, guests, cooking, cleaning, noise").eq("user_id", me.user.id).maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -42,6 +43,7 @@ function Questions() {
           setPledged(true);
           setStep("review");
         }
+        setLoaded(true);
       });
   }, [me]);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -67,6 +69,8 @@ function Questions() {
   };
 
   const progress = step === "intro" ? 0 : step === "review" ? 1 : step / QUESTIONS.length;
+
+  if (!loaded) return <Loading />;
 
   if (step === "review") {
     return (

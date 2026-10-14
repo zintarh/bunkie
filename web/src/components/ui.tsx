@@ -147,6 +147,16 @@ export function Sheet({ onClose, children, label }: { onClose: () => void; child
 }
 
 /** Progress bar used by multi-step flows. */
+/** Full-screen spinner shown until a screen knows what to show, so nothing flashes and then changes. */
+export function Loading({ tabs }: { tabs?: boolean }) {
+  return (
+    <main className="screen">
+      <div className="body" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></div>
+      {tabs && <TabBar />}
+    </main>
+  );
+}
+
 export function Progress({ value }: { value: number }) {
   return (
     <span className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value * 100)}>

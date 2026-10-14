@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { BookingRow } from "@/components/BookingRow";
-import { Seg, TabBar } from "@/components/ui";
+import { Loading, Seg, TabBar } from "@/components/ui";
 import { useMe } from "@/lib/auth";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 
@@ -20,6 +20,8 @@ export default function Bookings() {
   const past = (list ?? []).filter((b) => !OPEN.includes(b.status) && !LIVE.includes(b.status));
   const open = (list ?? []).filter((b) => OPEN.includes(b.status)).length;
   const shown = tab === "active" ? active : past;
+
+  if (loading) return <Loading tabs />;
 
   return (
     <main className="screen">

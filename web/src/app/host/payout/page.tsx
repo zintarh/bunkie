@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { BadgeCheck, Lock } from "lucide-react";
 import { RequireAuth, safeNext } from "@/components/auth";
-import { TopBar } from "@/components/ui";
+import { Loading, TopBar } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { callFunction } from "@/lib/functions";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -14,7 +14,7 @@ function Payout() {
   const router = useRouter();
   const next = safeNext(useSearchParams().get("next"), "/host");
   const [me] = useMe();
-  const [current, setCurrent] = useState<Account | null>(null);
+  const [current, setCurrent] = useState<Account | null | undefined>(undefined);
   const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
   const [bank, setBank] = useState("");
   const [acct, setAcct] = useState("");
@@ -43,6 +43,7 @@ function Payout() {
     }
   };
 
+  if (current === undefined) return <Loading />;
   if (current && !editing) {
     return (
       <main className="screen">

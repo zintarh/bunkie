@@ -21,7 +21,7 @@ export default function HostHome() {
   const router = useRouter();
   const [me, loading] = useMe();
   const [listings, setListings] = useState<MyListing[] | null>(null);
-  const [bookings, setBookings] = useState<BookingFull[]>([]);
+  const [bookings, setBookings] = useState<BookingFull[] | null>(null);
   const [payouts, setPayouts] = useState<{ amount_kobo: number; status: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [toast, showToast] = useToast();
@@ -31,7 +31,7 @@ export default function HostHome() {
     if (!me || !db) return;
     db.from("listings").select("id, status, draft_step, area_name, monthly_total, cover_path, photo_count").eq("host_id", me.user.id).order("created_at", { ascending: false })
       .then(({ data }) => setListings((data ?? []) as MyListing[]));
-    void fetchMyBookings("host").then(setBookings);
+    fetchMyBookings("host").then(setBookings, () => setBookings([]));
     db.from("payouts").select("amount_kobo, status").then(({ data }) => setPayouts(data ?? []));
   }, [me]);
 
@@ -47,7 +47,7 @@ export default function HostHome() {
   };
 
   // Wait until we know whether they host, so the dashboard doesn't flash before "Share your room".
-  if (loading || (me && listings === null)) {
+  if (loading || (me && (listings === null || (listings.length > 0 && bookings === null)))) {
     return (
       <main className="screen">
         <div className="body" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></div>
@@ -80,8 +80,9 @@ export default function HostHome() {
     );
   }
 
-  const needAction = bookings.filter((b) => (b.status === "requested" && b.deadline_at) || (b.status === "viewed" && b.tenant_matched_at) || b.status === "moved_in");
-  const others = bookings.filter((b) => !needAction.includes(b) && (OPEN.includes(b.status) || LIVE.includes(b.status)));
+  const all = bookings ?? [];
+  const needAction = all.filter((b) => (b.status === "requested" && b.deadline_at) || (b.status === "viewed" && b.tenant_matched_at) || b.status === "moved_in");
+  const others = all.filter((b) => !needAction.includes(b) && (OPEN.includes(b.status) || LIVE.includes(b.status)));
   const held = payouts.filter((p) => p.status === "scheduled" || p.status === "processing").reduce((a, p) => a + p.amount_kobo, 0) / 100;
   const paidOut = payouts.filter((p) => p.status === "done").reduce((a, p) => a + p.amount_kobo, 0) / 100;
 

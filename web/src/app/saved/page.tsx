@@ -3,12 +3,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { RoomCard } from "@/components/RoomCard";
-import { TabBar } from "@/components/ui";
+import { Loading, TabBar } from "@/components/ui";
 import { useSaved } from "@/lib/saved";
 import type { RoomCard as Room } from "@/lib/types";
 
 export default function Saved() {
-  const [saved, toggle] = useSaved();
+  const [saved, toggle, savedReady] = useSaved();
   const [rooms, setRooms] = useState<Room[] | null>(null);
 
   // Saved rooms come from the same cached search, filtered to the saved ids.
@@ -20,6 +20,7 @@ export default function Saved() {
   }, []);
 
   const list = (rooms ?? []).filter((r) => saved.has(r.id));
+  if (!rooms || !savedReady) return <Loading tabs />;
   return (
     <main className="screen">
       <div className="body" style={{ padding: "0 16px 24px" }}>

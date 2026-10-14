@@ -6,7 +6,7 @@ import { MapPin, SlidersHorizontal, Tent, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { RoomCard } from "@/components/RoomCard";
-import { TabBar, Wordmark } from "@/components/ui";
+import { Loading, TabBar, Wordmark } from "@/components/ui";
 import { fit } from "@/lib/bunkie";
 import { dayLabel } from "@/lib/format";
 import { BATCHES } from "@/lib/places";
@@ -69,6 +69,9 @@ export default function Explore() {
   }, [rooms, myAnswers]);
 
   const nFilters = activeFilterCount(f, inCamp);
+
+  // Wait for the phone's saved choices, so the PPA bar doesn't flash "Add your PPA" first.
+  if (!ready || !prefs.stage) return <Loading tabs />;
 
   return (
     <main className="screen">
