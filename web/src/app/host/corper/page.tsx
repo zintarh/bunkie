@@ -4,9 +4,10 @@ import { Suspense, useState } from "react";
 import { Award, BriefcaseBusiness, ChevronLeft, House, Lock } from "lucide-react";
 import { RequireAuth, safeNext } from "@/components/auth";
 import { DocPicker, uploadDoc } from "@/components/DocPicker";
-import { Loading, TopBar } from "@/components/ui";
+import { Loading, Seg, TopBar } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { callFunction } from "@/lib/functions";
+import { BATCHES, batchFromStateCode } from "@/lib/places";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { CorperStatus } from "@/lib/types";
 
@@ -17,7 +18,8 @@ const OPTIONS: { value: CorperStatus; label: string; Icon: typeof Award }[] = [
 ];
 
 /**
- * "Are you a corp member?" for hosts. Serving: state code + call-up letter. Served: NYSC certificate.
+ * "Are you a corp member?" for hosts. Serving: state code, batch, call-up letter and PPA acceptance letter.
+ * Served: NYSC certificate.
  * A proven answer shows a badge on their rooms and puts them first among similar rooms.
  * Without ?next, finishing opens (or continues) their listing.
  */
@@ -29,7 +31,9 @@ function Corper() {
   const [phase, setPhase] = useState<"ask" | "prove" | "leaving">("ask");
   const [code, setCode] = useState("");
   const [cert, setCert] = useState("");
+  const [stream, setStream] = useState<1 | 2 | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [ppaFile, setPpaFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,8 +67,9 @@ function Corper() {
     setError(null);
     try {
       if (status === "serving") {
-        const path = await uploadDoc(me.user.id, "call-up", file);
-        await callFunction("verify", { action: "call_up", path, state_code: code });
+        const callUp = await uploadDoc(me.user.id, "call-up", file);
+        const ppa = await uploadDoc(me.user.id, "ppa-acceptance", ppaFile!);
+        await callFunction("verify", { action: "serving_corper", state_code: code, batch_id: batch?.id, call_up_path: callUp, ppa_path: ppa });
       } else {
         const path = await uploadDoc(me.user.id, "nysc-certificate", file);
         await callFunction("verify", { action: "discharge", path, certificate_number: cert });
@@ -78,11 +83,15 @@ function Corper() {
     }
   };
 
+  // The state code carries the year and batch letter (FC/26B/1234 = 2026 Batch B); the stream isn't in it.
+  const fromCode = batchFromStateCode(code);
+  const batch = fromCode && stream ? BATCHES.find((b) => b.year === fromCode.year && b.batch === fromCode.batch && b.stream === stream) : undefined;
+
   if (phase === "leaving") return <Loading />;
 
   if (phase === "prove") {
     const serving = status === "serving";
-    const ready = !!file && (serving ? /^[A-Z]{2}\/\d{2}[ABC]\/\d{3,5}$/.test(code) : /^[A-Z0-9/-]{6,20}$/.test(cert));
+    const ready = !!file && (serving ? !!batch && !!ppaFile : /^[A-Z0-9/-]{6,20}$/.test(cert));
     return (
       <main className="screen">
         <div className="topbar">
@@ -94,6 +103,7 @@ function Corper() {
             <div className="stack">
               <label className="lbl" htmlFor="sc">NYSC state code</label>
               <label className="field"><input id="sc" placeholder="FC/26B/1234" autoCapitalize="characters" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ""))} /></label>
+              {code.length >= 9 && !fromCode && <span className="err" style={{ fontSize: 13 }}>State codes look like FC/26B/1234</span>}
             </div>
           ) : (
             <div className="stack">
@@ -101,7 +111,16 @@ function Corper() {
               <label className="field"><input id="cert" autoCapitalize="characters" value={cert} onChange={(e) => setCert(e.target.value.toUpperCase().replace(/\s/g, ""))} /></label>
             </div>
           )}
+          {serving && fromCode && (
+            <div className="stack open">
+              <span className="lbl">Batch · {fromCode.year} Batch {fromCode.batch}</span>
+              <Seg<1 | 2> label="Stream" value={stream} onChange={setStream}
+                options={[{ value: 1, label: "Stream 1" }, { value: 2, label: "Stream 2" }]} />
+              {stream && !batch && <span className="err" style={{ fontSize: 13 }}>We don&apos;t have that batch yet. Get help.</span>}
+            </div>
+          )}
           <DocPicker label={serving ? "NYSC call-up letter" : "Certificate of National Service"} file={file} setFile={setFile} />
+          {serving && <DocPicker label="PPA acceptance letter" file={ppaFile} setFile={setPpaFile} />}
           {error && <p className="err" role="alert">{error}</p>}
           <p className="note"><Lock size={16} style={{ flexShrink: 0, marginTop: 1 }} />Others see a badge, never the document. Delete your data any time.</p>
         </div>
