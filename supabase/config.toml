@@ -8,6 +8,8 @@ enable_signup = true
 
 [auth.email]
 enable_confirmations = true
+otp_length = 6
+otp_expiry = 3600
 
 [auth.email.template.confirmation]
 subject = "Your Bunkie code"
@@ -17,6 +19,8 @@ content_path = "./supabase/templates/confirm.html"
 # Phone is only added in verification (updateUser + verifyOtp 'phone_change'), never used to sign in.
 enable_signup = false
 enable_confirmations = true
+otp_length = 6
+otp_expiry = 3600
 
 # Turn on once the Google OAuth client exists.
 [auth.external.google]
