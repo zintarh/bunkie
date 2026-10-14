@@ -294,3 +294,47 @@ reset role;
 do $$ begin
   assert (select run_after > now() from private.jobs where last_error = 'timeout'), 'failed job backs off';
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- Short stays: weeks at the host's weekly price, accepted without a viewing, paid upfront, no deposit
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000b3');   -- Bisi
+select t.expect_error($$ select public.request_room((select listing_id from ids), current_date + 200, p_weeks => 2) $$, '%short stays%');
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+update public.listings set open_to_short = true, weekly_price = 18000 where id = (select listing_id from ids);
+select t.as_user('00000000-0000-0000-0000-0000000000b3');
+select t.expect_error($$ select public.request_room((select listing_id from ids), current_date + 200, p_weeks => 5) $$, '%1 to 4 weeks%');
+select t.expect_error($$ select public.request_room((select listing_id from ids), current_date + 200, 1, null, 2) $$, '%how long%');
+create temp table s1 as select (public.request_room((select listing_id from ids), current_date + 200, p_weeks => 2)).id;
+grant select on s1 to authenticated, service_role;
+do $$ begin
+  assert (select move_out - move_in from public.bookings where id = (select id from s1)) = 14, '2 weeks = 14 nights';
+  assert (select count(*) from public.search_rooms(p_stay => 'weeks')) = 1, 'weeks filter finds it';
+end $$;
+
+-- Host accepts straight to the agreement; the address waits until it's paid.
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+select public.booking_action((select id from s1), 'accept', null, '{"skip_viewing": true}');
+select t.as_user('00000000-0000-0000-0000-0000000000b3');
+do $$ begin
+  assert (select status from public.bookings where id = (select id from s1)) = 'host_confirmed', 'agreement ready';
+  assert (select count(*) from public.room_address((select id from s1))) = 0, 'no address before paying';
+end $$;
+select public.booking_action((select id from s1), 'confirm_terms', null,
+  jsonb_build_object('terms_hash', (select terms_hash from public.agreement_versions where booking_id = (select id from s1))));
+create temp table spay as select * from public.start_payment((select id from s1));
+grant select on spay to service_role;
+do $$ begin
+  assert (select amount_kobo from spay) = 18000 * 2 * 100, 'whole stay, no deposit';
+end $$;
+reset role;
+set role service_role;
+select public.sys_mark_paid((select paystack_reference from spay), (select amount_kobo + paystack_fee_kobo from spay), '{}');
+reset role;
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000b3');
+do $$ begin
+  assert (select count(*) from public.room_address((select id from s1))) = 1, 'address once paid';
+end $$;
+reset role;

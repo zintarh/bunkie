@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Camera, CircleAlert, Plus, X } from "lucide-react";
+import { Camera, CircleAlert, ImageUp, Plus, X } from "lucide-react";
 import { errorText } from "@/lib/auth";
-import { position, shrink } from "@/lib/image";
+import { position, shrink, shrinkFile, type Shrunk } from "@/lib/image";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { PhotoShot } from "@/lib/types";
 import type { StepProps } from "./steps";
+
+/** Testing only: pick photos from files instead of the in-app camera. Never set in production. */
+const ALLOW_UPLOAD = process.env.NEXT_PUBLIC_ALLOW_PHOTO_UPLOAD === "true";
 
 const REQUIRED: { shot: PhotoShot; label: string }[] = [
   { shot: "bedroom", label: "Bedroom" }, { shot: "bathroom", label: "Bathroom" }, { shot: "kitchen", label: "Kitchen" },
@@ -51,22 +54,39 @@ export function PhotosStep({ listing, reload, next, back }: StepProps) {
     }
   };
 
-  const snap = async () => {
-    const db = supabaseBrowser();
-    if (!db || !video.current) return;
+  // Stores one photo. Camera photos carry where they were taken; uploads (testing only) don't.
+  const save = async (img: Shrunk, s: PhotoShot, at: { lat: number; lng: number } | null) => {
+    const db = supabaseBrowser()!;
+    const path = `${listing.id}/${crypto.randomUUID()}.${img.ext}`;
+    const up = await db.storage.from("listing-photos").upload(path, img.blob, { contentType: img.blob.type, cacheControl: "31536000" });
+    if (up.error) throw up.error;
+    const ins = await db.from("listing_photos").insert({
+      listing_id: listing.id, path, shot: s, position: photos.length, width: img.width, height: img.height,
+      taken_at: new Date().toISOString(), taken_lat: at?.lat ?? null, taken_lng: at?.lng ?? null,
+    });
+    if (ins.error) throw ins.error;
+    await reload();
+  };
+
+  const upload = async (s: PhotoShot, file: File | undefined) => {
+    if (!file) return;
     setBusy(true);
     setError(null);
     try {
-      const img = await shrink(video.current, 1600, 0.8);
-      const path = `${listing.id}/${crypto.randomUUID()}.${img.ext}`;
-      const up = await db.storage.from("listing-photos").upload(path, img.blob, { contentType: img.blob.type, cacheControl: "31536000" });
-      if (up.error) throw up.error;
-      const ins = await db.from("listing_photos").insert({
-        listing_id: listing.id, path, shot, position: photos.length, width: img.width, height: img.height,
-        taken_at: new Date().toISOString(), taken_lat: here.current?.lat ?? null, taken_lng: here.current?.lng ?? null,
-      });
-      if (ins.error) throw ins.error;
-      await reload();
+      await save(await shrinkFile(file, 1600, 0.8), s, null);
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const snap = async () => {
+    if (!video.current) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await save(await shrink(video.current, 1600, 0.8), shot, here.current);
       const left = REQUIRED.filter((r) => r.shot !== shot && !photos.some((p) => p.shot === r.shot));
       if (left.length && photos.length + 1 < MAX) setShot(left[0].shot);
       else {
@@ -148,18 +168,36 @@ export function PhotosStep({ listing, reload, next, back }: StepProps) {
             <span className="lbl" style={{ paddingBottom: 6 }}>Still needed</span>
             {missing.map((m) => (
               <div key={m.shot} className="lrow" style={{ minHeight: 52 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: "var(--green)", margin: "0 6px" }} />{m.label}
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: "var(--green)", margin: "0 6px" }} />
+                <span style={{ flex: 1 }}>{m.label}</span>
+                {ALLOW_UPLOAD && <UploadButton disabled={busy} onFile={(f) => upload(m.shot, f)} label={`Upload ${m.label.toLowerCase()} photo`} />}
               </div>
             ))}
           </div>
         )}
         {photos.length === 0 && <button className="btn" onClick={() => open("bedroom")}><Camera size={20} />Open camera</button>}
+        {ALLOW_UPLOAD && missing.length === 0 && photos.length < MAX && (
+          <UploadButton disabled={busy} onFile={(f) => upload("extra", f)} label="Upload an extra photo" wide />
+        )}
+        {ALLOW_UPLOAD && <p className="small">Testing: photo upload is on.</p>}
         {error && <p className="err" role="alert">{error}</p>}
       </div>
       <div className="foot split">
         <button className="link" onClick={back}>Back</button>
         <button className="next" disabled={missing.length > 0} onClick={next}>Next</button>
       </div>
+    </>
+  );
+}
+
+function UploadButton({ onFile, label, disabled, wide }: { onFile: (f: File | undefined) => void; label: string; disabled?: boolean; wide?: boolean }) {
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <button className={wide ? "btn ghost" : "pill"} disabled={disabled} onClick={() => input.current?.click()} aria-label={label}>
+        <ImageUp size={16} />{wide ? label : "Upload"}
+      </button>
+      <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ""; }} />
     </>
   );
 }
