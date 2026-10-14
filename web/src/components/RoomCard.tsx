@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { BadgeCheck, CalendarDays, Clock, Heart } from "lucide-react";
+import { Award, BadgeCheck, CalendarDays, Clock, Heart } from "lucide-react";
 import { HOUSEHOLD_LABEL } from "@/lib/bunkie";
-import { naira, stayRange } from "@/lib/format";
+import { CORPER_LABEL, naira, stayRange } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import type { RoomCard as Room } from "@/lib/types";
 
@@ -21,7 +21,11 @@ export function RoomCard({
     <article className="rcard">
       <Link href={`/rooms/${room.id}`} aria-label={title} className="photo"
         style={{ position: "relative", display: "block", height: 200, borderRadius: 18, backgroundImage: `url(${photoUrl(room.cover_path)})` }}>
-        {room.host_verified && (
+        {room.host_corper === "serving" || room.host_corper === "served" ? (
+          <span className="badge verified" style={{ position: "absolute", left: 10, top: 10, color: "var(--amber-text)" }}>
+            <Award size={14} strokeWidth={2.4} />{CORPER_LABEL[room.host_corper]}
+          </span>
+        ) : room.host_verified && (
           <span className="badge verified" style={{ position: "absolute", left: 10, top: 10 }}>
             <BadgeCheck size={14} strokeWidth={2.4} />Verified host
           </span>

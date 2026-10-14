@@ -1,12 +1,13 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Camera, Check, ChevronLeft, FileUp, Lock, ShieldCheck, Trash2, Zap } from "lucide-react";
+import { Camera, ChevronLeft, FileUp, Lock, ShieldCheck, Zap } from "lucide-react";
 import { RequireAuth, safeNext } from "@/components/auth";
+import { DocPicker, uploadDoc } from "@/components/DocPicker";
 import { Progress } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { callFunction } from "@/lib/functions";
-import { shrink, shrinkFile } from "@/lib/image";
+import { shrink } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 type StepKey = "phone" | "nin" | "liveness" | "call_up" | "address";
@@ -253,47 +254,6 @@ function LivenessStep({ userId, onDone }: { userId: string; onDone: () => void }
   );
 }
 
-function DocPicker({ label, file, setFile }: { label: string; file: File | null; setFile: (f: File | null) => void }) {
-  const camera = useRef<HTMLInputElement>(null);
-  const upload = useRef<HTMLInputElement>(null);
-  return (
-    <div className="stack">
-      <span className="lbl">{label}</span>
-      {file ? (
-        <div className="soft row">
-          <span className="tile t-mint"><Check size={20} /></span>
-          <span className="stack" style={{ gap: 0, flex: 1, minWidth: 0 }}>
-            <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</span>
-            <span className="small">{(file.size / 1048576).toFixed(1)} MB</span>
-          </span>
-          <button className="ib" aria-label="Remove file" onClick={() => setFile(null)}><Trash2 size={18} /></button>
-        </div>
-      ) : (
-        <div className="grid2">
-          <button className="btn ghost sm" onClick={() => camera.current?.click()}><Camera size={18} />Take photo</button>
-          <button className="btn ghost sm" onClick={() => upload.current?.click()}><FileUp size={18} />Upload file</button>
-        </div>
-      )}
-      <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      <input ref={upload} type="file" accept="image/*,application/pdf" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-    </div>
-  );
-}
-
-async function uploadDoc(userId: string, name: string, file: File): Promise<string> {
-  const db = supabaseBrowser()!;
-  let blob: Blob = file;
-  let ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  if (file.type.startsWith("image/")) {
-    const s = await shrinkFile(file, 2000, 0.85);
-    blob = s.blob;
-    ext = s.ext;
-  }
-  const path = `${userId}/${name}-${Date.now()}.${ext}`;
-  const { error } = await db.storage.from("kyc").upload(path, blob, { contentType: blob.type || "application/pdf" });
-  if (error) throw error;
-  return path;
-}
 
 function CallUpStep({ userId, onDone }: { userId: string; onDone: () => void }) {
   const [code, setCode] = useState("");

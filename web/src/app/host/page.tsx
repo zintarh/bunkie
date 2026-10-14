@@ -39,6 +39,7 @@ export default function HostHome() {
     const db = supabaseBrowser();
     if (!me) return router.push("/signup?next=/host");
     if (!db) return;
+    if (!me.profile.corper_status) return router.push("/host/corper");
     setBusy(true);
     const { data, error } = await db.rpc("start_listing");
     setBusy(false);

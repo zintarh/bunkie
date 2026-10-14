@@ -36,6 +36,8 @@ export type RoomCard = {
   host_first_name: string;
   host_photo_path: string | null;
   host_verified: boolean;
+  /** Set only when the host proved it: serving now, or served before. */
+  host_corper: CorperStatus | null;
   host_answers: Answers | null;
   commute_min: number | null;
   ease_min: number | null;
@@ -85,3 +87,6 @@ export type Booking = {
   version: number;
   created_at: string;
 };
+
+/** A host's answer to "Are you a corp member?" */
+export type CorperStatus = "serving" | "served" | "not_corper";

@@ -3,10 +3,10 @@ import Link from "next/link";
 import { MapImage } from "@/components/MapImage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, Share2, Tent, Wallet } from "lucide-react";
+import { Award, BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, Share2, Tent, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui";
 import { HOUSEHOLD_LABEL, QUESTIONS, fit } from "@/lib/bunkie";
-import { dayLabel, initial, naira, stayRange } from "@/lib/format";
+import { CORPER_LABEL, dayLabel, initial, naira, stayRange } from "@/lib/format";
 import { avatarUrl, photoUrl } from "@/lib/photos";
 import { usePrefs } from "@/lib/prefs";
 import { useSaved } from "@/lib/saved";
@@ -100,6 +100,9 @@ export function RoomView({ room }: { room: RoomDetail }) {
           <span className="stack" style={{ gap: 3, flex: 1 }}>
             <span className="row" style={{ gap: 6, fontWeight: 700 }}>Hosted by {room.host_first_name}{room.host_verified && <BadgeCheck size={18} color="var(--green)" strokeWidth={2.4} aria-label="Verified" />}</span>
             <span className="small" style={{ fontSize: 14 }}>Lives here</span>
+            {(room.host_corper === "serving" || room.host_corper === "served") && (
+              <span className="badge amber" style={{ alignSelf: "flex-start", marginTop: 2 }}><Award size={13} strokeWidth={2.4} />{CORPER_LABEL[room.host_corper]}</span>
+            )}
           </span>
         </section>
 

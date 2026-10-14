@@ -5,6 +5,7 @@
 //   liveness         { path }                 selfie already uploaded to kyc/{user}/...
 //   call_up          { path, state_code }     call-up letter already uploaded
 //   address          { kind, value }          host proof of address (meter number, bill or receipt path)
+//   discharge        { path, certificate_number }  NYSC certificate, for hosts who served before
 import { HttpError, admin, json, requireUser, serve } from "../_shared/clients.ts";
 import { identity } from "../_shared/identity.ts";
 
@@ -80,6 +81,17 @@ serve(async (req) => {
       const r = await p.proofOfAddress(kind, value, user.id);
       await record(user.id, "proof_of_address", r.passed, p.name, r.ref, { result: { kind } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "We couldn't confirm that address.");
+      return json({ ok: true });
+    }
+
+    case "discharge": {
+      const number = String(body.certificate_number ?? "").toUpperCase().replace(/\s/g, "");
+      if (!/^[A-Z0-9/-]{6,20}$/.test(number)) throw new HttpError(400, "Check the certificate number.");
+      if (!ownPath(body.path)) throw new HttpError(400, "Add a photo of your certificate.");
+      const p = identity();
+      const r = await p.dischargeCertificate(body.path, number, user.id);
+      await record(user.id, "discharge", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null } });
+      if (!r.passed) throw new HttpError(400, r.reason ?? "The name on the certificate must match your NIN.");
       return json({ ok: true });
     }
 

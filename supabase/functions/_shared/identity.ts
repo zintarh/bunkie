@@ -10,6 +10,8 @@ export interface IdentityProvider {
   liveness(selfiePath: string, userId: string): Promise<CheckResult>;
   callUpLetter(docPath: string, stateCode: string, userId: string): Promise<CheckResult>;
   proofOfAddress(kind: string, value: string, userId: string): Promise<CheckResult>;
+  /** NYSC Certificate of National Service, for hosts who served before. Name must match the NIN. */
+  dischargeCertificate(docPath: string, certificateNumber: string, userId: string): Promise<CheckResult>;
 }
 
 /** Passes everything. Only allowed when ALLOW_TEST_VERIFICATION=true (never in production). */
@@ -26,6 +28,9 @@ const testProvider: IdentityProvider = {
     return { passed: true, ref: `test-${crypto.randomUUID()}` };
   },
   async proofOfAddress() {
+    return { passed: true, ref: `test-${crypto.randomUUID()}` };
+  },
+  async dischargeCertificate() {
     return { passed: true, ref: `test-${crypto.randomUUID()}` };
   },
 };

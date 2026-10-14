@@ -1,4 +1,4 @@
-import type { RoomDetail } from "./types";
+import type { CorperStatus, RoomDetail } from "./types";
 
 /**
  * Sample rooms shown when Supabase isn't connected, so the app can be clicked through
@@ -15,6 +15,7 @@ const base = {
   pay_schedule: "monthly" as const,
   host_photo_path: null,
   host_verified: true,
+  host_corper: null as CorperStatus | null,
   commute_min: null,
   ease_min: null,
   photo_count: 5,
@@ -37,7 +38,7 @@ export const DEMO_ROOMS: RoomDetail[] = [
   {
     ...base, id: "demo-wuse2", area_name: "Wuse 2", area_lat: 9.079, area_lng: 7.47, room_kind: "own_room", bath_kind: "shared",
     household: "women", min_months: 1, max_months: 6, available_from: inDays(0), rent_monthly: 45000, monthly_total: 53000,
-    total_varies: true, cover_path: "/demo/room-1.svg", host_id: "demo-tolu", host_first_name: "Tolu",
+    total_varies: true, cover_path: "/demo/room-1.svg", host_id: "demo-tolu", host_first_name: "Tolu", host_corper: "serving",
     host_answers: { sleep: 1, guests: 1, cooking: 2, cleaning: 0, noise: 1 }, published_at: inDays(-3), photos: photos(0),
     costs: [
       { name: "Light", amount: 6000, tenant_pays: true, varies: true },
@@ -48,7 +49,7 @@ export const DEMO_ROOMS: RoomDetail[] = [
   {
     ...base, id: "demo-garki", area_name: "Garki II", area_lat: 9.03, area_lng: 7.489, room_kind: "own_room", bath_kind: "own",
     household: "mixed", min_months: 3, max_months: 12, available_from: inDays(5), rent_monthly: 60000, monthly_total: 71000,
-    total_varies: false, cover_path: "/demo/room-2.svg", host_id: "demo-emeka", host_first_name: "Emeka",
+    total_varies: false, cover_path: "/demo/room-2.svg", host_id: "demo-emeka", host_first_name: "Emeka", host_corper: "served",
     host_answers: { sleep: 2, guests: 0, cooking: 1, cleaning: 1, noise: 0 }, published_at: inDays(-6), photos: photos(1),
     costs: [
       { name: "Service charge", amount: 7000, tenant_pays: true, varies: false },

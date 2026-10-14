@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BadgeCheck, ChevronRight, CircleHelp, FileText, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
+import { Award, BadgeCheck, ChevronRight, CircleHelp, FileText, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
 import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
 import { initial } from "@/lib/format";
@@ -16,6 +16,7 @@ export default function Profile() {
     { href: "/host", label: me?.profile.is_host ? "Hosting" : "Host a room", Icon: Home, tile: "t-mint", show: true },
     { href: "/verify", label: "Verify you", Icon: ShieldCheck, tile: "t-amber", show: !!me && !me.profile.is_verified },
     { href: "/questions?next=/profile", label: "Bunkie questions", Icon: Sparkles, tile: "t-lilac", show: !!me },
+    { href: "/host/corper?next=/profile", label: me?.profile.corper_verified ? "Corp member · verified" : "Corp member status", Icon: Award, tile: "t-amber", show: !!me?.profile.corper_status },
     { href: "/help", label: "Get help", Icon: CircleHelp, tile: "t-sky", show: true },
     { href: "/privacy", label: "Privacy, in plain words", Icon: Lock, tile: "t-coral", show: true },
     { href: "/terms", label: "Terms", Icon: FileText, tile: "t-mint", show: true },

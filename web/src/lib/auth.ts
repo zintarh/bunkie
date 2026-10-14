@@ -2,10 +2,14 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabaseBrowser } from "./supabase/client";
+import type { CorperStatus } from "./types";
 
 export type Me = {
   user: User;
-  profile: { first_name: string; photo_path: string | null; is_verified: boolean; is_host: boolean; standing: number };
+  profile: {
+    first_name: string; photo_path: string | null; is_verified: boolean; is_host: boolean; standing: number;
+    corper_status: CorperStatus | null; corper_verified: boolean;
+  };
 };
 
 let cached: Me | null | undefined;
@@ -16,8 +20,8 @@ async function loadMe(): Promise<Me | null> {
   if (!db) return null;
   const { data } = await db.auth.getUser();
   if (!data.user) return null;
-  const { data: profile } = await db.from("profiles").select("first_name, photo_path, is_verified, is_host, standing").eq("id", data.user.id).single();
-  return { user: data.user, profile: profile ?? { first_name: "", photo_path: null, is_verified: false, is_host: false, standing: 100 } };
+  const { data: profile } = await db.from("profiles").select("first_name, photo_path, is_verified, is_host, standing, corper_status, corper_verified").eq("id", data.user.id).single();
+  return { user: data.user, profile: profile ?? { first_name: "", photo_path: null, is_verified: false, is_host: false, standing: 100, corper_status: null, corper_verified: false } };
 }
 
 export async function refreshMe() {

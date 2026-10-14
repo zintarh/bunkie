@@ -68,3 +68,6 @@ export function untilLabel(iso: string | null): string {
 export function initial(name: string | null | undefined): string {
   return (name?.trim()?.[0] ?? "?").toUpperCase();
 }
+
+/** Badge text for a host whose corp member status is verified. */
+export const CORPER_LABEL = { serving: "Corper host", served: "Ex-corper host" } as const;

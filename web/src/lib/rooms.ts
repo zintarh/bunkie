@@ -3,7 +3,7 @@ import { DEMO_ROOMS } from "./demo";
 import { estimateMinutes } from "./estimate";
 import { ZONES } from "./places";
 import { supabasePublic } from "./supabase/server";
-import type { RoomCard, RoomDetail, SearchParams } from "./types";
+import type { CorperStatus, RoomCard, RoomDetail, SearchParams } from "./types";
 
 const CENTRE = { lat: 9.0579, lng: 7.4951 };
 
@@ -61,7 +61,7 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
       `id, area_name, area_lat, area_lng, room_kind, bath_kind, furnished, household, open_to_camp, min_months, max_months,
        available_from, rent_monthly, monthly_total, total_varies, deposit, pay_schedule, photo_count, cover_path, published_at,
        early_leave_notice_days, redeploy_refund, ask_leave_notice_days, host_id,
-       host:profiles!listings_host_id_fkey(first_name, photo_path, is_verified),
+       host:profiles!listings_host_id_fkey(first_name, photo_path, is_verified, corper_status, corper_verified),
        listing_photos(path, shot, taken_at, position),
        listing_costs(name, amount, tenant_pays, varies, position),
        house_rules(topic, choice, consequence, position)`,
@@ -77,13 +77,16 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     .eq("user_id", l.host_id)
     .maybeSingle();
 
-  const host = (Array.isArray(l.host) ? l.host[0] : l.host) as { first_name: string; photo_path: string | null; is_verified: boolean };
+  const host = (Array.isArray(l.host) ? l.host[0] : l.host) as {
+    first_name: string; photo_path: string | null; is_verified: boolean; corper_status: CorperStatus | null; corper_verified: boolean;
+  };
   const byPos = <T extends { position: number }>(xs: T[]) => [...xs].sort((a, b) => a.position - b.position);
   return {
     ...(l as unknown as RoomDetail),
     host_first_name: host?.first_name ?? "",
     host_photo_path: host?.photo_path ?? null,
     host_verified: host?.is_verified ?? false,
+    host_corper: host?.corper_verified ? host.corper_status : null,
     host_answers: answers?.approved_at ? { sleep: answers.sleep, guests: answers.guests, cooking: answers.cooking, cleaning: answers.cleaning, noise: answers.noise } : null,
     commute_min: null,
     ease_min: l.area_lat ? estimate(l.area_lat, l.area_lng!, CENTRE.lat, CENTRE.lng) : null,

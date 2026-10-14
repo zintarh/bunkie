@@ -2,9 +2,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, ChevronRight, CircleAlert } from "lucide-react";
+import { Award, Check, ChevronRight, CircleAlert } from "lucide-react";
 import { TopBar } from "@/components/ui";
-import { errorText } from "@/lib/auth";
+import { errorText, useMe } from "@/lib/auth";
 import { naira } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -26,6 +26,7 @@ const FIX: Record<string, { label: string; href: (id: string) => string }> = {
 
 export function ReviewStep({ listing, reload }: StepProps) {
   const router = useRouter();
+  const [me] = useMe();
   const [missing, setMissing] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +79,13 @@ export function ReviewStep({ listing, reload }: StepProps) {
           </div>
         )}
         {missing && missing.length === 0 && listing.status === "draft" && <div className="banner green"><Check size={20} />Everything&apos;s in.</div>}
+        {me && (me.profile.corper_status === "serving" || me.profile.corper_status === "served") && !me.profile.corper_verified && (
+          <div className="lrows">
+            <Link className="lrow" href={`/host/corper?next=${qs(`/host/listing/${listing.id}?step=review`)}`}>
+              <span className="tile t-amber"><Award size={20} /></span><span style={{ flex: 1 }}>Get your corper badge</span><ChevronRight size={18} color="var(--muted)" />
+            </Link>
+          </div>
+        )}
         <Link className="link" style={{ alignSelf: "flex-start" }} href={`/host/listing/${listing.id}?step=location`}>Edit listing</Link>
         {error && <p className="err" role="alert">{error}</p>}
       </div>
