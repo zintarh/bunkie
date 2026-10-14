@@ -7,8 +7,3 @@
 .fact b { font-size: 17px; }
 .fact span { font-size: 13px; color: var(--muted); }
 .rr { display: flex; align-items: center; gap: 12px; min-height: 40px; }
-.map { height: 150px; border-radius: 14px; background: #e2e7de; position: relative; overflow: hidden; }
-.roadH { position: absolute; left: 0; right: 0; top: 60px; height: 14px; background: #fff; }
-.roadV { position: absolute; top: 0; bottom: 0; left: 30%; width: 14px; background: #fff; }
-.roadV2 { position: absolute; top: 0; bottom: 0; left: 70%; width: 20px; background: #f7e3a6; }
-.area { position: absolute; left: calc(50% - 48px); top: 30px; width: 96px; height: 96px; border-radius: 999px; background: rgba(23, 168, 98, 0.18); border: 2px solid var(--green); }

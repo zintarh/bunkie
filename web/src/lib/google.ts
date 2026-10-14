@@ -9,7 +9,20 @@ export const FCT = { low: { latitude: 8.35, longitude: 6.7 }, high: { latitude: 
 export const inFct = (lat: number, lng: number) =>
   lat >= FCT.low.latitude && lat <= FCT.high.latitude && lng >= FCT.low.longitude && lng <= FCT.high.longitude;
 
-export type Place = { label: string; address: string; lat: number; lng: number };
+/** label: the place's name; area: the neighbourhood or district it's in (shown on listings). */
+export type Place = { label: string; area: string; address: string; lat: number; lng: number };
+
+type Part = { types: string[]; long_name?: string; longText?: string };
+/** Most specific named area: neighbourhood, then district, then town. Works for both Geocoding and Places parts. */
+export function areaName(parts: Part[]): string | undefined {
+  for (const t of ["neighborhood", "sublocality_level_1", "sublocality", "locality"]) {
+    const p = parts.find((x) => x.types.includes(t));
+    const name = p?.long_name ?? p?.longText;
+    if (name) return name;
+  }
+}
+
+export const shortAddress = (a: string) => a.replace(/,?\s*Nigeria$/, "").replace(/\s+\d{6}(?=,|$)/, "");
 
 /** 501 tells the app to fall back to the built-in area list. */
 export const notConfigured = () => NextResponse.json({ error: "not_configured" }, { status: 501 });

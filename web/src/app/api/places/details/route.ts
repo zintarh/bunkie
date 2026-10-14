@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { GOOGLE_MAPS_KEY, failed, notConfigured, sessionToken, type Place } from "@/lib/google";
+import { GOOGLE_MAPS_KEY, areaName, failed, notConfigured, sessionToken, shortAddress, type Place } from "@/lib/google";
 
-// Coordinates for a place picked from search.
+// Coordinates and area for a place picked from search.
 export async function GET(req: NextRequest) {
   if (!GOOGLE_MAPS_KEY) return notConfigured();
   const id = req.nextUrl.searchParams.get("id") ?? "";
@@ -10,15 +10,20 @@ export async function GET(req: NextRequest) {
   const session = sessionToken(req.nextUrl.searchParams.get("session"));
   const url = `https://places.googleapis.com/v1/places/${id}?languageCode=en${session ? `&sessionToken=${session}` : ""}`;
   const res = await fetch(url, {
-    headers: { "X-Goog-Api-Key": GOOGLE_MAPS_KEY, "X-Goog-FieldMask": "displayName,formattedAddress,location" },
+    headers: { "X-Goog-Api-Key": GOOGLE_MAPS_KEY, "X-Goog-FieldMask": "displayName,formattedAddress,location,addressComponents" },
   }).catch(() => null);
   if (!res?.ok) return failed();
 
-  const p = (await res.json()) as { displayName?: { text: string }; formattedAddress?: string; location?: { latitude: number; longitude: number } };
+  const p = (await res.json()) as {
+    displayName?: { text: string }; formattedAddress?: string; location?: { latitude: number; longitude: number };
+    addressComponents?: { longText: string; types: string[] }[];
+  };
   if (!p.location) return failed();
+  const label = p.displayName?.text ?? p.formattedAddress ?? "Your PPA";
   const place: Place = {
-    label: p.displayName?.text ?? p.formattedAddress ?? "Your PPA",
-    address: (p.formattedAddress ?? "").replace(/,?\s*Nigeria$/, ""),
+    label,
+    area: areaName(p.addressComponents ?? []) ?? label,
+    address: shortAddress(p.formattedAddress ?? ""),
     lat: p.location.latitude,
     lng: p.location.longitude,
   };

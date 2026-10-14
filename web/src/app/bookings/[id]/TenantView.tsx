@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { MapImage } from "@/components/MapImage";
 import { useEffect, useRef, useState } from "react";
 import { CalendarPlus, Camera, Check, CircleAlert, Home, KeyRound, MapPin, Navigation, PartyPopper, Phone, Video, Wallet } from "lucide-react";
 import { CLOSE_REASON } from "@/lib/bunkie";
@@ -126,6 +127,7 @@ function ViewingBooked({ b, reload }: Props) {
         <h1 className="h1">Viewing booked</h1>
         <div className="card stack" style={{ gap: 12 }}>
           <span style={{ fontWeight: 700, fontSize: 17 }}>{b.viewing_at ? slotLabel(b.viewing_at) : ""} · {video ? "video call" : "in person"}</span>
+          {addr && !video && <MapImage lat={addr.lat} lng={addr.lng} mode="pin" height={140} label={`Map of ${addr.address_line}`} />}
           {addr && (
             <div className="row" style={{ alignItems: "flex-start" }}>
               <MapPin size={20} color="var(--green)" style={{ flexShrink: 0 }} />

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { MapImage } from "@/components/MapImage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, Share2, Tent, Wallet } from "lucide-react";
@@ -166,9 +167,9 @@ export function RoomView({ room }: { room: RoomDetail }) {
 
         <section className={styles.sec} style={{ gap: 12 }}>
           <span className="h2">Where you&apos;ll be</span>
-          <div className={styles.map} aria-hidden="true">
-            <span className={styles.roadH} /><span className={styles.roadV} /><span className={styles.roadV2} /><span className={styles.area} />
-          </div>
+          {room.area_lat != null && room.area_lng != null
+            ? <MapImage lat={room.area_lat} lng={room.area_lng} mode="area" label={`Map around ${room.area_name}`} />
+            : <MapImage lat={9.0579} lng={7.4951} mode="area" zoom={12} label="Map of Abuja" />}
           <span className="small" style={{ fontSize: 14 }}>
             {room.area_name}. Exact address shared when your viewing is booked.
             {room.area_lat != null && (

@@ -1,6 +1,8 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import { Check, LocateFixed, Plus, X } from "lucide-react";
+import { MapImage } from "@/components/MapImage";
+import { PlaceSearch, placeAt, type Place } from "@/components/PlaceSearch";
 import { Chips, Seg, Stepper, Switch } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { isoDay, months as monthsLabel, naira } from "@/lib/format";
@@ -76,47 +78,75 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const use = (p: Place) => {
+    setPin({ lat: p.lat, lng: p.lng });
+    setAddress(p.address);
+    setArea(p.area);
+    setError(null);
+  };
+
   const here = async () => {
     setLocating(true);
     setError(null);
     const p = await position(12000);
+    if (!p) {
+      setLocating(false);
+      return setError("Couldn't get your location. Allow location and stand at the room.");
+    }
+    try {
+      const place = await placeAt(p.lat, p.lng);
+      if (place) use(place);
+      else {
+        setPin(p);
+        if (!area) setArea(nearestZone(p.lat, p.lng).name);
+      }
+    } catch {
+      setError("That location isn't in Abuja. Bunkie is in Abuja for now.");
+    }
     setLocating(false);
-    if (!p) return setError("Couldn't get your location. Allow location and stand at the room.");
-    if (p.lat < 8.3 || p.lat > 9.5 || p.lng < 6.7 || p.lng > 7.7) return setError("That location isn't in Abuja. Bunkie is in Abuja for now.");
-    setPin(p);
-    if (!area) setArea(nearestZone(p.lat, p.lng).name);
   };
 
   return (
-    <StepShell title="Where's the room?" back={back} next={next} canNext={!!pin && address.trim().length > 4 && area.length > 1}
+    <StepShell title="Where's the room?" back={back} next={next} canNext={!!pin && address.trim().length > 4 && area.trim().length > 1}
       onSave={async () => {
-        await saveListing(listing.id, { area_name: area });
+        await saveListing(listing.id, { area_name: area.trim() });
         const { error } = await db().from("listing_locations").upsert({ listing_id: listing.id, address_line: address.trim(), landmark: landmark.trim() || null, lat: pin!.lat, lng: pin!.lng });
         if (error) throw error;
         await reload();
       }}>
-      <div className="stack">
-        <label className="lbl" htmlFor="addr">Address</label>
-        <label className="field"><input id="addr" autoComplete="street-address" placeholder="Flat 4, Block C, Aminu Kano Crescent" value={address} onChange={(e) => setAddress(e.target.value)} /></label>
-      </div>
-      <div className="stack">
-        <label className="lbl" htmlFor="landmark">Landmark <span style={{ fontWeight: 500 }}>· optional</span></label>
-        <label className="field"><input id="landmark" placeholder="Opposite Banex Plaza" value={landmark} onChange={(e) => setLandmark(e.target.value)} /></label>
-      </div>
-      <div className="stack">
-        <label className="lbl" htmlFor="area">Area</label>
-        <select id="area" className="sel" value={area} onChange={(e) => setArea(e.target.value)}>
-          <option value="">Pick an area</option>
-          {ZONES.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
-        </select>
-      </div>
-      <button className={pin ? "opt on" : "opt"} onClick={here} disabled={locating}>
-        <span className="ico">{pin ? <Check size={20} color="var(--green)" /> : <LocateFixed size={20} />}</span>
-        <span className="stack" style={{ gap: 2 }}>
-          <span>{locating ? "Finding you…" : pin ? "Pin set at the room" : "I'm at the room now"}</span>
-          <span className="small" style={{ fontWeight: 400 }}>Only shown to a bunkie once a viewing is booked.</span>
-        </span>
-      </button>
+      {!pin ? (
+        <>
+          <PlaceSearch placeholder="Search the street or building" onPick={use} />
+          <button className="opt" onClick={here} disabled={locating}>
+            <span className="ico"><LocateFixed size={20} /></span>
+            <span className="stack" style={{ gap: 2 }}>
+              <span>{locating ? "Finding you…" : "I'm at the room now"}</span>
+              <span className="small" style={{ fontWeight: 400 }}>Uses your phone's location</span>
+            </span>
+          </button>
+        </>
+      ) : (
+        <>
+          <MapImage lat={pin.lat} lng={pin.lng} mode="pin" label={`Map of ${address || area}`} />
+          <div className="between">
+            <span className="small" style={{ fontSize: 14 }}>Only shown to a bunkie once a viewing is booked.</span>
+            <button className="link" onClick={() => setPin(null)}>Change</button>
+          </div>
+          <div className="stack">
+            <label className="lbl" htmlFor="addr">Address <span style={{ fontWeight: 500 }}>· add the flat or house number</span></label>
+            <label className="field"><input id="addr" autoComplete="street-address" placeholder="Flat 4, Block C, Aminu Kano Crescent" value={address} onChange={(e) => setAddress(e.target.value)} /></label>
+          </div>
+          <div className="stack">
+            <label className="lbl" htmlFor="area">Area</label>
+            <label className="field"><input id="area" list="areas" maxLength={80} placeholder="Wuse 2" value={area} onChange={(e) => setArea(e.target.value)} /></label>
+            <datalist id="areas">{ZONES.map((z) => <option key={z.id} value={z.name} />)}</datalist>
+          </div>
+          <div className="stack">
+            <label className="lbl" htmlFor="landmark">Landmark <span style={{ fontWeight: 500 }}>· optional</span></label>
+            <label className="field"><input id="landmark" placeholder="Opposite Banex Plaza" value={landmark} onChange={(e) => setLandmark(e.target.value)} /></label>
+          </div>
+        </>
+      )}
       {error && <p className="err">{error}</p>}
     </StepShell>
   );
