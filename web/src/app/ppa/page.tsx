@@ -5,10 +5,12 @@ import { LocateFixed, MapPin } from "lucide-react";
 import { PlaceSearch, placeAt } from "@/components/PlaceSearch";
 import { TopBar } from "@/components/ui";
 import { ZONES, nearestZone } from "@/lib/places";
+import { useHasGps } from "@/lib/device";
 import { setPrefs } from "@/lib/prefs";
 
 export default function PpaSearch() {
   const router = useRouter();
+  const gps = useHasGps();
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,10 +70,12 @@ export default function PpaSearch() {
           fallback={areaRows}
           idle={
             <>
-              <button className="lrow" onClick={useLocation} disabled={locating} style={{ marginTop: 8 }}>
-                <span className="tile t-mint"><LocateFixed size={20} strokeWidth={2.2} /></span>
-                <span style={{ fontWeight: 600 }}>{locating ? "Finding you…" : "Use my current location"}</span>
-              </button>
+              {gps && (
+                <button className="lrow" onClick={useLocation} disabled={locating} style={{ marginTop: 8 }}>
+                  <span className="tile t-mint"><LocateFixed size={20} strokeWidth={2.2} /></span>
+                  <span style={{ fontWeight: 600 }}>{locating ? "Finding you…" : "Use my current location"}</span>
+                </button>
+              )}
               {error && <p className="err" style={{ padding: "12px 0" }}>{error}</p>}
             </>
           }

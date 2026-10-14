@@ -6,6 +6,7 @@ import { PlaceSearch, placeAt, type Place } from "@/components/PlaceSearch";
 import { Chips, Seg, Stepper, Switch } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { isoDay, months as monthsLabel, naira } from "@/lib/format";
+import { useHasGps } from "@/lib/device";
 import { HOST_STEPS } from "@/lib/hosting";
 import { position } from "@/lib/image";
 import { ZONES, nearestZone } from "@/lib/places";
@@ -87,6 +88,7 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
   const [landmark, setLandmark] = useState(loc?.landmark ?? "");
   const [area, setArea] = useState(listing.area_name);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(loc ? { lat: loc.lat, lng: loc.lng } : null);
+  const gps = useHasGps();
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,13 +131,13 @@ export function LocationStep({ listing, reload, next, back }: StepProps) {
       {!pin ? (
         <>
           <PlaceSearch placeholder="Search the street or building" onPick={applyPlace} />
-          <button className="opt" onClick={here} disabled={locating}>
+          {gps && <button className="opt" onClick={here} disabled={locating}>
             <span className="ico"><LocateFixed size={20} /></span>
             <span className="stack" style={{ gap: 2 }}>
               <span>{locating ? "Finding you…" : "I'm at the room now"}</span>
               <span className="small" style={{ fontWeight: 400 }}>Uses your phone&apos;s location</span>
             </span>
-          </button>
+          </button>}
         </>
       ) : (
         <>
