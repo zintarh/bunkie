@@ -37,7 +37,10 @@ function Send() {
       const { data: answers } = await db.from("bunkie_answers").select("approved_at").eq("user_id", me.user.id).maybeSingle();
       if (!answers?.approved_at) return router.replace(`/questions?next=${encodeURIComponent(here)}`);
       const fresh = await refreshMe();
-      if (!fresh?.profile.is_verified) return router.replace(`/verify?next=${encodeURIComponent(here)}`);
+      // Testing mode (settings.require_verification_to_request = false) skips ID checks.
+      const { data: rule } = await db.from("settings").select("value").eq("key", "require_verification_to_request").maybeSingle();
+      const mustVerify = rule?.value !== false;
+      if (mustVerify && !fresh?.profile.is_verified) return router.replace(`/verify?next=${encodeURIComponent(here)}`);
       setChecking(false);
     })();
   }, [me, draft, here, router]);
