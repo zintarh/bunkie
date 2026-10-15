@@ -286,4 +286,3 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .composer textarea:focus { border-color: var(--green); background: var(--white); }
 .composer .send { width: 44px; height: 44px; border-radius: 999px; border: 0; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .composer .send:disabled { background: #cfd8d3; }
-.tab .tab-badge { position: absolute; top: 0; left: calc(50% + 6px); z-index: 2; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid var(--white); }

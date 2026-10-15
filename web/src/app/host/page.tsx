@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Camera, ChevronRight, CircleDollarSign, House, MapPin, Plus, ReceiptText, ScrollText, Undo2, Wallet } from "lucide-react";
+import { Camera, ChevronRight, CircleDollarSign, House, MapPin, MessageCircle, Plus, ReceiptText, ScrollText, Undo2, Wallet } from "lucide-react";
 import { BookingRow } from "@/components/BookingRow";
 import { Progress, TabBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
+import { useUnreadChats } from "@/lib/chat";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 import { naira } from "@/lib/format";
 import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, type ProgressFields } from "@/lib/hosting";
@@ -25,6 +26,7 @@ export default function HostHome() {
   const [payouts, setPayouts] = useState<{ amount_kobo: number; status: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [toast, showToast] = useToast();
+  const unreadChats = useUnreadChats();
 
   useEffect(() => {
     const db = supabaseBrowser();
@@ -95,6 +97,14 @@ export default function HostHome() {
           <div className="card stack" style={{ gap: 2 }}><span className="small">Coming to you</span><span className="price num" style={{ fontSize: 22 }}>{naira(held)}</span></div>
           <div className="card stack" style={{ gap: 2 }}><span className="small">Paid out</span><span className="price num" style={{ fontSize: 22 }}>{naira(paidOut)}</span></div>
         </div>
+
+        {unreadChats > 0 && (
+          <Link href="/inbox" className="card row" style={{ gap: 12, padding: "12px 14px", color: "var(--ink)" }}>
+            <span className="tile t-mint"><MessageCircle size={20} /></span>
+            <span style={{ flex: 1, fontWeight: 700 }}>{unreadChats} unread {unreadChats === 1 ? "chat" : "chats"}</span>
+            <ChevronRight size={18} color="var(--muted)" />
+          </Link>
+        )}
 
         {needAction.length > 0 && (
           <section className="stack" style={{ gap: 10 }}>

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { BadgeCheck, MessageCircle } from "lucide-react";
 import { RequireAuth } from "@/components/auth";
-import { Loading, TabBar } from "@/components/ui";
+import { Loading, TopBar } from "@/components/ui";
 import { useMe } from "@/lib/auth";
 import { useInbox } from "@/lib/chat";
 import { chatTime, initial } from "@/lib/format";
@@ -11,11 +11,12 @@ import { avatarUrl } from "@/lib/photos";
 function Inbox() {
   const [me] = useMe();
   const { rows, more, loadMore } = useInbox();
-  if (!rows) return <Loading tabs />;
+  if (!rows) return <Loading />;
   return (
     <main className="screen">
+      <TopBar back="/explore" />
       <div className="body" style={{ gap: 0, padding: "0 16px 24px" }}>
-        <div className="hero phero" style={{ margin: "0 -16px 8px" }}><h1 className="h1">Messages</h1></div>
+        <h1 className="h1" style={{ padding: "0 4px 8px" }}>Messages</h1>
         {rows.length === 0 ? (
           <div className="card stack" style={{ alignItems: "center", textAlign: "center", padding: "32px 20px", gap: 10, marginTop: 12 }}>
             <span className="tile t-mint" style={{ width: 56, height: 56, borderRadius: 999 }}><MessageCircle size={26} /></span>
@@ -57,7 +58,6 @@ function Inbox() {
           </div>
         )}
       </div>
-      <TabBar />
     </main>
   );
 }
