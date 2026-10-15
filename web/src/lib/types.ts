@@ -21,7 +21,9 @@ export type Miss =
   | { kind: "room"; is: RoomKind }
   | { kind: "no_short" }
   | { kind: "min_stay"; months: number }
-  | { kind: "max_stay"; months: number };
+  | { kind: "max_stay"; months: number }
+  | { kind: "shared_bath" }
+  | { kind: "unfurnished" };
 
 export type RoomCard = {
   id: string;
@@ -121,3 +123,13 @@ export type Booking = {
 
 /** A host's answer to "Are you a corp member?" */
 export type CorperStatus = "serving" | "served" | "not_corper";
+
+/** A typed search, understood (by /api/understand) as filters plus an optional place. */
+export type SearchIntent = {
+  text: string;
+  understood: {
+    place?: string; budgetMax?: number; room?: RoomKind; ownBath?: boolean; furnished?: boolean;
+    stay?: "weeks" | "short" | "long"; weeks?: number; months?: number; pref?: SharePref; maxMinutes?: number;
+  };
+  place: { label: string; lat: number; lng: number; zoneId: number } | null;
+};

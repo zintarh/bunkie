@@ -94,6 +94,8 @@ export function missLabel(m: import("./types").Miss): string {
     case "no_short": return "No short stays";
     case "min_stay": return `At least ${months(m.months)}`;
     case "max_stay": return `Up to ${months(m.months)}`;
+    case "shared_bath": return "Shared bathroom";
+    case "unfurnished": return "Not furnished";
   }
 }
 

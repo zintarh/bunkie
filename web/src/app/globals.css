@@ -291,3 +291,7 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .composer .send:disabled { background: #cfd8d3; }
 .hostcard { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 22px; color: #fff; background: radial-gradient(120% 120% at 100% 0%, #4be095 0%, rgba(75, 224, 149, 0) 55%), linear-gradient(150deg, #1fb86c 0%, #0e8247 100%); box-shadow: 0 10px 24px rgba(23, 168, 98, 0.28); }
 .hostcard:active { transform: scale(0.98); }
+/* Smart search on Home */
+.smart { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 6px 0 16px; border-radius: 999px; background: var(--white); color: var(--ink); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16); }
+.smart input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 15px; height: 100%; }
+.smart .go { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

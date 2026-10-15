@@ -38,3 +38,21 @@ export const failed = () => NextResponse.json({ error: "Search isn't working rig
 
 /** Session tokens group a search and its pick into one Google billing session. */
 export const sessionToken = (v: string | null) => (v && /^[\w-]{8,64}$/.test(v) ? v : undefined);
+
+/** The best match for a typed place in the FCT (one Text Search call), or null. */
+export async function findPlace(text: string): Promise<Place | null> {
+  if (!GOOGLE_MAPS_KEY || !text.trim()) return null;
+  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_MAPS_KEY,
+      "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location,places.addressComponents",
+    },
+    body: JSON.stringify({ textQuery: `${text}, Abuja`, locationRestriction: { rectangle: FCT }, languageCode: "en", pageSize: 1 }),
+  }).catch(() => null);
+  if (!res?.ok) return null;
+  const p = ((await res.json()) as { places?: { displayName?: { text: string }; formattedAddress?: string; location?: { latitude: number; longitude: number }; addressComponents?: { longText: string; types: string[] }[] }[] }).places?.[0];
+  if (!p?.location) return null;
+  const label = p.displayName?.text ?? text;
+  return { label, area: areaName(p.addressComponents ?? [], p.formattedAddress) ?? label, address: shortAddress(p.formattedAddress ?? ""), lat: p.location.latitude, lng: p.location.longitude };
+}

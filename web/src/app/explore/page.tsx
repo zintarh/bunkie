@@ -9,6 +9,7 @@ import { ChatIcon } from "@/components/icons";
 import { useMe } from "@/lib/auth";
 import { useUnreadChats } from "@/lib/chat";
 import { RoomCard } from "@/components/RoomCard";
+import { SmartSearch } from "@/components/SmartSearch";
 import { Loading, TabBar, Wordmark } from "@/components/ui";
 import { fit } from "@/lib/bunkie";
 import { dayLabel } from "@/lib/format";
@@ -16,7 +17,7 @@ import { BATCHES } from "@/lib/places";
 import { usePrefs } from "@/lib/prefs";
 import { useSaved } from "@/lib/saved";
 import { useMyAnswers } from "@/lib/useMyAnswers";
-import type { RoomCard as Room } from "@/lib/types";
+import type { Miss, RoomCard as Room, SearchIntent } from "@/lib/types";
 
 const topIcon: React.CSSProperties = { position: "relative", width: 44, height: 44, borderRadius: 999, background: "rgba(255,255,255,.18)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" };
 const countDot: React.CSSProperties = { position: "absolute", right: 2, top: 2, minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" };
@@ -32,6 +33,7 @@ export default function Explore() {
   const [hidden, setHidden] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState<SearchIntent | null>(null);
 
   useEffect(() => {
     if (ready && !prefs.stage) router.replace("/start");
@@ -57,8 +59,24 @@ export default function Explore() {
     if (f.room) q.set("room", f.room);
     q.set("stay", inCamp ? "any" : f.stay);
     if (f.maxMinutes && !inCamp) q.set("maxMinutes", String(f.maxMinutes));
+    // A typed search overrides the saved choices for this search only.
+    if (search) {
+      const u = search.understood;
+      if (search.place) {
+        if (!inCamp) q.set("mode", "ppa");
+        q.set("lat", search.place.lat.toFixed(3));
+        q.set("lng", search.place.lng.toFixed(3));
+        q.set("zone", String(search.place.zoneId));
+      }
+      if (u.budgetMax) q.set("budgetMax", String(u.budgetMax));
+      if (u.room) q.set("room", u.room);
+      const stay = u.weeks ? "weeks" : u.months ? (u.months <= 3 ? "short" : u.months >= 6 ? "long" : null) : u.stay;
+      if (stay && !inCamp) q.set("stay", stay);
+      if (u.pref) q.set("pref", u.pref);
+      if (u.maxMinutes) q.set("maxMinutes", String(u.maxMinutes));
+    }
     return q.toString();
-  }, [inCamp, batch, prefs.ppa, prefs.pref, f]);
+  }, [inCamp, batch, prefs.ppa, prefs.pref, f, search]);
 
   useEffect(() => {
     if (!ready || !prefs.stage) return;
@@ -82,13 +100,20 @@ export default function Explore() {
   // phone, so searches stay cacheable. Exact matches first, then close matches with what's different.
   const ranked = useMemo(() => {
     if (!rooms) return null;
-    const withFit = rooms.map((r) => {
+    // Asked for in a typed search but not a search filter: own bathroom, furnished. Rooms without them
+    // become close matches that say so.
+    const want = search?.understood;
+    const withFit = rooms.map((r0) => {
+      const extra: Miss[] = [];
+      if (want?.ownBath && r0.bath_kind !== "own" && r0.room_kind !== "self_contain") extra.push({ kind: "shared_bath" });
+      if (want?.furnished && !r0.furnished) extra.push({ kind: "unfurnished" });
+      const r = extra.length ? { ...r0, exact: false, misses: [...(r0.misses ?? []), ...extra] } : r0;
       const f = fit(myAnswers, r.host_answers)?.score ?? null;
-      return { r, fit: f, score: (r.match_score ?? 0) + (f != null ? (15 * f) / 100 : 0) };
+      return { r, fit: f, score: (r.match_score ?? 0) - 8 * extra.length + (f != null ? (15 * f) / 100 : 0) };
     });
     withFit.sort((a, b) => Number(b.r.exact !== false) - Number(a.r.exact !== false) || b.score - a.score);
     return withFit;
-  }, [rooms, myAnswers]);
+  }, [rooms, myAnswers, search]);
   const exact = ranked?.filter(({ r }) => r.exact !== false) ?? null;
   const close = ranked?.filter(({ r }) => r.exact === false) ?? [];
 
@@ -129,6 +154,9 @@ export default function Explore() {
               <span style={{ position: "absolute", right: 6, top: 6, minWidth: 18, height: 18, borderRadius: 999, background: "var(--amber)", fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{nFilters}</span>
             )}
           </button>
+        </div>
+        <div style={{ padding: "8px 16px 0" }}>
+          <SmartSearch value={search} onChange={setSearch} />
         </div>
       </div>
 
