@@ -21,6 +21,7 @@ export default function Explore() {
   const [saved, toggleSave] = useSaved();
   const myAnswers = useMyAnswers();
   const [rooms, setRooms] = useState<Room[] | null>(null);
+  const [hidden, setHidden] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -57,7 +58,12 @@ export default function Explore() {
     setError(null);
     fetch(`/api/search?${query}`)
       .then((r) => r.json())
-      .then((j) => live && (j.error ? setError(j.error) : setRooms(j.rooms)))
+      .then((j) => {
+        if (!live) return;
+        if (j.error) return setError(j.error);
+        setRooms(j.rooms);
+        setHidden(j.hiddenByHousehold ?? 0);
+      })
       .catch(() => live && setError("No connection. Pull down to try again."));
     return () => {
       live = false;
@@ -117,6 +123,15 @@ export default function Explore() {
           </div>
         )}
         {ranked == null && !error && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>Finding apartments…</span>}
+        {ranked != null && hidden > 0 && (
+          <Link href="/start" className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18, color: "var(--ink)", gap: 12 }}>
+            <span className="tile t-lilac"><Users size={20} /></span>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>
+              {hidden} {hidden === 1 ? "home" : "homes"} hidden because you chose {prefs.pref === "women_only" ? "women only" : "men only"}
+            </span>
+            <span className="link" style={{ height: "auto" }}>Change</span>
+          </Link>
+        )}
         {exact && exact.length > 0 && (
           <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
             {exact.length} {exact.length === 1 ? "apartment" : "apartments"}{inCamp ? " free on your camp exit day" : ""}

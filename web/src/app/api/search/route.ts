@@ -29,8 +29,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const rooms = await searchRooms(params);
+    // Household choice is a dealbreaker; count what it hides so the app can say so instead of looking empty.
+    let hiddenByHousehold = 0;
+    if (params.pref && params.pref !== "mixed_ok") {
+      const all = await searchRooms({ ...params, pref: "mixed_ok" });
+      hiddenByHousehold = all.length - rooms.length;
+    }
     return NextResponse.json(
-      { rooms },
+      { rooms, hiddenByHousehold },
       { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
     );
   } catch {
