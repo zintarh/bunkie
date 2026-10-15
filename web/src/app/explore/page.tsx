@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, MessageCircle, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
+import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
+import { ChatIcon } from "@/components/icons";
 import { useMe } from "@/lib/auth";
 import { useUnreadChats } from "@/lib/chat";
 import { RoomCard } from "@/components/RoomCard";
@@ -104,7 +105,7 @@ export default function Explore() {
           <span className="row" style={{ gap: 8 }}>
             {me && (
               <Link href="/inbox" aria-label={unreadChats ? `Messages, ${unreadChats} unread` : "Messages"} style={topIcon}>
-                <MessageCircle size={22} strokeWidth={2.2} />
+                <ChatIcon size={23} />
                 {unreadChats > 0 && <span style={{ ...countDot, background: "var(--red)", color: "#fff" }}>{unreadChats > 9 ? "9+" : unreadChats}</span>}
               </Link>
             )}

@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { BedDouble, ChevronLeft, CircleUserRound, DoorOpen, House, Minus, Plus, X } from "lucide-react";
+import { ChevronLeft, Minus, Plus, X } from "lucide-react";
+import { BunkIcon, HomeIcon, KeyIcon, ProfileIcon } from "./icons";
 
 /** The bunk-bed mark used in the logo. */
 export function BunkMark({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -43,10 +44,10 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
 
 // Messages is an icon on Home (shows unread replies); Saved is in Profile; hosting gets its own tab.
 const TABS = [
-  { href: "/explore", label: "Home", Icon: House, also: ["/rooms", "/inbox"] },
-  { href: "/bookings", label: "Bookings", Icon: BedDouble, also: [] },
-  { href: "/host", label: "Host", Icon: DoorOpen, also: [] },
-  { href: "/profile", label: "Profile", Icon: CircleUserRound, also: ["/saved"] },
+  { href: "/explore", label: "Home", Icon: HomeIcon, also: ["/rooms", "/inbox"] },
+  { href: "/bookings", label: "Bookings", Icon: BunkIcon, also: [] },
+  { href: "/host", label: "Host", Icon: KeyIcon, also: [] },
+  { href: "/profile", label: "Profile", Icon: ProfileIcon, also: ["/saved"] },
 ];
 
 export function TabBar() {
@@ -57,8 +58,8 @@ export function TabBar() {
         const on = [href, ...also].some((h) => path === h || path.startsWith(h + "/"));
         return (
           <Link key={href} href={href} className={on ? "tab on" : "tab"} aria-current={on ? "page" : undefined}>
-            <Icon size={24} strokeWidth={on ? 2.3 : 2} />
-            {label}
+            <Icon size={24} active={on} />
+            <span>{label}</span>
           </Link>
         );
       })}
