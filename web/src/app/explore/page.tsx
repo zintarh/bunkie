@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, SlidersHorizontal, Tent, Video } from "lucide-react";
+import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { RoomCard } from "@/components/RoomCard";
@@ -125,9 +125,24 @@ export default function Explore() {
           </div>
         )}
         {ranked && ranked.length === 0 && (
-          <div className="stack" style={{ padding: "40px 8px", alignItems: "center", textAlign: "center", gap: 12 }}>
+          <div className="stack" style={{ padding: "32px 8px", alignItems: "center", textAlign: "center", gap: 12 }}>
             <span className="h2">No apartments match</span>
-            <button className="pill" style={{ height: 44 }} onClick={() => setShowFilters(true)}>Change filters</button>
+            {/* Say what's narrowing the search, so a hidden listing never looks like a missing one. */}
+            <div className="lrows" style={{ width: "100%", textAlign: "left" }}>
+              {inCamp && (
+                <Link className="lrow" href="/start"><span className="tile t-amber"><Tent size={20} /></span>
+                  <span className="stack" style={{ gap: 0, flex: 1 }}><span>Open to camp bookings</span><span className="small">Free on {batch ? dayLabel(batch.campEnd) : "your camp exit day"}</span></span>
+                  <span className="link" style={{ height: "auto" }}>Change</span></Link>
+              )}
+              {(prefs.pref === "women_only" || prefs.pref === "men_only") && (
+                <Link className="lrow" href="/start"><span className="tile t-lilac"><Users size={20} /></span>
+                  <span style={{ flex: 1 }}>{prefs.pref === "women_only" ? "Women-only homes" : "Men-only homes"}</span>
+                  <span className="link" style={{ height: "auto" }}>Change</span></Link>
+              )}
+              <button className="lrow" onClick={() => setShowFilters(true)}><span className="tile t-mint"><SlidersHorizontal size={20} /></span>
+                <span style={{ flex: 1 }}>{nFilters > 0 ? `${nFilters} ${nFilters === 1 ? "filter" : "filters"} on` : "Price, stay and room"}</span>
+                <span className="link" style={{ height: "auto" }}>Change</span></button>
+            </div>
           </div>
         )}
       </div>
