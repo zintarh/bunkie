@@ -30,6 +30,9 @@ export type RoomCard = {
   total_varies: boolean;
   deposit: number | null;
   pay_schedule: PaySchedule;
+  /** Takes 1-4 week stays at weekly_price. */
+  open_to_short: boolean;
+  weekly_price: number | null;
   photo_count: number;
   cover_path: string | null;
   host_id: string;
@@ -62,7 +65,7 @@ export type SearchParams = {
   priceMax?: number;
   pref?: SharePref;
   room?: RoomKind;
-  stay?: "short" | "long" | "any";
+  stay?: "weeks" | "short" | "long" | "any";
   maxMinutes?: number;
 };
 
@@ -75,7 +78,10 @@ export type Booking = {
   is_camp_booking: boolean;
   move_in: string;
   move_out: string;
-  months: number;
+  /** A stay is in months, or in weeks for a short stay (never both). */
+  months: number | null;
+  weeks: number | null;
+  weekly_price: number | null;
   monthly_total: number;
   deadline_at: string | null;
   offered_slots: string[];

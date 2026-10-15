@@ -12,7 +12,7 @@ export type Prefs = {
   filters: {
     priceMin: number;
     priceMax: number;
-    stay: "short" | "long" | "any";
+    stay: "weeks" | "short" | "long" | "any";
     room: RoomKind | null;
     maxMinutes: number | null;
     moveIn: string | null;

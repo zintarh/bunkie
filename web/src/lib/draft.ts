@@ -1,7 +1,8 @@
 "use client";
 
 /** A request being put together. Survives the sign-up, questions and verification detours. */
-export type RequestDraft = { listingId: string; hostName: string; moveIn: string; months: number; message: string };
+/** weeks is set for a short stay (1-4 weeks); otherwise the stay is `months` long. */
+export type RequestDraft = { listingId: string; hostName: string; moveIn: string; months: number; weeks?: number | null; message: string };
 
 const KEY = "bunkie.requestDraft.v1";
 

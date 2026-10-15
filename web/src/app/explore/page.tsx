@@ -42,7 +42,7 @@ export default function Explore() {
     q.set("priceMax", String(f.priceMax >= 150000 ? 10_000_000 : f.priceMax));
     if (prefs.pref) q.set("pref", prefs.pref);
     if (f.room) q.set("room", f.room);
-    q.set("stay", inCamp ? "short" : f.stay);
+    q.set("stay", inCamp ? "any" : f.stay);
     if (f.maxMinutes && !inCamp) q.set("maxMinutes", String(f.maxMinutes));
     return q.toString();
   }, [inCamp, batch, prefs.ppa, prefs.pref, f]);

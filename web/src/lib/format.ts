@@ -13,6 +13,15 @@ export function months(n: number): string {
   return n + (n === 1 ? " month" : " months");
 }
 
+export function weeks(n: number): string {
+  return n + (n === 1 ? " week" : " weeks");
+}
+
+/** "2 weeks" for a short stay, "3 months" otherwise. */
+export function stayLength(s: { months: number | null; weeks?: number | null }): string {
+  return s.weeks ? weeks(s.weeks) : months(s.months ?? 0);
+}
+
 export function stayRange(min: number, max: number): string {
   return min === max ? months(min) : `${min}–${max} months`;
 }

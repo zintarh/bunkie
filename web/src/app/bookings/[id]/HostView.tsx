@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { MessageSquare, Video, Wallet } from "lucide-react";
 import { CLOSE_REASON } from "@/lib/bunkie";
 import type { BookingFull } from "@/lib/bookings";
-import { dayLabel, dayParts, isoDay, months, naira, slotLabel, timeLabel, untilLabel } from "@/lib/format";
+import { dayLabel, dayParts, isoDay, naira, slotLabel, stayLength, timeLabel, untilLabel } from "@/lib/format";
 import { useMyAnswers } from "@/lib/useMyAnswers";
 import { Err, Foot, PersonCard, useStep } from "./shared";
 
@@ -17,7 +17,7 @@ export function HostView({ b, reload }: Props) {
   const t = b.tenant.first_name;
   const [confirmCancel, setConfirmCancel] = useState(false);
 
-  const person = <PersonCard p={b.tenant} sub={`${dayLabel(b.move_in)} – ${dayLabel(b.move_out)} · ${months(b.months)}`} answers={b.tenantAnswers} myAnswers={myAnswers} />;
+  const person = <PersonCard p={b.tenant} sub={`${dayLabel(b.move_in)} – ${dayLabel(b.move_out)} · ${stayLength(b)}`} answers={b.tenantAnswers} myAnswers={myAnswers} />;
 
   if (b.status === "requested") return <Review b={b} reload={reload} person={person} />;
 
@@ -174,11 +174,18 @@ function Review({ b, reload, person }: Props & { person: React.ReactNode }) {
         {person}
         {b.is_camp_booking && <div className="banner green"><Video size={18} />Camp booking · moves in on camp exit day</div>}
         {b.message && <div className="card"><span className="lbl">Message</span><p style={{ marginTop: 6 }}>{b.message}</p></div>}
-        <div className="kv"><span>Pays monthly</span><span className="num">{naira(b.monthly_total)}</span></div>
+        {b.weeks
+          ? <div className="kv"><span>Short stay · pays upfront</span><span className="num">{naira((b.weekly_price ?? 0) * b.weeks)}</span></div>
+          : <div className="kv"><span>Pays monthly</span><span className="num">{naira(b.monthly_total)}</span></div>}
         <Err error={error} />
       </div>
       <Foot>
-        <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Accept</button>
+        {b.weeks ? (
+          <>
+            <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => run("accept", { skip_viewing: true })}>Accept</button>
+            <button className="btn ghost" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Offer a viewing first</button>
+          </>
+        ) : <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Accept</button>}
         <button className="link" disabled={!!busy} onClick={() => run("decline")}>Decline</button>
       </Foot>
     </>

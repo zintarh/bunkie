@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Video } from "lucide-react";
-import { Stepper, TopBar } from "@/components/ui";
+import { Seg, Stepper, TopBar } from "@/components/ui";
 import { useMe } from "@/lib/auth";
 import { loadDraft, saveDraft } from "@/lib/draft";
-import { addMonths, dayLabel, dayParts, isoDay, months as monthsLabel, naira, parseDay } from "@/lib/format";
+import { addMonths, dayLabel, dayParts, isoDay, months as monthsLabel, naira, parseDay, weeks as weeksLabel } from "@/lib/format";
 import { BATCHES } from "@/lib/places";
 import { usePrefs } from "@/lib/prefs";
 import type { RoomDetail } from "@/lib/types";
@@ -30,6 +30,11 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
   const [moveIn, setMoveIn] = useState<string>(isoDay(days[0]));
   const [m, setM] = useState(Math.max(minMonths, Math.min(3, maxMonths)));
   const [message, setMessage] = useState("");
+  // Short stays (1-4 weeks) when the host offers them.
+  const canShort = room.open_to_short && !!room.weekly_price;
+  const [unit, setUnit] = useState<"weeks" | "months">("months");
+  const [w, setW] = useState(2);
+  const short = canShort && unit === "weeks";
 
   useEffect(() => {
     if (!ready) return;
@@ -37,17 +42,22 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
     if (d) {
       setMoveIn(d.moveIn);
       setM(d.months);
+      if (d.weeks && canShort) {
+        setUnit("weeks");
+        setW(d.weeks);
+      }
       setMessage(d.message);
     } else if (inCamp && campEnd) setMoveIn(campEnd);
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const end = addMonths(parseDay(moveIn), m);
-  end.setDate(end.getDate() - 1);
-  const deposit = room.deposit ?? 0;
-  const first = room.pay_schedule === "lump_sum" ? room.monthly_total * m + deposit : room.monthly_total + deposit;
+  const end = short ? parseDay(moveIn) : addMonths(parseDay(moveIn), m);
+  end.setDate(end.getDate() + (short ? 7 * w : 0) - 1);
+  const deposit = short ? 0 : room.deposit ?? 0;
+  const first = short ? (room.weekly_price ?? 0) * w
+    : room.pay_schedule === "lump_sum" ? room.monthly_total * m + deposit : room.monthly_total + deposit;
 
   const go = () => {
-    saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, message });
+    saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, weeks: short ? w : null, message });
     const next = `/request/${room.id}/send`;
     router.push(me ? next : `/signup?next=${qs(next)}`);
   };
@@ -88,16 +98,24 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
         </section>
 
         <section className="stack" style={{ gap: 10 }}>
+          {canShort && (
+            <Seg label="Stay length" value={unit} onChange={setUnit}
+              options={[{ value: "weeks", label: "1–4 weeks" }, { value: "months", label: `${minMonths}–${maxMonths} months` }]} />
+          )}
           <div className="between">
             <span className="stack" style={{ gap: 2 }}>
               <span className="h2">How long</span>
               <span className="small">Until {dayLabel(end, true)}</span>
             </span>
-            <Stepper value={m} min={minMonths} max={maxMonths} onChange={setM} format={monthsLabel} label="months" />
+            {short
+              ? <Stepper value={w} min={1} max={4} onChange={setW} format={weeksLabel} label="weeks" />
+              : <Stepper value={m} min={minMonths} max={maxMonths} onChange={setM} format={monthsLabel} label="months" />}
           </div>
-          <span className="small">
-            {inCamp ? "Camp bookings are 1 to 3 months. Extend after you get your PPA." : `${room.host_first_name} accepts ${minMonths} to ${room.max_months} months`}
-          </span>
+          {!short && (
+            <span className="small">
+              {inCamp ? "Camp bookings are 1 to 3 months. Extend after you get your PPA." : `${room.host_first_name} accepts ${minMonths} to ${room.max_months} months`}
+            </span>
+          )}
         </section>
 
         {inCamp && (
@@ -109,11 +127,13 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
 
         <section className="card stack" style={{ gap: 10 }}>
           <span className="h2">Cost</span>
-          <div className="kv num"><span>Monthly, all in</span><span>{room.total_varies ? "about " : ""}{naira(room.monthly_total)}</span></div>
+          {short
+            ? <div className="kv num"><span>Weekly, all in</span><span>{naira(room.weekly_price)}</span></div>
+            : <div className="kv num"><span>Monthly, all in</span><span>{room.total_varies ? "about " : ""}{naira(room.monthly_total)}</span></div>}
           {deposit > 0 && <div className="kv num"><span>Caution deposit</span><span>{naira(deposit)}</span></div>}
           <div className="divider" />
-          <div className="kv num" style={{ fontWeight: 700 }}><span style={{ color: "var(--ink)" }}>First payment</span><span>{naira(first)}</span></div>
-          <span className="small">Paid only after you view the room and both agree.</span>
+          <div className="kv num" style={{ fontWeight: 700 }}><span style={{ color: "var(--ink)" }}>{short ? "Whole stay" : "First payment"}</span><span>{naira(first)}</span></div>
+          <span className="small">{short ? "Paid only after you both agree." : "Paid only after you view the room and both agree."}</span>
         </section>
 
         <section className="stack">

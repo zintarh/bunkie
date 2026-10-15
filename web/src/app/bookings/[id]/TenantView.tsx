@@ -6,7 +6,7 @@ import { CalendarPlus, Camera, Check, CircleAlert, Home, KeyRound, MapPin, Navig
 import { CLOSE_REASON } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
 import { roomTitle, type BookingFull } from "@/lib/bookings";
-import { dayLabel, months, naira, slotLabel, timeLabel, untilLabel } from "@/lib/format";
+import { dayLabel, naira, slotLabel, stayLength, timeLabel, untilLabel } from "@/lib/format";
 import { callFunction } from "@/lib/functions";
 import { shrinkFile } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -231,8 +231,10 @@ function Pay({ b, reload }: Props) {
     return () => clearInterval(t);
   }, [reload]);
 
-  const deposit = b.listing.deposit ?? 0;
-  const rentPart = b.listing.pay_schedule === "lump_sum" ? b.monthly_total * b.months : b.monthly_total;
+  const short = !!b.weeks;
+  const deposit = short ? 0 : b.listing.deposit ?? 0;
+  const rentPart = short ? (b.weekly_price ?? 0) * (b.weeks ?? 0)
+    : b.listing.pay_schedule === "lump_sum" ? b.monthly_total * (b.months ?? 0) : b.monthly_total;
   const net = rentPart + deposit;
   const fee = pending ? pending.paystack_fee_kobo / 100 : null;
 
@@ -252,7 +254,7 @@ function Pay({ b, reload }: Props) {
       <Body>
         <h1 className="h1">Pay</h1>
         <div className="card stack" style={{ gap: 10 }}>
-          <div className="kv num"><span>{b.listing.pay_schedule === "lump_sum" ? `${months(b.months)} rent` : `First month (${dayLabel(b.move_in).slice(4)})`}</span><span>{naira(rentPart)}</span></div>
+          <div className="kv num"><span>{short || b.listing.pay_schedule === "lump_sum" ? `${stayLength(b)} rent` : `First month (${dayLabel(b.move_in).slice(4)})`}</span><span>{naira(rentPart)}</span></div>
           {deposit > 0 && <div className="kv num"><span>Caution deposit</span><span>{naira(deposit)}</span></div>}
           {fee != null && <div className="kv num"><span>Paystack charge</span><span>{naira(fee)}</span></div>}
           <div className="divider" />

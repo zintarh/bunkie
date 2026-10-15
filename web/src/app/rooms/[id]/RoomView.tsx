@@ -129,6 +129,12 @@ export function RoomView({ room }: { room: RoomDetail }) {
             <span style={{ fontSize: 15 }}>Every month</span>
             <span className="num" style={{ fontWeight: 800, fontSize: 20 }}>{room.total_varies ? "about " : ""}{naira(room.monthly_total)}</span>
           </div>
+          {room.open_to_short && room.weekly_price ? (
+            <div className="between" style={{ alignItems: "baseline" }}>
+              <span style={{ fontSize: 15 }}>Short stay, 1–4 weeks</span>
+              <span className="num" style={{ fontWeight: 800, fontSize: 17 }}>{naira(room.weekly_price)}<span className="muted" style={{ fontWeight: 500, fontSize: 14 }}> /week</span></span>
+            </div>
+          ) : null}
           {showCosts && (
             <div className="open stack soft" style={{ gap: 8 }}>
               <div className="kv num" style={{ fontSize: 14 }}><span>Rent share</span><span>{naira(room.rent_monthly)}</span></div>

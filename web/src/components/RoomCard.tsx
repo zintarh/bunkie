@@ -51,6 +51,9 @@ export function RoomCard({
           {HOUSEHOLD_LABEL[room.household]} household{room.furnished ? " · Furnished" : ""}
           {fitScore != null ? ` · ${fitScore}% bunkie fit` : ""}
         </span>
+        {room.open_to_short && room.weekly_price ? (
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--green-text)" }}>Short stays from {naira(room.weekly_price)}/week</span>
+        ) : null}
       </Link>
     </article>
   );

@@ -6,11 +6,11 @@ import type { Answers, Booking, BookingStatus } from "./types";
 export type Person = { id: string; first_name: string; photo_path: string | null; is_verified: boolean };
 export type Agreement = { id: string; version: number; terms: Terms; terms_hash: string; host_confirmed_at: string | null; tenant_confirmed_at: string | null };
 export type Terms = {
-  move_in: string; move_out: string; months: number; monthly_total: number; rent_monthly: number; deposit: number;
+  move_in: string; move_out: string; months: number | null; weeks: number | null; weekly_price: number | null; monthly_total: number; rent_monthly: number; deposit: number;
   pay_schedule: "monthly" | "lump_sum"; total_varies: boolean;
   costs: { name: string; amount: number; tenant_pays: boolean; varies: boolean }[];
   rules: { topic: string; choice: string; consequence: string }[];
-  refunds: { early_leave_notice_days: number; redeploy_refund: string; ask_leave_notice_days: number };
+  refunds: { early_leave_notice_days: number; redeploy_refund: string; ask_leave_notice_days: number; short_stay_no_refund_last_days?: number };
   platform: { min_notice_days: number };
 };
 export type Payment = { id: string; amount_kobo: number; paystack_fee_kobo: number; bunkie_fee_kobo: number; paystack_reference: string; status: string; paid_at: string | null };

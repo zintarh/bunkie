@@ -16,6 +16,8 @@ const base = {
   host_photo_path: null,
   host_verified: true,
   host_corper: null as CorperStatus | null,
+  open_to_short: false,
+  weekly_price: null as number | null,
   commute_min: null,
   ease_min: null,
   photo_count: 5,
@@ -38,7 +40,7 @@ export const DEMO_ROOMS: RoomDetail[] = [
   {
     ...base, id: "demo-wuse2", area_name: "Wuse 2", area_lat: 9.079, area_lng: 7.47, room_kind: "own_room", bath_kind: "shared",
     household: "women", min_months: 1, max_months: 6, available_from: inDays(0), rent_monthly: 45000, monthly_total: 53000,
-    total_varies: true, cover_path: "/demo/room-1.svg", host_id: "demo-tolu", host_first_name: "Tolu", host_corper: "serving",
+    total_varies: true, cover_path: "/demo/room-1.svg", host_id: "demo-tolu", host_first_name: "Tolu", host_corper: "serving", open_to_short: true, weekly_price: 15000,
     host_answers: { sleep: 1, guests: 1, cooking: 2, cleaning: 0, noise: 1 }, published_at: inDays(-3), photos: photos(0),
     costs: [
       { name: "Light", amount: 6000, tenant_pays: true, varies: true },

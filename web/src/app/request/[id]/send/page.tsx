@@ -7,7 +7,7 @@ import { RequireAuth } from "@/components/auth";
 import { TopBar } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { clearDraft, loadDraft, type RequestDraft } from "@/lib/draft";
-import { addMonths, dayLabel, months, parseDay } from "@/lib/format";
+import { addMonths, dayLabel, parseDay, stayLength } from "@/lib/format";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
 
@@ -52,7 +52,7 @@ function Send() {
     setBusy(true);
     setError(null);
     const { data, error } = await db.rpc("request_room", {
-      p_listing: draft.listingId, p_move_in: draft.moveIn, p_months: draft.months, p_message: draft.message || null,
+      p_listing: draft.listingId, p_move_in: draft.moveIn, p_months: draft.weeks ? null : draft.months, p_weeks: draft.weeks ?? null, p_message: draft.message || null,
     });
     setBusy(false);
     if (error) return setError(errorText(error));
@@ -63,8 +63,8 @@ function Send() {
   if (!draft || checking) {
     return <main className="screen" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></main>;
   }
-  const end = addMonths(parseDay(draft.moveIn), draft.months);
-  end.setDate(end.getDate() - 1);
+  const end = draft.weeks ? parseDay(draft.moveIn) : addMonths(parseDay(draft.moveIn), draft.months);
+  end.setDate(end.getDate() + (draft.weeks ? 7 * draft.weeks : 0) - 1);
 
   return (
     <main className="screen">
@@ -73,7 +73,7 @@ function Send() {
         <h1 className="h1">Send request to {draft.hostName}</h1>
         <div className="lrows">
           <div className="lrow"><span className="tile t-mint"><CalendarDays size={20} /></span>
-            <span className="stack" style={{ gap: 0 }}><span style={{ fontWeight: 700 }}>{dayLabel(draft.moveIn)} – {dayLabel(end, true)}</span><span className="small">{months(draft.months)}</span></span>
+            <span className="stack" style={{ gap: 0 }}><span style={{ fontWeight: 700 }}>{dayLabel(draft.moveIn)} – {dayLabel(end, true)}</span><span className="small">{stayLength({ months: draft.months, weeks: draft.weeks })}</span></span>
           </div>
           <div className="lrow"><span className="tile t-amber"><BadgeCheck size={20} /></span><span>Verified, with your bunkie profile</span></div>
           {draft.message && <div className="lrow"><span className="tile t-sky"><MessageSquare size={20} /></span><span style={{ fontSize: 15 }}>{draft.message}</span></div>}

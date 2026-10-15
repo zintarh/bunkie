@@ -65,7 +65,7 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
           <section className={styles.sec}>
             <span className="h2">How long</span>
             <Seg label="Stay length" value={f.stay} onChange={(v) => set({ stay: v })}
-              options={[{ value: "short", label: "1–3 months" }, { value: "long", label: "6–12 months" }, { value: "any", label: "Any" }]} />
+              options={[{ value: "weeks", label: "1–4 weeks" }, { value: "short", label: "1–3 months" }, { value: "long", label: "6–12 mo" }, { value: "any", label: "Any" }]} />
           </section>
         )}
 

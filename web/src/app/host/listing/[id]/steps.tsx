@@ -18,7 +18,7 @@ export const STEPS = HOST_STEPS;
 export type Listing = {
   id: string; status: string; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
   household: Household | null; open_to_camp: boolean; min_months: number; max_months: number; pay_schedule: PaySchedule;
-  available_from: string | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
+  available_from: string | null; open_to_short: boolean; weekly_price: number | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
   early_leave_notice_days: number; redeploy_refund: "all_unused" | "unused_minus_2w"; ask_leave_notice_days: number; allowed_to_share: boolean;
   listing_locations: { address_line: string; lat: number; lng: number; landmark: string | null } | null;
   listing_photos: { id: string; path: string; shot: PhotoShot; position: number; flagged: boolean }[];
@@ -177,10 +177,15 @@ export function RoomStep({ listing, reload, next, back }: StepProps) {
   const [mx, setMx] = useState(listing.max_months === 12 && listing.min_months === 1 ? 6 : listing.max_months);
   const [pay, setPay] = useState<PaySchedule>(listing.pay_schedule);
   const [from, setFrom] = useState(listing.available_from ?? isoDay(new Date()));
+  const [short, setShort] = useState(listing.open_to_short);
+  const [weekly, setWeekly] = useState(listing.weekly_price ?? 0);
   return (
-    <StepShell title="Room and stay" back={back} next={next} canNext={!!who && !!from}
+    <StepShell title="Room and stay" back={back} next={next} canNext={!!who && !!from && (!short || weekly > 0)}
       onSave={async () => {
-        await saveListing(listing.id, { room_kind: room, bath_kind: bath, household: who, open_to_camp: camp, furnished: furn, min_months: mn, max_months: mx, pay_schedule: pay, available_from: from });
+        await saveListing(listing.id, {
+          room_kind: room, bath_kind: bath, household: who, open_to_camp: camp, furnished: furn, min_months: mn, max_months: mx,
+          pay_schedule: pay, available_from: from, open_to_short: short, weekly_price: short ? weekly : null,
+        });
         await reload();
       }}>
       <Seg label="Room" value={room} onChange={setRoom} options={[{ value: "own_room", label: "Own room" }, { value: "shared_room", label: "Shared room" }]} />
@@ -196,6 +201,18 @@ export function RoomStep({ listing, reload, next, back }: StepProps) {
       <div className="between"><span className="h2" style={{ fontSize: 16 }}>Furnished</span><Switch on={furn} onChange={setFurn} label="Furnished" /></div>
       <div className="between"><span className="h2" style={{ fontSize: 16 }}>Shortest stay</span><Stepper value={mn} min={1} max={mx} onChange={setMn} format={monthsLabel} label="months" /></div>
       <div className="between"><span className="h2" style={{ fontSize: 16 }}>Longest stay</span><Stepper value={mx} min={mn} max={12} onChange={setMx} format={monthsLabel} label="months" /></div>
+      <div className="between">
+        <span className="stack" style={{ gap: 2 }}><span className="h2" style={{ fontSize: 16 }}>Short stays</span><span className="small">1 to 4 weeks, paid upfront, no deposit</span></span>
+        <Switch on={short} onChange={setShort} label="Open to short stays" />
+      </div>
+      {short && (
+        <div className="stack open">
+          <label className="lbl" htmlFor="weekly">Price per week, all in</label>
+          <label className="field"><span className="prefix">₦</span>
+            <input id="weekly" inputMode="numeric" value={weekly ? weekly.toLocaleString("en-NG") : ""} onChange={(e) => setWeekly(num(e.target.value))} />
+          </label>
+        </div>
+      )}
       <div className="stack" style={{ gap: 10 }}>
         <span className="h2">Payment</span>
         <Seg label="Payment" value={pay} onChange={setPay} options={[{ value: "monthly", label: "Monthly" }, { value: "lump_sum", label: "Lump sum" }]} />

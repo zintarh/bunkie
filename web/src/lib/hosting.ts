@@ -13,13 +13,13 @@ export const REQUIRED_SHOTS = ["bedroom", "bathroom", "kitchen", "meter", "entra
 export type ProgressFields = {
   id: string;
   room_kind: string | null; household: string | null; available_from: string | null;
-  rent_monthly: number | null; allowed_to_share: boolean;
+  rent_monthly: number | null; allowed_to_share: boolean; open_to_short: boolean; weekly_price: number | null;
   listing_locations: unknown | null;
   listing_photos: { shot: string }[];
   house_rules: unknown[];
 };
 export const LISTING_PROGRESS =
-  "id, room_kind, household, available_from, rent_monthly, allowed_to_share, listing_locations(listing_id), listing_photos(shot), house_rules(id)";
+  "id, room_kind, household, available_from, rent_monthly, allowed_to_share, open_to_short, weekly_price, listing_locations(listing_id), listing_photos(shot), house_rules(id)";
 
 /** Which steps are filled in. Steps can be done in any order; the listing goes live only when all are. */
 export function stepsDone(l: ProgressFields): Set<HostStep> {
@@ -27,7 +27,7 @@ export function stepsDone(l: ProgressFields): Set<HostStep> {
   const done = new Set<HostStep>();
   if (loc) done.add("location");
   if (REQUIRED_SHOTS.every((s) => l.listing_photos?.some((p) => p.shot === s))) done.add("photos");
-  if (l.room_kind && l.household && l.available_from) done.add("room");
+  if (l.room_kind && l.household && l.available_from && (!l.open_to_short || (l.weekly_price ?? 0) > 0)) done.add("room");
   if ((l.rent_monthly ?? 0) > 0) done.add("costs");
   if ((l.house_rules?.length ?? 0) > 0) done.add("rules");
   if (l.allowed_to_share) done.add("refunds");

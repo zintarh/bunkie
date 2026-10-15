@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     priceMax: int("priceMax") !== undefined ? Math.ceil(int("priceMax")! / 5000) * 5000 : undefined,
     pref: pick<SharePref>("pref", ["women_only", "men_only", "mixed_ok"]),
     room: pick<RoomKind>("room", ["own_room", "shared_room"]),
-    stay: pick("stay", ["short", "long", "any"] as const),
+    stay: pick("stay", ["weeks", "short", "long", "any"] as const),
     maxMinutes: int("maxMinutes"),
   };
 

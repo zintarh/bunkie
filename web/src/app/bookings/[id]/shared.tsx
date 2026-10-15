@@ -4,7 +4,7 @@ import { BadgeCheck, Check, ChevronDown } from "lucide-react";
 import { QUESTIONS, fit } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
 import { act, type BookingFull, type Person, type Terms } from "@/lib/bookings";
-import { dayLabel, initial, months, naira } from "@/lib/format";
+import { dayLabel, initial, naira, stayLength } from "@/lib/format";
 import { avatarUrl } from "@/lib/photos";
 import type { Answers } from "@/lib/types";
 
@@ -76,9 +76,15 @@ const REDEPLOY: Record<string, string> = { all_unused: "Unused months back", unu
 
 export function AgreementParts({ terms, hostName }: { terms: Terms; hostName: string }) {
   const [open, setOpen] = useState(0);
+  const short = !!terms.weeks;
   const parts: [string, string, [string, string][]][] = [
-    ["Dates", `${dayLabel(terms.move_in)} – ${dayLabel(terms.move_out, true)}`, [["Move in", dayLabel(terms.move_in, true)], ["Move out", dayLabel(terms.move_out, true)], ["Length", months(terms.months)]]],
-    ["Money", `${terms.total_varies ? "about " : ""}${naira(terms.monthly_total)} a month`, [
+    ["Dates", `${dayLabel(terms.move_in)} – ${dayLabel(terms.move_out, true)}`, [["Move in", dayLabel(terms.move_in, true)], ["Move out", dayLabel(terms.move_out, true)], ["Length", stayLength(terms)]]],
+    short ? ["Money", `${naira(terms.weekly_price)} a week`, [
+      ["Weekly, all in", naira(terms.weekly_price)],
+      ["Whole stay", naira((terms.weekly_price ?? 0) * (terms.weeks ?? 0))],
+      ["Payment", "Whole stay upfront"],
+      ["Caution deposit", "None"],
+    ]] : ["Money", `${terms.total_varies ? "about " : ""}${naira(terms.monthly_total)} a month`, [
       ["Monthly, all in", naira(terms.monthly_total)],
       ["Rent share", naira(terms.rent_monthly)],
       ...terms.costs.map((c) => [c.name, c.tenant_pays ? `${c.varies ? "about " : ""}${naira(c.amount)}` : "Included"] as [string, string]),
@@ -86,7 +92,10 @@ export function AgreementParts({ terms, hostName }: { terms: Terms; hostName: st
       ["Caution deposit", terms.deposit ? `${naira(terms.deposit)}, refundable` : "None"],
     ]],
     ["House rules", `${terms.rules.length} ${terms.rules.length === 1 ? "rule" : "rules"}`, terms.rules.map((r) => [r.topic, `${r.choice} · ${CONSEQUENCE[r.consequence] ?? ""}`])],
-    ["Refunds", "3 cases", [
+    short ? ["Refunds", "Short stay", [
+      ["You leave early", `Unused nights back, except the last ${terms.refunds.short_stay_no_refund_last_days ?? 3}`],
+      [`${hostName} cancels`, "Full refund"],
+    ]] : ["Refunds", "3 cases", [
       ["You leave early", `${terms.refunds.early_leave_notice_days} days’ notice, unused months back`],
       ["You’re redeployed", REDEPLOY[terms.refunds.redeploy_refund] ?? ""],
       [`${hostName} asks you to leave`, "Unused months back"],

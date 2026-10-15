@@ -38,7 +38,7 @@ function searchDemo(p: SearchParams): RoomCard[] {
     .filter((r) => r.monthly_total >= (p.priceMin ?? 0) && r.monthly_total <= (p.priceMax ?? Infinity))
     .filter((r) => !p.room || r.room_kind === p.room)
     .filter((r) => !p.pref || p.pref === "mixed_ok" || (p.pref === "women_only" ? r.household === "women" : r.household === "men"))
-    .filter((r) => !p.stay || p.stay === "any" || (p.stay === "short" ? r.min_months <= 3 : r.max_months >= 6))
+    .filter((r) => !p.stay || p.stay === "any" || (p.stay === "weeks" ? r.open_to_short : p.stay === "short" ? r.min_months <= 3 : r.max_months >= 6))
     .filter((r) => p.mode !== "camp" || (r.open_to_camp && r.min_months <= 3))
     .filter((r) => !p.moveIn || !r.available_from || r.available_from <= p.moveIn)
     .filter((r) => !p.maxMinutes || r.commute_min == null || r.commute_min <= p.maxMinutes)
