@@ -3,8 +3,11 @@ import Link from "next/link";
 import { MapImage } from "@/components/MapImage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Award, BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, Share2, Tent, Wallet } from "lucide-react";
+import { Award, BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui";
+import { errorText, useMe } from "@/lib/auth";
+import { openChat } from "@/lib/chat";
+import { qs } from "@/lib/url";
 import { HOUSEHOLD_LABEL, QUESTIONS, fit } from "@/lib/bunkie";
 import { CORPER_LABEL, dayLabel, initial, naira, stayRange } from "@/lib/format";
 import { avatarUrl, photoUrl } from "@/lib/photos";
@@ -26,6 +29,21 @@ export function RoomView({ room }: { room: RoomDetail }) {
   const [photo, setPhoto] = useState(0);
   const [showCosts, setShowCosts] = useState(false);
   const [toast, showToast] = useToast();
+  const [me] = useMe();
+  const [opening, setOpening] = useState(false);
+  const isDemo = room.id.startsWith("demo-");
+
+  // Opens the chat with this host (signed out: sign up first, then come back here).
+  const message = async () => {
+    if (!me) return router.push(`/signup?next=${qs(`/rooms/${room.id}`)}`);
+    setOpening(true);
+    try {
+      router.push(`/inbox/${await openChat(room.id)}`);
+    } catch (e) {
+      setOpening(false);
+      showToast(errorText(e));
+    }
+  };
 
   const photos = room.photos.length ? room.photos : [{ path: room.cover_path ?? "", shot: "bedroom" as const, taken_at: "" }];
   const n = photos.length;
@@ -104,6 +122,11 @@ export function RoomView({ room }: { room: RoomDetail }) {
               <span className="badge amber" style={{ alignSelf: "flex-start", marginTop: 2 }}><Award size={13} strokeWidth={2.4} />{CORPER_LABEL[room.host_corper]}</span>
             )}
           </span>
+          {!isDemo && me?.user.id !== room.host_id && (
+            <button className="pill" onClick={message} disabled={opening} style={{ flexShrink: 0 }}>
+              {opening ? <span className="spin dark" /> : <><MessageCircle size={16} />Message</>}
+            </button>
+          )}
         </section>
 
         {room.host_answers && (

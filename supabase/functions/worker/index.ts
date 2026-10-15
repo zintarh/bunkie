@@ -79,22 +79,33 @@ const TEMPLATES: Record<string, { name: string; text: (o: string) => string }> =
   move_in_day: { name: "bunkie_move_in_day", text: (o) => `Move-in day with ${o}. Check in when you arrive.` },
   confirm_move_in: { name: "bunkie_confirm_move_in", text: (o) => `${o} checked in. Confirm they moved in.` },
   stay_ending: { name: "bunkie_stay_ending", text: (o) => `${o} gave notice. See the last night.` },
+  // Never includes the message text: just who, and a link into the chat.
+  new_message: { name: "bunkie_new_message", text: (o) => `${o} sent you a message on Bunkie.` },
 };
 
 async function whatsapp(job: Job) {
-  const { user_id, template, booking_id } = job.payload;
+  const { user_id, template, booking_id, conversation_id, message_id } = job.payload;
   const t = TEMPLATES[template];
   if (!t) return;
+  // Chat nudges: only if still unread, not muted, and none sent for this chat in the last 30 minutes.
+  if (template === "new_message") {
+    const { data: due } = await admin.rpc("sys_chat_should_notify", { p_conversation: conversation_id, p_user: user_id, p_message: message_id });
+    if (!due) return;
+  }
   const { data: who } = await admin.from("profile_private").select("phone, phone_verified, whatsapp_opt_in").eq("user_id", user_id).maybeSingle();
   if (!who?.phone || !who.phone_verified || !who.whatsapp_opt_in) return;
 
   let other = "Your bunkie";
-  if (booking_id) {
+  if (conversation_id) {
+    const { data: c } = await admin.from("conversations").select("tenant_id, host_id").eq("id", conversation_id).maybeSingle();
+    const otherId = c ? (c.tenant_id === user_id ? c.host_id : c.tenant_id) : null;
+    if (otherId) other = (await admin.from("profiles").select("first_name").eq("id", otherId).single()).data?.first_name || other;
+  } else if (booking_id) {
     const { data: b } = await admin.from("bookings").select("tenant_id, host_id").eq("id", booking_id).maybeSingle();
     const otherId = b ? (b.tenant_id === user_id ? b.host_id : b.tenant_id) : null;
     if (otherId) other = (await admin.from("profiles").select("first_name").eq("id", otherId).single()).data?.first_name || other;
   }
-  const link = booking_id ? `${SITE}/bookings/${booking_id}` : `${SITE}/host`;
+  const link = conversation_id ? `${SITE}/inbox/${conversation_id}` : booking_id ? `${SITE}/bookings/${booking_id}` : `${SITE}/host`;
 
   const token = Deno.env.get("WHATSAPP_TOKEN");
   const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");

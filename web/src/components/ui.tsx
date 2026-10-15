@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { BedDouble, ChevronLeft, CircleUserRound, DoorOpen, House, Minus, Plus, X } from "lucide-react";
+import { BedDouble, ChevronLeft, CircleUserRound, DoorOpen, House, MessageCircle, Minus, Plus, X } from "lucide-react";
+import { useUnreadChats } from "@/lib/chat";
 
 /** The bunk-bed mark used in the logo. */
 export function BunkMark({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -45,12 +46,14 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
 const TABS = [
   { href: "/explore", label: "Home", Icon: House, also: ["/saved", "/rooms"] },
   { href: "/bookings", label: "Bookings", Icon: BedDouble, also: [] },
+  { href: "/inbox", label: "Messages", Icon: MessageCircle, also: [] },
   { href: "/host", label: "Host", Icon: DoorOpen, also: [] },
   { href: "/profile", label: "Profile", Icon: CircleUserRound, also: [] },
 ];
 
 export function TabBar() {
   const path = usePathname();
+  const unread = useUnreadChats();
   return (
     <nav className="tabs" aria-label="Main">
       {TABS.map(({ href, label, Icon, also }) => {
@@ -58,6 +61,7 @@ export function TabBar() {
         return (
           <Link key={href} href={href} className={on ? "tab on" : "tab"} aria-current={on ? "page" : undefined}>
             <Icon size={24} strokeWidth={on ? 2.3 : 2} />
+            {href === "/inbox" && unread > 0 && <span className="tab-badge" aria-label={`${unread} unread`}>{unread > 9 ? "9+" : unread}</span>}
             {label}
           </Link>
         );

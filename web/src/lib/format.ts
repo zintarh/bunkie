@@ -93,3 +93,22 @@ export function missLabel(m: import("./types").Miss): string {
     case "max_stay": return `Up to ${months(m.months)}`;
   }
 }
+
+/** Inbox times: "14:05" today, "Yesterday", "Mon" this week, "12 Oct" before that. */
+export function chatTime(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const days = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000);
+  if (days === 0) return d.toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" });
+  if (days === 1) return "Yesterday";
+  if (days < 7) return DOW[d.getDay()];
+  return `${d.getDate()} ${MON[d.getMonth()]}`;
+}
+
+/** Day headings inside a chat: "Today", "Yesterday", "Mon 12 Oct". */
+export function chatDay(iso: string): string {
+  const t = chatTime(iso);
+  if (t === "Yesterday") return t;
+  return /\d:\d/.test(t) ? "Today" : dayLabel(new Date(iso));
+}
