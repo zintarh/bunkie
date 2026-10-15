@@ -6,6 +6,7 @@ import type { BookingFull } from "@/lib/bookings";
 import { dayLabel, dayParts, isoDay, naira, slotLabel, stayLength, timeLabel, untilLabel } from "@/lib/format";
 import { useMyAnswers } from "@/lib/useMyAnswers";
 import { Err, Foot, JoinCall, PersonCard, useStep } from "./shared";
+import { ReviewForm } from "@/components/ReviewForm";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
 const WINDOW: Record<string, string> = { morning: "8am–11am", midday: "11am–2pm", afternoon: "2pm–5pm", evening: "5pm–8pm" };
@@ -104,6 +105,7 @@ export function HostView({ b, reload }: Props) {
       break;
     case "moved_out": case "completed":
       title = "Stay finished";
+      body = <ReviewForm bookingId={b.id} role="host" otherName={t} moveOut={b.move_out} />;
       break;
     case "closed":
       title = "Closed";

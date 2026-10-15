@@ -11,6 +11,7 @@ import { callFunction } from "@/lib/functions";
 import { shrinkFile } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useMyAnswers } from "@/lib/useMyAnswers";
+import { ReviewForm } from "@/components/ReviewForm";
 import { AgreementParts, Err, Foot, JoinCall, PersonCard, Timeline, useStep } from "./shared";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
@@ -26,7 +27,13 @@ export function TenantView({ b, reload }: Props) {
     case "agreed": return <Pay b={b} reload={reload} />;
     case "paid": return <Booked b={b} reload={reload} />;
     case "moved_in": case "active": case "ending": return <MyStay b={b} reload={reload} />;
-    case "moved_out": case "completed": return <Simple title="Stay finished" text={`Thanks for bunking with ${host}.`} />;
+    case "moved_out": case "completed": return (
+      <Body>
+        <h1 className="h1">Stay finished</h1>
+        <p className="sub">Thanks for bunking with {host}.</p>
+        <ReviewForm bookingId={b.id} role="tenant" otherName={host} moveOut={b.move_out} />
+      </Body>
+    );
     case "closed": return <Closed b={b} />;
   }
 }

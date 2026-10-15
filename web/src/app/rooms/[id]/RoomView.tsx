@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MapImage } from "@/components/MapImage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Award, BadgeCheck, Bath, Eye, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
+import { Award, BadgeCheck, Bath, Eye, Star, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { openChat } from "@/lib/chat";
@@ -28,6 +28,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
   const myAnswers = useMyAnswers();
   const [photo, setPhoto] = useState(0);
   const [showCosts, setShowCosts] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [toast, showToast] = useToast();
   const [me] = useMe();
   const [opening, setOpening] = useState(false);
@@ -208,6 +209,41 @@ export function RoomView({ room }: { room: RoomDetail }) {
           <div className={styles.rr} style={{ justifyContent: "space-between" }}><span style={{ fontSize: 15 }}>You leave early</span><span className="small" style={{ fontSize: 14 }}>{room.early_leave_notice_days} days&apos; notice</span></div>
           <div className={styles.rr} style={{ justifyContent: "space-between" }}><span style={{ fontSize: 15 }}>You&apos;re redeployed</span><span className="small" style={{ fontSize: 14 }}>{REDEPLOY[room.redeploy_refund]}</span></div>
           <div className={styles.rr} style={{ justifyContent: "space-between" }}><span style={{ fontSize: 15 }}>Host asks you to leave</span><span className="small" style={{ fontSize: 14 }}>Unused months back</span></div>
+        </section>
+
+        <section className={styles.sec} style={{ gap: 14 }}>
+          <span className="row" style={{ gap: 8 }}>
+            <Star size={22} fill="var(--amber)" color="var(--amber)" />
+            <span className="h2">{room.rating_count ? `${Number(room.rating_avg).toFixed(1)} · ${room.rating_count} ${room.rating_count === 1 ? "review" : "reviews"}` : "No reviews yet"}</span>
+          </span>
+          {room.reviews.length > 0 && (
+            <div className="grid2" style={{ gap: 8 }}>
+              {([["Accuracy", "accuracy"], ["Cleanliness", "cleanliness"], [room.host_first_name, "communication"]] as const).map(([label, k]) => {
+                const vals = room.reviews.map((r) => r[k]).filter((v): v is number => v != null);
+                return vals.length ? <div key={k} className="kv" style={{ fontSize: 14 }}><span>{label}</span><b>{(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1)}</b></div> : null;
+              })}
+            </div>
+          )}
+          {room.reviews.slice(0, showAllReviews ? 20 : 3).map((r) => (
+            <div key={r.id} className="stack" style={{ gap: 6, paddingTop: 12, borderTop: "1px solid var(--line)" }}>
+              <span className="row" style={{ gap: 10 }}>
+                <span className="avatar" style={{ width: 36, height: 36, fontSize: 14 }}>
+                  {avatarUrl(r.author_photo) ? <img src={avatarUrl(r.author_photo)!} alt="" /> : initial(r.author_name)}
+                </span>
+                <span className="stack" style={{ gap: 0, flex: 1 }}>
+                  <b style={{ fontSize: 15 }}>{r.author_name ?? "A corper"}</b>
+                  <span className="small" style={{ fontSize: 13 }}>{r.stay_label} · {new Date(r.published_at).toLocaleDateString("en-NG", { month: "short", year: "numeric" })}</span>
+                </span>
+                <span className="row" style={{ gap: 1 }} aria-label={`${r.overall} stars`}>
+                  {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={13} fill={n <= r.overall ? "var(--amber)" : "none"} color={n <= r.overall ? "var(--amber)" : "#c3ccc6"} />)}
+                </span>
+              </span>
+              {r.comment && <p style={{ fontSize: 15, lineHeight: 1.5 }}>{r.comment}</p>}
+            </div>
+          ))}
+          {room.reviews.length > 3 && !showAllReviews && (
+            <button className="link" style={{ alignSelf: "flex-start" }} onClick={() => setShowAllReviews(true)}>Show all {room.reviews.length} reviews</button>
+          )}
         </section>
 
         <section className={styles.sec} style={{ gap: 12 }}>

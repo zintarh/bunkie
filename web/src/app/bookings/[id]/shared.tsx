@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { BadgeCheck, Check, ChevronDown, Video } from "lucide-react";
+import { BadgeCheck, Check, ChevronDown, Star, Video } from "lucide-react";
 import { QUESTIONS, fit } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
 import { act, type BookingFull, type Person, type Terms } from "@/lib/bookings";
@@ -40,6 +40,10 @@ export function PersonCard({ p, sub, answers, myAnswers }: { p: Person; sub?: st
         <span className="stack" style={{ gap: 2, flex: 1 }}>
           <span className="row" style={{ gap: 6, fontWeight: 700 }}>{p.first_name}{p.is_verified && <BadgeCheck size={18} color="var(--green)" aria-label="Verified" />}</span>
           {sub && <span className="small">{sub}</span>}
+          <span className="row small" style={{ gap: 4 }}>
+            <Star size={14} fill="var(--amber)" color="var(--amber)" />
+            {p.rating_count ? `${Number(p.rating_avg).toFixed(1)} from ${p.rating_count} ${p.rating_count === 1 ? "review" : "reviews"}` : "No reviews yet"}
+          </span>
         </span>
         {match && <span className="mins">{match.score}% fit</span>}
       </div>

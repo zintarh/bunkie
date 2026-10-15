@@ -3,7 +3,7 @@ import { DEMO_ROOMS } from "./demo";
 import { estimateMinutes } from "./estimate";
 import { ZONES } from "./places";
 import { supabasePublic } from "./supabase/server";
-import type { CorperStatus, RoomCard, RoomDetail, SearchParams } from "./types";
+import type { CorperStatus, RoomCard, RoomDetail, RoomReview, SearchParams } from "./types";
 
 const CENTRE = { lat: 9.0579, lng: 7.4951 };
 
@@ -85,7 +85,10 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     first_name: string; photo_path: string | null; is_verified: boolean; corper_status: CorperStatus | null; corper_verified: boolean;
   };
   const byPos = <T extends { position: number }>(xs: T[]) => [...xs].sort((a, b) => a.position - b.position);
-  const { data: hold } = await db.rpc("listing_hold", { p_listing: l.id });
+  const [{ data: hold }, { data: reviews }] = await Promise.all([
+    db.rpc("listing_hold", { p_listing: l.id }),
+    db.rpc("listing_reviews", { p_listing: l.id, p_limit: 20 }),
+  ]);
   return {
     ...(l as unknown as RoomDetail),
     host_first_name: host?.first_name ?? "",
@@ -93,6 +96,7 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     host_verified: host?.is_verified ?? false,
     host_corper: host?.corper_verified ? host.corper_status : null,
     being_viewed_until: (hold as string | null) ?? null,
+    reviews: (reviews ?? []) as RoomReview[],
     host_answers: answers?.approved_at ? { sleep: answers.sleep, guests: answers.guests, cooking: answers.cooking, cleaning: answers.cleaning, noise: answers.noise } : null,
     commute_min: null,
     ease_min: l.area_lat ? estimate(l.area_lat, l.area_lng!, CENTRE.lat, CENTRE.lng) : null,

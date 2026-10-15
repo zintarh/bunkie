@@ -1,4 +1,4 @@
-import type { CorperStatus, RoomDetail } from "./types";
+import type { CorperStatus, RoomDetail, RoomReview } from "./types";
 
 /**
  * Sample rooms shown when Supabase isn't connected, so the app can be clicked through
@@ -16,6 +16,7 @@ const base = {
   host_photo_path: null,
   host_verified: true,
   host_corper: null as CorperStatus | null,
+  reviews: [] as RoomReview[],
   open_to_short: false,
   weekly_price: null as number | null,
   commute_min: null,

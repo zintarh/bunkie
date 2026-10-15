@@ -4,7 +4,7 @@ import { supabaseBrowser } from "./supabase/client";
 import type { Answers, Booking, BookingStatus } from "./types";
 import { ROOM_LABEL } from "./format";
 
-export type Person = { id: string; first_name: string; photo_path: string | null; is_verified: boolean };
+export type Person = { id: string; first_name: string; photo_path: string | null; is_verified: boolean; rating_avg: number | null; rating_count: number };
 export type Agreement = { id: string; version: number; terms: Terms; terms_hash: string; host_confirmed_at: string | null; tenant_confirmed_at: string | null };
 export type Terms = {
   move_in: string; move_out: string; months: number | null; weeks: number | null; weekly_price: number | null; monthly_total: number; rent_monthly: number; deposit: number;
@@ -32,8 +32,8 @@ export const OPEN: BookingStatus[] = ["requested", "accepted", "inspection_due",
 export const LIVE: BookingStatus[] = ["paid", "moved_in", "active", "ending"];
 
 const SELECT = `*, listing:listings(id, area_name, room_kind, cover_path, deposit, pay_schedule),
-  tenant:profiles!bookings_tenant_id_fkey(id, first_name, photo_path, is_verified),
-  host:profiles!bookings_host_id_fkey(id, first_name, photo_path, is_verified)`;
+  tenant:profiles!bookings_tenant_id_fkey(id, first_name, photo_path, is_verified, rating_avg, rating_count),
+  host:profiles!bookings_host_id_fkey(id, first_name, photo_path, is_verified, rating_avg, rating_count)`;
 
 export async function fetchBooking(id: string): Promise<BookingFull | null> {
   const db = supabaseBrowser();

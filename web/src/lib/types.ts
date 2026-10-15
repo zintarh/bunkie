@@ -36,6 +36,9 @@ export type RoomCard = {
   inspection_fee?: number;
   /** Someone is inspecting it until then; requests wait in line. */
   being_viewed_until?: string | null;
+  /** Average of published reviews (1-5) and how many. */
+  rating_avg?: number | null;
+  rating_count?: number;
   area_name: string;
   area_lat: number | null;
   area_lng: number | null;
@@ -68,7 +71,10 @@ export type RoomCard = {
   published_at: string | null;
 };
 
+export type RoomReview = { id: string; author_name: string | null; author_photo: string | null; overall: number; accuracy: number | null; cleanliness: number | null; communication: number | null; comment: string | null; published_at: string; stay_label: string };
+
 export type RoomDetail = RoomCard & {
+  reviews: RoomReview[];
   photos: { path: string; shot: PhotoShot; taken_at: string }[];
   costs: { name: string; amount: number; tenant_pays: boolean; varies: boolean }[];
   rules: { topic: string; choice: string; consequence: string }[];

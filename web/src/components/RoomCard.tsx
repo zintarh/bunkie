@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Eye, Heart } from "lucide-react";
+import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Eye, Heart, Star } from "lucide-react";
 import { HOUSEHOLD_LABEL } from "@/lib/bunkie";
 import { CORPER_LABEL, missLabel, naira, ROOM_LABEL, stayRange } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
@@ -51,7 +51,13 @@ export function RoomCard({
           </span>
           {minutesLabel && <span className="mins"><Clock size={14} strokeWidth={2.6} />{minutesLabel}</span>}
         </span>
-        <span style={{ fontSize: 14 }}>{kind} in {room.area_name} · {room.host_first_name}</span>
+        <span className="row" style={{ fontSize: 14, gap: 6 }}>
+          <span>{kind} in {room.area_name} · {room.host_first_name}</span>
+          <span className="row" style={{ gap: 3, marginLeft: "auto", fontWeight: 700 }}>
+            <Star size={14} fill="var(--amber)" color="var(--amber)" />
+            {room.rating_count ? <>{Number(room.rating_avg).toFixed(1)}<span className="muted" style={{ fontWeight: 500 }}>({room.rating_count})</span></> : "New"}
+          </span>
+        </span>
         <span style={{ fontSize: 14, color: "var(--muted)" }}>
           {HOUSEHOLD_LABEL[room.household]} household{room.furnished ? " · Furnished" : ""}
           {fitScore != null ? ` · ${fitScore}% bunkie fit` : ""}
