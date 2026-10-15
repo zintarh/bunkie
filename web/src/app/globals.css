@@ -59,6 +59,9 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
   position: relative;
   box-shadow: 0 0 40px rgba(16, 35, 27, 0.08);
 }
+/* Full-width pages (the landing page) step out of the phone-width app column. */
+.app:has(> [data-full]) { max-width: none; box-shadow: none; }
+body:has([data-full]) { background: var(--white); }
 .screen { height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 .topbar { height: 56px; padding: 0 8px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .topbar .title { font-weight: 700; font-size: 16px; }

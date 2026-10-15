@@ -1,10 +1,10 @@
 // Bunkie service worker: keeps the app shell and room photos available on weak connections.
 // API calls, auth and payments always go to the network.
-const SHELL = "bunkie-shell-v1";
+const SHELL = "bunkie-shell-v2";
 const PHOTOS = "bunkie-photos-v1";
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(["/", "/explore", "/icons/icon-192.png"])).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(["/welcome", "/explore", "/icons/icon-192.png"])).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {

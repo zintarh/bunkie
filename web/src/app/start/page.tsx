@@ -52,7 +52,7 @@ export default function Start() {
 
   return (
     <main className="screen">
-      <TopBar back="/" />
+      <TopBar back="/welcome" />
       <div className="body">
         <h1 className="h1">Where are you in NYSC?</h1>
         <div role="radiogroup" aria-label="NYSC stage" className="stack" style={{ gap: 10 }}>

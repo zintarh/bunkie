@@ -1,142 +1,204 @@
-"use client";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, Clock, Home, ShieldCheck, Wallet } from "lucide-react";
+import { BadgeCheck, Check, ChevronDown, Clock, Lock, MessageCircle, Search, ShieldCheck, Sparkles, Tent, Video, Wallet } from "lucide-react";
+import { BunkIcon, HostIcon } from "@/components/icons";
 import { BunkMark } from "@/components/ui";
-import { setPrefs, usePrefs } from "@/lib/prefs";
-import styles from "./intro.module.css";
+import styles from "./landing.module.css";
 
-const SLIDES = [
-  { title: "Find your bunkie", sub: "Share a room near your PPA." },
-  { title: "Every host is verified", sub: "Real people. Real rooms." },
-  { title: "See it, then pay", sub: "Your money is held until you move in." },
+export const metadata: Metadata = {
+  title: { absolute: "Bunkie · Leave camp with a place to stay" },
+  description: "Verified shared rooms near your PPA in Abuja. Find your bunkie, see the room, pay safely in the app.",
+  openGraph: {
+    title: "Bunkie · Leave camp with a place to stay",
+    description: "Verified shared rooms near your PPA in Abuja.",
+    type: "website",
+  },
+};
+
+const STEPS = [
+  { Icon: Search, title: "Search near your PPA", text: "Type what you want, like “self con near Utako under 80k”." },
+  { Icon: Video, title: "See it first", text: "Inspect in person, or by video call from camp. Chat in Bunkie." },
+  { Icon: Wallet, title: "Pay, then move in", text: "Your money is held until you move in." },
 ];
 
-export default function Intro() {
-  const router = useRouter();
-  const [prefs, ready] = usePrefs();
-  const [i, setI] = useState(0);
-  const [splash, setSplash] = useState(true);
-  const startX = useRef<number | null>(null);
+const SAFETY = [
+  { Icon: BadgeCheck, tone: styles.tMint, title: "Every host is verified", text: "ID and selfie checks before a room goes live." },
+  { Icon: ShieldCheck, tone: styles.tAmber, title: "Your money is held", text: "Paid through Paystack and released after you move in. Refunded if the room isn’t as listed." },
+  { Icon: Lock, tone: styles.tSky, title: "Numbers stay private", text: "Phone numbers and account details stay hidden until you pay." },
+  { Icon: Sparkles, tone: styles.tLilac, title: "Corper hosts first", text: "Rooms from serving and past corpers show up first." },
+];
 
-  // Returning visitors skip straight to rooms.
-  useEffect(() => {
-    if (ready && prefs.introSeen && prefs.stage) router.replace("/explore");
-  }, [ready, prefs.introSeen, prefs.stage, router]);
+const FAQ = [
+  { q: "Is Bunkie only in Abuja?", a: <>For now, yes. <Link href="/waitlist">Join the waitlist</Link> for your state.</> },
+  { q: "How do I pay?", a: "Only inside Bunkie, by card, transfer or USSD through Paystack. Never to a personal account." },
+  { q: "When does the host get paid?", a: "24 hours after you move in, if nothing is wrong." },
+  { q: "What’s an inspection fee?", a: "Some hosts charge up to ₦5,000 to inspect in person. Bunkie holds it, refunds it if the host cancels, and takes it off your rent if you book." },
+  { q: "Can I book while I’m still in camp?", a: "Yes. View the room by video call and move in on your camp exit day." },
+  { q: "What does it cost to use?", a: "Searching, chatting and requesting are free. Paystack’s charge is added when you pay." },
+];
 
-  useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (!ready || (prefs.introSeen && prefs.stage)) return <main className="screen" style={{ background: "#fff" }} />;
-
-  const last = i === SLIDES.length - 1;
-  const go = (n: number) => setI(Math.max(0, Math.min(SLIDES.length - 1, n)));
-  const finish = () => setPrefs({ introSeen: true });
-
+export default function Landing() {
   return (
-    <main className="screen" style={{ background: "#fff" }}>
-      <div className={styles.top}>
-        <span className="wordmark" style={{ gap: 8 }}>
-          <i style={{ background: "var(--green)", color: "var(--amber)", borderRadius: 8 }}><BunkMark /></i>bunkie
-        </span>
-        {last ? <Link className="link" href="/signup">Sign up</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
-      </div>
+    <div className={styles.page} data-full>
+      <header className={styles.nav}>
+        <div className={styles.wrap}>
+          <Link href="/" className={styles.brand} aria-label="Bunkie home">
+            <i><BunkMark /></i>bunkie
+          </Link>
+          <nav className={styles.links} aria-label="Sections">
+            <a href="#how">How it works</a>
+            <a href="#safety">Safety</a>
+            <a href="#hosts">Hosting</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <Link href="/welcome" className={styles.navCta}>Find a room</Link>
+        </div>
+      </header>
 
-      <div className={styles.viewport}
-        onPointerDown={(e) => (startX.current = e.clientX)}
-        onPointerUp={(e) => {
-          if (startX.current == null) return;
-          const dx = e.clientX - startX.current;
-          if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
-          startX.current = null;
-        }}>
-        <div className={styles.track} style={{ transform: `translateX(-${i * 100}%)` }}>
-          <section className={styles.slide} aria-hidden={i !== 0}>
-            <div className={`${styles.art} ${styles.green}`}>
-              <span className={styles.spark} style={{ left: 28, top: 30 }} />
-              <span className={styles.spark} style={{ right: 34, top: 160, animationDelay: ".8s" }} />
-              <span className={`${styles.fchip} ${styles.bob2}`} style={{ right: 18, top: 22 }}><Clock size={15} strokeWidth={2.6} color="#17A862" />18 min to PPA</span>
-              <span className={`${styles.fchip} ${styles.bob}`} style={{ left: 16, bottom: 18 }}><BadgeCheck size={15} strokeWidth={2.6} color="#17A862" />Verified host</span>
-              <div className={styles.bunk}>
-                <span className={styles.postL} /><span className={styles.postR} />
-                <span className={styles.rail} style={{ top: 96 }} /><span className={styles.rail} style={{ bottom: 40 }} />
-                <span className={styles.mattress} style={{ top: 70 }} /><span className={styles.mattress} style={{ bottom: 50 }} />
-                <span className={`${styles.face} ${styles.bob}`} style={{ left: 38, top: 18, background: "#10231B", color: "#F5B83D" }}>A</span>
-                <span className={`${styles.face} ${styles.bob2}`} style={{ right: 38, bottom: 76, background: "#FCE9BE" }}>T</span>
-              </div>
+      <section className={styles.hero}>
+        <div className={`${styles.wrap} ${styles.heroGrid}`}>
+          <div className={styles.heroText}>
+            <span className={styles.eyebrow}><Tent size={15} />For corp members in Abuja</span>
+            <h1>Leave camp with a place to stay.</h1>
+            <p>Verified shared rooms near your PPA. Find your bunkie, see the room, pay safely in the app.</p>
+            <div className={styles.ctas}>
+              <Link href="/welcome" className={styles.ctaMain}>Find a room</Link>
+              <Link href="/host" className={styles.ctaGhost}>Host a corper</Link>
             </div>
-            <Text {...SLIDES[0]} />
-          </section>
+            <ul className={styles.ticks}>
+              <li><Check size={16} />Verified hosts</li>
+              <li><Check size={16} />Pay only in Bunkie</li>
+              <li><Check size={16} />Book from camp</li>
+            </ul>
+          </div>
 
-          <section className={styles.slide} aria-hidden={i !== 1}>
-            <div className={`${styles.art} ${styles.dark}`}>
-              <span className={styles.spark} style={{ left: 34, top: 40 }} />
-              <span className={`${styles.fchip} ${styles.bob2}`} style={{ left: 22, bottom: 44 }}><ShieldCheck size={15} strokeWidth={2.6} color="#17A862" />NIN checked</span>
-              <div className={`${styles.profile} ${styles.bob}`}>
-                <div className="photo" style={{ height: 110, borderRadius: 14, backgroundImage: "url(/demo/room-1.svg)" }} />
-                <div className="row" style={{ gap: 10 }}>
-                  <span className="avatar" style={{ width: 34, height: 34 }}>T</span>
-                  <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                    <span className={styles.line} style={{ width: "80%" }} /><span className={styles.line} style={{ width: "50%" }} />
-                  </span>
+          <div className={styles.phoneArea} aria-hidden="true">
+            <div className={styles.phone}>
+              <div className={styles.screen}>
+                <div className={styles.appHero}>
+                  <span className={styles.appBrand}><i><BunkMark /></i>bunkie</span>
+                  <span className={styles.appSearch}><Sparkles size={14} />self con near Utako under 80k</span>
+                  <span className={styles.appChips}><b>Near Utako</b><b>Under ₦80k</b><b>Self contain</b></span>
+                </div>
+                <div className={styles.appList}>
+                  <div className={styles.card}>
+                    <div className={styles.cardImg} style={{ backgroundImage: "url(/demo/room-1.svg)" }}>
+                      <span className={styles.badgeAmber}><Sparkles size={11} />Corper host</span>
+                    </div>
+                    <div className={styles.cardRow}><b>₦72,000<small> /month</small></b><span className={styles.mins}><Clock size={11} />8 min</span></div>
+                    <span className={styles.cardSub}>Self contain in Utako · Amaka</span>
+                  </div>
+                  <div className={styles.card}>
+                    <div className={styles.cardImg} style={{ backgroundImage: "url(/demo/room-3.svg)" }}>
+                      <span className={styles.badgeWhite}><BadgeCheck size={11} />Verified host</span>
+                    </div>
+                    <div className={styles.cardRow}><b>₦65,000<small> /month</small></b><span className={styles.mins}><Clock size={11} />12 min</span></div>
+                    <span className={styles.cardSub}>Self contain in Jabi · Tunde</span>
+                  </div>
                 </div>
               </div>
-              <span className={styles.seal}><BadgeCheck size={30} strokeWidth={2.4} /></span>
             </div>
-            <Text {...SLIDES[1]} />
-          </section>
+            <div className={`${styles.float} ${styles.floatA}`}><span className={styles.dotGreen}><MessageCircle size={14} /></span>Amaka accepted your request</div>
+            <div className={`${styles.float} ${styles.floatB}`}><span className={styles.dotAmber}><Wallet size={14} /></span>Paid · held until you move in</div>
+          </div>
+        </div>
+      </section>
 
-          <section className={styles.slide} aria-hidden={i !== 2}>
-            <div className={`${styles.art} ${styles.amber}`}>
-              <span className={`${styles.fchip} ${styles.bob2}`} style={{ right: 22, top: 40 }}><Wallet size={15} strokeWidth={2.6} color="#17A862" />Held until move-in</span>
-              <div className={`${styles.zero} ${styles.bob}`}>
-                <span className="tile t-mint" style={{ width: 52, height: 52, borderRadius: 16 }}><Home size={26} strokeWidth={2.2} /></span>
-                <span style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 44, lineHeight: 1 }}>₦0</span>
-                <span className="lbl">until you&apos;ve seen it</span>
+      <section id="how" className={styles.section}>
+        <div className={styles.wrap}>
+          <h2>How it works</h2>
+          <ol className={styles.steps}>
+            {STEPS.map(({ Icon, title, text }, i) => (
+              <li key={title}>
+                <span className={styles.stepNum}>{i + 1}</span>
+                <span className={styles.stepIcon}><Icon size={22} /></span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="safety" className={`${styles.section} ${styles.soft}`}>
+        <div className={styles.wrap}>
+          <h2>Safe from the first message</h2>
+          <div className={styles.grid4}>
+            {SAFETY.map(({ Icon, tone, title, text }) => (
+              <div key={title} className={styles.tile}>
+                <span className={`${styles.tileIcon} ${tone}`}><Icon size={22} /></span>
+                <h3>{title}</h3>
+                <p>{text}</p>
               </div>
-            </div>
-            <Text {...SLIDES[2]} />
-          </section>
-        </div>
-      </div>
-
-      <div className={styles.bottom}>
-        <div className={styles.dots}>
-          {SLIDES.map((s, n) => (
-            <button key={s.title} className={styles.dot} onClick={() => go(n)} aria-label={`Slide ${n + 1}`} aria-current={n === i}
-              style={{ width: n === i ? 24 : 8, background: n === i ? "var(--green)" : "#D5DCD6" }} />
-          ))}
-        </div>
-        {last ? (
-          <div className="stack" style={{ gap: 4 }}>
-            <Link className="btn" href="/start" onClick={finish}>Find my bunkie</Link>
-            <Link className="link" href="/host" onClick={finish}>I have a room to share</Link>
+            ))}
           </div>
-        ) : (
-          <div className="stack" style={{ gap: 4 }}>
-            <button className="btn" onClick={() => go(i + 1)}>Next</button>
-            <span style={{ height: 44 }} />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={`${styles.wrap} ${styles.grid2}`}>
+          <div className={`${styles.feature} ${styles.featureGreen}`}>
+            <Tent size={28} />
+            <h3>Leaving camp?</h3>
+            <p>Book from camp, view by video call, and move in on your exit day.</p>
           </div>
-        )}
-      </div>
+          <div className={`${styles.feature} ${styles.featureAmber}`}>
+            <BunkIcon size={28} />
+            <h3>Just need a week or two?</h3>
+            <p>Short stays from 1 week. Paid upfront, no deposit.</p>
+          </div>
+        </div>
+      </section>
 
-      <button className={styles.splash} onClick={() => setSplash(false)} aria-label="Bunkie. Tap to continue"
-        style={{ opacity: splash ? 1 : 0, visibility: splash ? "visible" : "hidden" }}>
-        <span className={styles.logo}><BunkMark size={42} /></span>
-        <span className={styles.logoText}>bunkie</span>
-      </button>
-    </main>
-  );
-}
+      <section id="hosts" className={styles.section}>
+        <div className={`${styles.wrap} ${styles.hosts}`}>
+          <div>
+            <span className={styles.hostIcon}><HostIcon size={30} /></span>
+            <h2>Got a spare room? Host a corper.</h2>
+            <ul className={styles.hostList}>
+              <li><Check size={18} />Verified corpers only</li>
+              <li><Check size={18} />Your house rules, in a written agreement</li>
+              <li><Check size={18} />Free or paid inspections, your choice</li>
+              <li><Check size={18} />Paid 24 hours after move-in</li>
+            </ul>
+            <Link href="/host" className={styles.ctaDark}>Host a corper</Link>
+          </div>
+        </div>
+      </section>
 
-function Text({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "center" }}>
-      <h1 className="h1">{title}</h1>
-      <p className="sub">{sub}</p>
+      <section id="faq" className={`${styles.section} ${styles.soft}`}>
+        <div className={`${styles.wrap} ${styles.narrow}`}>
+          <h2>Questions</h2>
+          <div className={styles.faq}>
+            {FAQ.map(({ q, a }) => (
+              <details key={q}>
+                <summary>{q}<ChevronDown size={20} /></summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.band}>
+        <div className={styles.wrap}>
+          <h2>Find your bunkie.</h2>
+          <Link href="/welcome" className={styles.ctaMain}>Find a room</Link>
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <div className={`${styles.wrap} ${styles.footGrid}`}>
+          <span className={styles.brand}><i><BunkMark /></i>bunkie</span>
+          <nav aria-label="Footer">
+            <Link href="/help">Help</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/waitlist">Other states</Link>
+          </nav>
+          <p>[Company name] · RC [CAC number] · Not affiliated with or endorsed by NYSC.</p>
+        </div>
+      </footer>
     </div>
   );
 }

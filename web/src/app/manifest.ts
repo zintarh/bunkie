@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Bunkie",
     short_name: "Bunkie",
     description: "Leave camp with a place to stay.",
-    start_url: "/",
+    start_url: "/welcome",
     display: "standalone",
     background_color: "#FFFFFF",
     theme_color: "#17A862",
