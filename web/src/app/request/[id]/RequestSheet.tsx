@@ -134,6 +134,11 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
           <div className="divider" />
           <div className="kv num" style={{ fontWeight: 700 }}><span style={{ color: "var(--ink)" }}>{short ? "Whole stay" : "First payment"}</span><span>{naira(first)}</span></div>
           <span className="small">{short ? "Paid only after you both agree." : "Paid only after you view the room and both agree."}</span>
+          {!inCamp && (
+            <span className="small">
+              Inspection: {room.inspection_fee ? `${naira(room.inspection_fee)}, paid once ${room.host_first_name} accepts. Comes off your first payment.` : "free"}
+            </span>
+          )}
         </section>
 
         <section className="stack">

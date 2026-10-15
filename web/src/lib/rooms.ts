@@ -85,12 +85,14 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     first_name: string; photo_path: string | null; is_verified: boolean; corper_status: CorperStatus | null; corper_verified: boolean;
   };
   const byPos = <T extends { position: number }>(xs: T[]) => [...xs].sort((a, b) => a.position - b.position);
+  const { data: hold } = await db.rpc("listing_hold", { p_listing: l.id });
   return {
     ...(l as unknown as RoomDetail),
     host_first_name: host?.first_name ?? "",
     host_photo_path: host?.photo_path ?? null,
     host_verified: host?.is_verified ?? false,
     host_corper: host?.corper_verified ? host.corper_status : null,
+    being_viewed_until: (hold as string | null) ?? null,
     host_answers: answers?.approved_at ? { sleep: answers.sleep, guests: answers.guests, cooking: answers.cooking, cleaning: answers.cleaning, noise: answers.noise } : null,
     commute_min: null,
     ease_min: l.area_lat ? estimate(l.area_lat, l.area_lng!, CENTRE.lat, CENTRE.lng) : null,

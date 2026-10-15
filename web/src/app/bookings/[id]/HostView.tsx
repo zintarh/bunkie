@@ -25,6 +25,11 @@ export function HostView({ b, reload }: Props) {
   let body: React.ReactNode = null;
   let foot: React.ReactNode = null;
   switch (b.status) {
+    case "inspection_due":
+      title = `Waiting for ${t} to pay the inspection fee`;
+      body = <p className="small" style={{ fontSize: 15 }}>{b.viewing_at ? slotLabel(b.viewing_at) : ""} is held for {untilLabel(b.deadline_at)}. You get {naira(b.inspection_fee * 0.98)} once the inspection happens.</p>;
+      foot = <button className="btn ghost" disabled={!!busy} onClick={() => run("decline")}>Decline</button>;
+      break;
     case "accepted":
       title = `Waiting for ${t} to pick a time`;
       body = <p className="small" style={{ fontSize: 15 }}>You offered {b.offered_slots.map(slotLabel).join(", ")}.</p>;

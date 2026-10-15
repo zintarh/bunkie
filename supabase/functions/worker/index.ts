@@ -40,7 +40,10 @@ async function payout(job: Job) {
   const p = data?.[0];
   if (!p) return;                                       // cancelled, already sent, or a problem is open
   if (new Date(p.release_after) > new Date()) throw new Error("not yet");
-  if (!["moved_in", "active", "ending", "moved_out", "completed"].includes(p.booking_status)) return;
+  // Inspection fees are paid out once the inspection happened (the database only schedules them then);
+  // stay payments wait for move-in.
+  const { data: pay } = await admin.from("payments").select("kind").eq("id", job.payload.payment_id).maybeSingle();
+  if (pay?.kind !== "inspection" && !["moved_in", "active", "ending", "moved_out", "completed"].includes(p.booking_status)) return;
   if (!p.recipient_code) throw new Error("host has no payout account");
   await admin.rpc("sys_set_money_status", { p_table: "payouts", p_id: p.payout_id, p_status: "processing", p_ref: null, p_error: null });
   const t = await paystack<{ transfer_code: string }>("/transfer", {
@@ -74,6 +77,7 @@ const TEMPLATES: Record<string, { name: string; text: (o: string) => string }> =
   tenant_matched: { name: "bunkie_tenant_matched", text: (o) => `${o} confirmed the room matched. Confirm the agreement.` },
   agreement_ready: { name: "bunkie_agreement_ready", text: (o) => `${o} confirmed the agreement. Your turn.` },
   pay_now: { name: "bunkie_pay_now", text: () => "Pay to lock the room." },
+  pay_inspection: { name: "bunkie_pay_inspection", text: () => "Pay the inspection fee to confirm your inspection." },
   booked: { name: "bunkie_booked", text: (o) => `You and ${o} are bunkies.` },
   arrival_planned: { name: "bunkie_arrival_planned", text: (o) => `${o} picked an arrival time.` },
   move_in_day: { name: "bunkie_move_in_day", text: (o) => `Move-in day with ${o}. Check in when you arrive.` },

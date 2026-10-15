@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MapImage } from "@/components/MapImage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Award, BadgeCheck, Bath, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
+import { Award, BadgeCheck, Bath, Eye, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { openChat } from "@/lib/chat";
@@ -146,11 +146,24 @@ export function RoomView({ room }: { room: RoomDetail }) {
           </section>
         )}
 
+        {room.being_viewed_until && new Date(room.being_viewed_until) > new Date() && (
+          <section className={styles.sec} style={{ gap: 0 }}>
+            <div className="banner amber" style={{ alignItems: "flex-start" }}>
+              <Eye size={20} style={{ flexShrink: 0 }} />
+              <span>Someone is inspecting this room until {dayLabel(new Date(room.being_viewed_until))}. You can still request it and you&apos;ll be next in line.</span>
+            </div>
+          </section>
+        )}
+
         <section className={styles.sec} style={{ gap: 12 }}>
           <span className="h2">What you pay</span>
           <div className="between" style={{ alignItems: "baseline" }}>
             <span style={{ fontSize: 15 }}>Every month</span>
             <span className="num" style={{ fontWeight: 800, fontSize: 20 }}>{room.total_varies ? "about " : ""}{naira(room.monthly_total)}</span>
+          </div>
+          <div className="between" style={{ alignItems: "baseline" }}>
+            <span style={{ fontSize: 15 }}>Inspection</span>
+            <span style={{ fontWeight: 700, fontSize: 15 }}>{room.inspection_fee ? `${naira(room.inspection_fee)}, counts toward rent` : "Free"}</span>
           </div>
           {room.open_to_short && room.weekly_price ? (
             <div className="between" style={{ alignItems: "baseline" }}>

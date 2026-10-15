@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Heart } from "lucide-react";
+import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Eye, Heart } from "lucide-react";
 import { HOUSEHOLD_LABEL } from "@/lib/bunkie";
 import { CORPER_LABEL, missLabel, naira, stayRange } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
@@ -28,6 +28,11 @@ export function RoomCard({
         ) : room.host_verified && (
           <span className="badge verified" style={{ position: "absolute", left: 10, top: 10 }}>
             <BadgeCheck size={14} strokeWidth={2.4} />Verified host
+          </span>
+        )}
+        {room.being_viewed_until && new Date(room.being_viewed_until) > new Date() && (
+          <span className="badge" style={{ position: "absolute", right: 10, bottom: 10, background: "var(--amber)", color: "var(--ink)" }}>
+            <Eye size={13} strokeWidth={2.4} />Being viewed
           </span>
         )}
         <span className="badge dark" style={{ position: "absolute", left: 10, bottom: 10 }}>

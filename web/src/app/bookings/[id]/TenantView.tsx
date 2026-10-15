@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { MapImage } from "@/components/MapImage";
 import { useEffect, useRef, useState } from "react";
-import { CalendarPlus, Camera, Check, CircleAlert, Home, KeyRound, MapPin, Navigation, PartyPopper, Phone, Video, Wallet } from "lucide-react";
+import { CalendarPlus, Camera, Check, CircleAlert, Home, KeyRound, MapPin, Navigation, PartyPopper, Phone, Undo2, Video, Wallet } from "lucide-react";
 import { CLOSE_REASON } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
 import { roomTitle, type BookingFull } from "@/lib/bookings";
@@ -19,6 +19,7 @@ export function TenantView({ b, reload }: Props) {
   const host = b.host.first_name;
   switch (b.status) {
     case "requested": case "accepted": return b.status === "accepted" ? <PickViewing b={b} reload={reload} /> : <Waiting b={b} reload={reload} />;
+    case "inspection_due": return <PayInspection b={b} reload={reload} />;
     case "viewing_booked": return <ViewingBooked b={b} reload={reload} />;
     case "viewed": return <AfterViewing b={b} reload={reload} />;
     case "host_confirmed": return <ConfirmAgreement b={b} reload={reload} />;
@@ -87,12 +88,70 @@ function PickViewing({ b, reload }: Props) {
             </div>
           </div>
         ))}
+        {mode === "in_person" && b.inspection_fee > 0 && !b.inspection_payment_id && (
+          <div className="card stack" style={{ gap: 6 }}>
+            <div className="kv num"><span style={{ color: "var(--ink)", fontWeight: 700 }}>Inspection fee</span><span>{naira(b.inspection_fee)}</span></div>
+            <span className="small">Paid in Bunkie to confirm the time. Comes off your first payment if you book. Refunded if {b.host.first_name} cancels or doesn&apos;t show.</span>
+          </div>
+        )}
+        {mode === "in_person" && b.inspection_fee === 0 && <span className="small">Free inspection</span>}
         {future.length === 0 && <p className="small">The offered times have passed. Ask {b.host.first_name} for new ones by cancelling and requesting again.</p>}
         <Err error={error} />
       </Body>
       <Foot>
-        <button className="btn" disabled={!slot || !!busy} onClick={() => run("book_viewing", { at: slot, mode })}>{busy ? <span className="spin" /> : "Book viewing"}</button>
+        <button className="btn" disabled={!slot || !!busy} onClick={() => run("book_viewing", { at: slot, mode })}>
+          {busy ? <span className="spin" /> : mode === "in_person" && b.inspection_fee > 0 && !b.inspection_payment_id ? "Continue to pay" : mode === "in_person" ? "Book inspection" : "Book video viewing"}
+        </button>
         <button className="link" disabled={!!busy} onClick={() => run("withdraw")}>Cancel request</button>
+      </Foot>
+    </>
+  );
+}
+
+function PayInspection({ b, reload }: Props) {
+  const { busy, error, run } = useStep(b, reload);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  // Back from Paystack: keep checking until the webhook confirms the inspection.
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).get("reference")) return;
+    const t = setInterval(() => void reload(), 3000);
+    return () => clearInterval(t);
+  }, [reload]);
+  const pay = async () => {
+    setPaying(true);
+    setPayError(null);
+    try {
+      const r = await callFunction<{ authorization_url: string }>("paystack", { booking_id: b.id });
+      window.location.href = r.authorization_url;
+    } catch (e) {
+      setPayError(errorText(e));
+      setPaying(false);
+    }
+  };
+  return (
+    <>
+      <Body>
+        <h1 className="h1">Pay the inspection fee</h1>
+        <div className="card stack" style={{ gap: 10 }}>
+          <span style={{ fontWeight: 700, fontSize: 17 }}>{b.viewing_at ? slotLabel(b.viewing_at) : ""} · in person</span>
+          <div className="kv num"><span>Inspection fee</span><span>{naira(b.inspection_fee)}</span></div>
+          <span className="small">Plus Paystack&apos;s charge at checkout.</span>
+        </div>
+        <div className="lrows">
+          <div className="lrow"><span className="tile t-mint"><Wallet size={20} /></span><span>Held by Bunkie until the inspection happens</span></div>
+          <div className="lrow"><span className="tile t-amber"><Undo2 size={20} /></span><span>Back to you if {b.host.first_name} cancels, doesn&apos;t show, or the room isn&apos;t as listed</span></div>
+          <div className="lrow"><span className="tile t-sky"><Check size={20} /></span><span>Comes off your first payment if you book</span></div>
+        </div>
+        <p className="small">Pay within {untilLabel(b.deadline_at)} to keep this time.</p>
+        <Err error={error ?? payError} />
+      </Body>
+      <Foot>
+        <button className="btn" disabled={paying || !!busy} onClick={pay}>{paying ? <span className="spin" /> : `Pay ${naira(b.inspection_fee)}`}</button>
+        <div className="row" style={{ justifyContent: "center", gap: 16 }}>
+          <button className="link" disabled={!!busy} onClick={() => run("change_time")}>Pick another time</button>
+          <button className="link" disabled={!!busy} onClick={() => run("withdraw")}>Cancel request</button>
+        </div>
       </Foot>
     </>
   );
@@ -235,7 +294,10 @@ function Pay({ b, reload }: Props) {
   const deposit = short ? 0 : b.listing.deposit ?? 0;
   const rentPart = short ? (b.weekly_price ?? 0) * (b.weeks ?? 0)
     : b.listing.pay_schedule === "lump_sum" ? b.monthly_total * (b.months ?? 0) : b.monthly_total;
-  const net = rentPart + deposit;
+  // An inspection fee already paid comes off this payment.
+  const paidInspection = b.payments.find((p) => p.id === b.inspection_payment_id && p.status === "success");
+  const credit = paidInspection ? b.inspection_fee : 0;
+  const net = Math.max(100, rentPart + deposit - credit);
   const fee = pending ? pending.paystack_fee_kobo / 100 : null;
 
   const pay = async () => {
@@ -256,6 +318,7 @@ function Pay({ b, reload }: Props) {
         <div className="card stack" style={{ gap: 10 }}>
           <div className="kv num"><span>{short || b.listing.pay_schedule === "lump_sum" ? `${stayLength(b)} rent` : `First month (${dayLabel(b.move_in).slice(4)})`}</span><span>{naira(rentPart)}</span></div>
           {deposit > 0 && <div className="kv num"><span>Caution deposit</span><span>{naira(deposit)}</span></div>}
+          {credit > 0 && <div className="kv num"><span>Inspection fee you paid</span><span>−{naira(credit)}</span></div>}
           {fee != null && <div className="kv num"><span>Paystack charge</span><span>{naira(fee)}</span></div>}
           <div className="divider" />
           <div className="kv num" style={{ fontWeight: 800, fontSize: 18 }}><span style={{ color: "var(--ink)" }}>Total</span><span>{naira(net + (fee ?? 0))}</span></div>

@@ -12,6 +12,7 @@ export function statusLine(b: BookingFull, role: "tenant" | "host"): { text: str
   switch (b.status) {
     case "requested": return role === "tenant" ? { text: `Waiting for ${other}${by}`, tone: "amber" } : { text: `New request · reply${by}`, tone: "amber" };
     case "accepted": return role === "tenant" ? { text: `Pick a viewing time${by}`, tone: "green" } : { text: `Waiting for ${other} to pick a time`, tone: "grey" };
+    case "inspection_due": return role === "tenant" ? { text: `Pay the inspection fee${by}`, tone: "amber" } : { text: `Waiting for ${other} to pay the inspection fee`, tone: "grey" };
     case "viewing_booked": return { text: `Viewing ${b.viewing_at ? dayLabel(new Date(b.viewing_at)) : ""}`, tone: "green" };
     case "viewed": return { text: role === "tenant" && !b.tenant_matched_at ? "Did the room match?" : role === "host" && b.tenant_matched_at ? "Confirm the agreement" : `Waiting for ${other}`, tone: "amber" };
     case "host_confirmed": return role === "tenant" ? { text: `Confirm the agreement${by}`, tone: "amber" } : { text: `Waiting for ${other} to confirm`, tone: "grey" };

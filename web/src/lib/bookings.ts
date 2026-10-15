@@ -27,7 +27,7 @@ export type BookingFull = Booking & {
   refunds: { amount_kobo: number; status: string; reason: string }[];
 };
 
-export const OPEN: BookingStatus[] = ["requested", "accepted", "viewing_booked", "viewed", "host_confirmed", "agreed"];
+export const OPEN: BookingStatus[] = ["requested", "accepted", "inspection_due", "viewing_booked", "viewed", "host_confirmed", "agreed"];
 export const LIVE: BookingStatus[] = ["paid", "moved_in", "active", "ending"];
 
 const SELECT = `*, listing:listings(id, area_name, room_kind, cover_path, deposit, pay_schedule),

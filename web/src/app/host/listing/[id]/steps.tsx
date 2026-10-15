@@ -16,7 +16,7 @@ import type { BathKind, Household, PaySchedule, PhotoShot, RoomKind } from "@/li
 export const STEPS = HOST_STEPS;
 
 export type Listing = {
-  id: string; status: string; area_name: string; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
+  id: string; status: string; area_name: string; inspection_fee: number; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
   household: Household | null; open_to_camp: boolean; min_months: number; max_months: number; pay_schedule: PaySchedule;
   available_from: string | null; open_to_short: boolean; weekly_price: number | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
   early_leave_notice_days: number; redeploy_refund: "all_unused" | "unused_minus_2w"; ask_leave_notice_days: number; allowed_to_share: boolean;
@@ -233,6 +233,8 @@ const num = (v: string) => parseInt(v.replace(/\D/g, ""), 10) || 0;
 export function CostsStep({ listing, reload, next, back }: StepProps) {
   const [rent, setRent] = useState(listing.rent_monthly ?? 0);
   const [depOn, setDepOn] = useState((listing.deposit ?? 0) > 0);
+  const [inspect, setInspect] = useState<"free" | "fee">(listing.inspection_fee > 0 ? "fee" : "free");
+  const [inspectFee, setInspectFee] = useState(listing.inspection_fee || 2000);
   const [dep, setDep] = useState(listing.deposit ?? 20000);
   const [bills, setBills] = useState<Bill[]>(() =>
     listing.listing_costs.sort((a, b) => a.position - b.position).map((c, i) => ({ key: i, name: c.name, amount: c.amount, tenant_pays: c.tenant_pays, varies: c.varies })));
@@ -245,9 +247,10 @@ export function CostsStep({ listing, reload, next, back }: StepProps) {
   const have = bills.map((b) => b.name);
 
   return (
-    <StepShell title="Costs" back={back} next={next} canNext={rent > 0 && bills.every((b) => b.name.trim())}
+    <StepShell title="Costs" back={back} next={next}
+      canNext={rent > 0 && bills.every((b) => b.name.trim()) && (inspect === "free" || (inspectFee >= 500 && inspectFee <= 5000))}
       onSave={async () => {
-        await saveListing(listing.id, { rent_monthly: rent, deposit: depOn ? dep : 0 });
+        await saveListing(listing.id, { rent_monthly: rent, deposit: depOn ? dep : 0, inspection_fee: inspect === "fee" ? inspectFee : 0 });
         const c = db();
         const del = await c.from("listing_costs").delete().eq("listing_id", listing.id);
         if (del.error) throw del.error;
@@ -291,6 +294,17 @@ export function CostsStep({ listing, reload, next, back }: StepProps) {
         <label className="field open"><span className="prefix">₦</span><span className="sr-only">Deposit</span>
           <input inputMode="numeric" value={dep ? dep.toLocaleString("en-NG") : ""} onChange={(e) => setDep(num(e.target.value))} /></label>
       )}
+      <div className="stack" style={{ gap: 10 }}>
+        <span className="h2" style={{ fontSize: 16 }}>Inspection</span>
+        <Seg label="Inspection" value={inspect} onChange={setInspect} options={[{ value: "free", label: "Free" }, { value: "fee", label: "Inspection fee" }]} />
+        {inspect === "fee" && (
+          <div className="stack open" style={{ gap: 6 }}>
+            <label className="field"><span className="prefix">₦</span><span className="sr-only">Inspection fee</span>
+              <input inputMode="numeric" value={inspectFee ? inspectFee.toLocaleString("en-NG") : ""} onChange={(e) => setInspectFee(Math.min(5000, num(e.target.value)))} /></label>
+            <span className="small">Up to ₦5,000. Paid in Bunkie, yours once the inspection happens. Video viewings stay free.</span>
+          </div>
+        )}
+      </div>
       <div className="soft stack" style={{ gap: 4 }}>
         <div className="between"><span>Bunkie pays a month</span><b className="num">{varies ? "about " : ""}{naira(total)}</b></div>
         <span className="small">You get {naira(Math.round(total * 0.98))} after the 2% fee</span>

@@ -7,7 +7,7 @@ export type PaySchedule = "monthly" | "lump_sum";
 export type PhotoShot = "bedroom" | "bathroom" | "kitchen" | "meter" | "entrance" | "extra";
 
 export type BookingStatus =
-  | "requested" | "accepted" | "viewing_booked" | "viewed" | "host_confirmed" | "agreed"
+  | "requested" | "accepted" | "inspection_due" | "viewing_booked" | "viewed" | "host_confirmed" | "agreed"
   | "paid" | "moved_in" | "active" | "ending" | "moved_out" | "completed" | "closed";
 
 export type Answers = { sleep: number; guests: number; cooking: number; cleaning: number; noise: number };
@@ -30,6 +30,10 @@ export type RoomCard = {
   exact?: boolean;
   misses?: Miss[];
   free_from?: string | null;
+  /** 0 = free inspections. */
+  inspection_fee?: number;
+  /** Someone is inspecting it until then; requests wait in line. */
+  being_viewed_until?: string | null;
   area_name: string;
   area_lat: number | null;
   area_lng: number | null;
@@ -100,6 +104,9 @@ export type Booking = {
   months: number | null;
   weeks: number | null;
   weekly_price: number | null;
+  /** In-person inspection fee fixed when requested (0 = free); paid before the viewing is confirmed. */
+  inspection_fee: number;
+  inspection_payment_id: string | null;
   monthly_total: number;
   deadline_at: string | null;
   offered_slots: string[];
