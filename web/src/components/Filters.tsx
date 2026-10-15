@@ -12,7 +12,7 @@ const MAX = 150000;
 
 export function activeFilterCount(f: Prefs["filters"], inCamp: boolean): number {
   let n = 0;
-  if (f.priceMin !== DEFAULT_FILTERS.priceMin || f.priceMax !== DEFAULT_FILTERS.priceMax) n++;
+  if (f.priceMax < MAX) n++;
   if (!inCamp && f.stay !== "any") n++;
   if (f.room) n++;
   if (!inCamp && f.maxMinutes) n++;
@@ -46,19 +46,23 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
         <section className={styles.sec}>
           <div className="between">
             <span className="h2">Monthly budget</span>
-            <span className="num" style={{ fontWeight: 700 }}>{nairaK(f.priceMin)} – {nairaK(f.priceMax)}{f.priceMax >= MAX ? "+" : ""}</span>
+            <span className="num" style={{ fontWeight: 700 }}>{f.priceMax >= MAX ? "Any" : `Up to ${nairaK(f.priceMax)}`}</span>
           </div>
+          {/* One "up to" slider: a cheaper room is never a problem, so there's no minimum. */}
           <div className={styles.range}>
             <span className={styles.track} />
-            <span className={styles.fill} style={{ left: `calc(14px + ${pct(f.priceMin) * 100}% - ${pct(f.priceMin) * 28}px)`, right: `calc(14px + ${(1 - pct(f.priceMax)) * 100}% - ${(1 - pct(f.priceMax)) * 28}px)` }} />
-            <label htmlFor="bmin" className="sr-only">Minimum budget</label>
-            <input id="bmin" type="range" min={MIN} max={MAX} step={5000} value={f.priceMin}
-              onChange={(e) => set({ priceMin: Math.min(Number(e.target.value), f.priceMax - 10000) })} />
-            <label htmlFor="bmax" className="sr-only">Maximum budget</label>
+            <span className={styles.fill} style={{ left: 14, right: `calc(14px + ${(1 - pct(f.priceMax)) * 100}% - ${(1 - pct(f.priceMax)) * 28}px)` }} />
+            <label htmlFor="bmax" className="sr-only">Monthly budget</label>
             <input id="bmax" type="range" min={MIN} max={MAX} step={5000} value={f.priceMax}
-              onChange={(e) => set({ priceMax: Math.max(Number(e.target.value), f.priceMin + 10000) })} />
+              onChange={(e) => set({ priceMin: DEFAULT_FILTERS.priceMin, priceMax: Number(e.target.value) })} />
           </div>
-          <span className="small">Includes rent share and all bills</span>
+          <div className="chips">
+            {[40000, 60000, 80000, 100000, MAX].map((v) => (
+              <button key={v} className={f.priceMax === v ? "chip on" : "chip"} aria-pressed={f.priceMax === v}
+                onClick={() => set({ priceMin: DEFAULT_FILTERS.priceMin, priceMax: v })}>{v >= MAX ? "Any" : nairaK(v)}</button>
+            ))}
+          </div>
+          <span className="small">All in: rent share and bills. A bit over still shows as a close match.</span>
         </section>
 
         {!inCamp && (
