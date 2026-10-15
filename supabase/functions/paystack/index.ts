@@ -25,7 +25,8 @@ serve(async (req) => {
   }).catch((e) => {
     // A reference Paystack has already seen: reuse its checkout.
     if (String(e.message).includes("Duplicate")) return null;
-    throw e;
+    // Paystack's own reason (e.g. "Invalid Email Address Passed") is clearer than a generic error.
+    throw new HttpError(400, String(e.message).replace(/^Paystack \/[^:]+: /, ""));
   });
 
   if (!init) {

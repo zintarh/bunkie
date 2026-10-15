@@ -5,7 +5,7 @@
 
 begin;
 
-delete from auth.users where email like '%@demo.bunkie.test';
+delete from auth.users where email like '%@demo.bunkie.test' or email = 'tola.bunkie-test@example.com';
 drop table if exists demo;
 
 -- Hosts -----------------------------------------------------------------------
