@@ -13,8 +13,23 @@ export type BookingStatus =
 export type Answers = { sleep: number; guests: number; cooking: number; cleaning: number; noise: number };
 
 /** One row from search_rooms(). */
+/** Why a near-miss room isn't an exact match (from find_rooms). */
+export type Miss =
+  | { kind: "over_budget"; by: number }
+  | { kind: "later"; days: number; on: string }
+  | { kind: "farther"; minutes: number }
+  | { kind: "room"; is: RoomKind }
+  | { kind: "no_short" }
+  | { kind: "min_stay"; months: number }
+  | { kind: "max_stay"; months: number };
+
 export type RoomCard = {
   id: string;
+  /** Ranking from find_rooms: 0-100 score, exact match or near miss with reasons. */
+  match_score?: number;
+  exact?: boolean;
+  misses?: Miss[];
+  free_from?: string | null;
   area_name: string;
   area_lat: number | null;
   area_lng: number | null;
@@ -61,8 +76,11 @@ export type SearchParams = {
   mode: "camp" | "ppa" | "any";
   moveIn?: string;
   zone?: number;
-  priceMin?: number;
-  priceMax?: number;
+  /** Exact search point (the person's PPA), rounded so nearby searches share a cache entry. */
+  lat?: number;
+  lng?: number;
+  /** Monthly budget, all in; undefined = no limit. */
+  budgetMax?: number;
   pref?: SharePref;
   room?: RoomKind;
   stay?: "weeks" | "short" | "long" | "any";

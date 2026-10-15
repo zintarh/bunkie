@@ -8,14 +8,19 @@ export async function GET(req: NextRequest) {
   const int = (k: string) => (q.get(k) ? Math.max(0, parseInt(q.get(k)!, 10) || 0) : undefined);
   const pick = <T extends string>(k: string, allowed: readonly T[]) => (allowed.includes(q.get(k) as T) ? (q.get(k) as T) : undefined);
   const moveIn = q.get("moveIn");
+  const coord = (k: string, min: number, max: number) => {
+    const v = Number(q.get(k));
+    return q.get(k) && Number.isFinite(v) && v >= min && v <= max ? Math.round(v * 1000) / 1000 : undefined;
+  };
 
   const params: SearchParams = {
     mode: pick("mode", ["camp", "ppa", "any"] as const) ?? "any",
     moveIn: moveIn && /^\d{4}-\d{2}-\d{2}$/.test(moveIn) ? moveIn : undefined,
     zone: int("zone"),
-    // Round prices to the nearest ₦5k so near-identical filters share a cache entry.
-    priceMin: int("priceMin") !== undefined ? Math.floor(int("priceMin")! / 5000) * 5000 : undefined,
-    priceMax: int("priceMax") !== undefined ? Math.ceil(int("priceMax")! / 5000) * 5000 : undefined,
+    // Rounded so near-identical searches share a cache entry: ~100 m for the point, ₦5k for budget.
+    lat: coord("lat", 8.3, 9.5),
+    lng: coord("lng", 6.7, 7.7),
+    budgetMax: int("budgetMax") ? Math.ceil(int("budgetMax")! / 5000) * 5000 : undefined,
     pref: pick<SharePref>("pref", ["women_only", "men_only", "mixed_ok"]),
     room: pick<RoomKind>("room", ["own_room", "shared_room"]),
     stay: pick("stay", ["weeks", "short", "long", "any"] as const),

@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { Award, BadgeCheck, CalendarDays, Clock, Heart } from "lucide-react";
+import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Heart } from "lucide-react";
 import { HOUSEHOLD_LABEL } from "@/lib/bunkie";
-import { CORPER_LABEL, naira, stayRange } from "@/lib/format";
+import { CORPER_LABEL, missLabel, naira, stayRange } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import type { RoomCard as Room } from "@/lib/types";
 
@@ -51,6 +51,11 @@ export function RoomCard({
           {HOUSEHOLD_LABEL[room.household]} household{room.furnished ? " · Furnished" : ""}
           {fitScore != null ? ` · ${fitScore}% bunkie fit` : ""}
         </span>
+        {room.misses && room.misses.length > 0 && (
+          <span className="row" style={{ gap: 6, fontSize: 14, fontWeight: 600, color: "var(--amber-text)" }}>
+            <CircleAlert size={15} strokeWidth={2.4} style={{ flexShrink: 0 }} />{room.misses.map(missLabel).join(" · ")}
+          </span>
+        )}
         {room.open_to_short && room.weekly_price ? (
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--green-text)" }}>Short stays from {naira(room.weekly_price)}/week</span>
         ) : null}

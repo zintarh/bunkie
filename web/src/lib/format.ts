@@ -80,3 +80,16 @@ export function initial(name: string | null | undefined): string {
 
 /** Badge text for a host whose corp member status is verified. */
 export const CORPER_LABEL = { serving: "Corper host", served: "Ex-corper host" } as const;
+
+/** Plain words for why a close match isn't exact (find_rooms misses). */
+export function missLabel(m: import("./types").Miss): string {
+  switch (m.kind) {
+    case "over_budget": return `${nairaK(m.by)} over budget`;
+    case "later": return `Free from ${dayLabel(m.on).slice(4)}`;
+    case "farther": return `${m.minutes} min away`;
+    case "room": return m.is === "own_room" ? "Own room" : "Shared room";
+    case "no_short": return "No short stays";
+    case "min_stay": return `At least ${months(m.months)}`;
+    case "max_stay": return `Up to ${months(m.months)}`;
+  }
+}

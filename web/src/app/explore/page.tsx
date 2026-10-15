@@ -37,9 +37,13 @@ export default function Explore() {
     q.set("mode", inCamp ? "camp" : prefs.ppa ? "ppa" : "any");
     if (inCamp && batch) q.set("moveIn", batch.campEnd);
     else if (f.moveIn) q.set("moveIn", f.moveIn);
-    if (!inCamp && prefs.ppa) q.set("zone", String(prefs.ppa.zoneId));
-    q.set("priceMin", String(f.priceMin));
-    q.set("priceMax", String(f.priceMax >= 150000 ? 10_000_000 : f.priceMax));
+    if (!inCamp && prefs.ppa) {
+      // The exact PPA point ranks by real distance; the zone adds Google drive times when it's close.
+      q.set("lat", prefs.ppa.lat.toFixed(3));
+      q.set("lng", prefs.ppa.lng.toFixed(3));
+      q.set("zone", String(prefs.ppa.zoneId));
+    }
+    if (f.priceMax < 150000) q.set("budgetMax", String(f.priceMax));
     if (prefs.pref) q.set("pref", prefs.pref);
     if (f.room) q.set("room", f.room);
     q.set("stay", inCamp ? "any" : f.stay);
@@ -60,18 +64,19 @@ export default function Explore() {
     };
   }, [query, ready, prefs.stage]);
 
-  // Corper hosts stay first (search already puts them there). Once the person has answered the
-  // bunkie questions, closer fits rise to the top within each group.
+  // The search ranks rooms (commute, price, corper host, ...). Personal bunkie fit is added here, on the
+  // phone, so searches stay cacheable. Exact matches first, then close matches with what's different.
   const ranked = useMemo(() => {
     if (!rooms) return null;
-    const withFit = rooms.map((r) => ({ r, fit: fit(myAnswers, r.host_answers)?.score ?? null }));
-    const corper = (r: Room) => (r.host_corper === "serving" || r.host_corper === "served" ? 0 : 1);
-    if (myAnswers) {
-      withFit.sort((a, b) => corper(a.r) - corper(b.r)
-        || (b.fit ?? 0) - (a.fit ?? 0) + ((a.r.commute_min ?? 0) - (b.r.commute_min ?? 0)) / 4);
-    }
+    const withFit = rooms.map((r) => {
+      const f = fit(myAnswers, r.host_answers)?.score ?? null;
+      return { r, fit: f, score: (r.match_score ?? 0) + (f != null ? (15 * f) / 100 : 0) };
+    });
+    withFit.sort((a, b) => Number(b.r.exact !== false) - Number(a.r.exact !== false) || b.score - a.score);
     return withFit;
   }, [rooms, myAnswers]);
+  const exact = ranked?.filter(({ r }) => r.exact !== false) ?? null;
+  const close = ranked?.filter(({ r }) => r.exact === false) ?? [];
 
   const nFilters = activeFilterCount(f, inCamp);
 
@@ -111,14 +116,29 @@ export default function Explore() {
             <span style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>View by video call from camp. Free switch once you get your PPA.</span>
           </div>
         )}
-        {ranked?.length !== 0 && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
-          {ranked == null && !error ? "Finding apartments…" : ranked ? `${ranked.length} ${ranked.length === 1 ? "apartment" : "apartments"}${inCamp ? " free on your camp exit day" : ""}` : ""}
-        </span>}
+        {ranked == null && !error && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>Finding apartments…</span>}
+        {exact && exact.length > 0 && (
+          <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
+            {exact.length} {exact.length === 1 ? "apartment" : "apartments"}{inCamp ? " free on your camp exit day" : ""}
+          </span>
+        )}
         {error && <p className="err" role="alert">{error}</p>}
         {ranked == null && !error && <Skeletons />}
-        {ranked && ranked.length > 0 && (
+        {exact && exact.length > 0 && (
           <div className="rise stack" style={{ gap: 16 }}>
-            {ranked.map(({ r, fit }) => (
+            {exact.map(({ r, fit }) => (
+              <RoomCard key={r.id} room={r} saved={saved.has(r.id)} onToggleSave={() => toggleSave(r.id)} fitScore={fit}
+                minutesLabel={inCamp ? (r.ease_min != null ? `${r.ease_min} min to centre` : null) : r.commute_min != null ? `${r.commute_min} min` : null} />
+            ))}
+          </div>
+        )}
+        {close.length > 0 && (
+          <div className="rise stack" style={{ gap: 16, paddingTop: exact?.length ? 24 : 0 }}>
+            <span className="stack" style={{ gap: 2, padding: "12px 2px 0" }}>
+              <span className="h2">{exact?.length ? "Close matches" : "Nothing exact yet. These are close"}</span>
+              <span className="small">Each one says what&apos;s different.</span>
+            </span>
+            {close.map(({ r, fit }) => (
               <RoomCard key={r.id} room={r} saved={saved.has(r.id)} onToggleSave={() => toggleSave(r.id)} fitScore={fit}
                 minutesLabel={inCamp ? (r.ease_min != null ? `${r.ease_min} min to centre` : null) : r.commute_min != null ? `${r.commute_min} min` : null} />
             ))}

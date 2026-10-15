@@ -338,3 +338,38 @@ do $$ begin
   assert (select count(*) from public.room_address((select id from s1))) = 1, 'address once paid';
 end $$;
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- find_rooms: exact matches first, near misses with reasons, dealbreakers hidden
+-- ---------------------------------------------------------------------------
+set role anon;
+do $$ declare r record; begin
+  -- Women's home in Wuse 2, 53k a month (now booked by Adaeze for a while).
+  select * into r from public.find_rooms(p_mode => 'ppa', p_lat => 9.0790, p_lng => 7.4700, p_budget_max => 60000);
+  assert r.id is not null and r.commute_min <= 10, 'found near the search point';
+  assert r.match_score between 1 and 100, format('score in range, got %s', r.match_score);
+
+  -- 50k budget: 53k is a near miss "over budget by 3000", not hidden.
+  select * into r from public.find_rooms(p_budget_max => 50000);
+  assert not r.exact and r.misses @> '[{"kind": "over_budget", "by": 3000}]', format('over budget near miss, got %s', r.misses);
+
+  -- 30k budget: 53k is beyond the allowance, so it's hidden.
+  assert (select count(*) from public.find_rooms(p_budget_max => 30000)) = 0, 'way over budget is hidden';
+
+  -- Men only is a dealbreaker for a women's home.
+  assert (select count(*) from public.find_rooms(p_pref => 'men_only')) = 0, 'household is a dealbreaker';
+
+  -- Asking for a shared room: still shown, marked as a different room type.
+  select * into r from public.find_rooms(p_room => 'shared_room');
+  assert r.misses @> '[{"kind": "room"}]', 'room type is a near miss';
+end $$;
+reset role;
+
+-- Browsing without a move-in date never hides a room for being free later.
+update public.listings set available_from = current_date + 60 where id = (select listing_id from ids);
+set role anon;
+do $$ begin
+  assert (select exact from public.find_rooms() limit 1), 'free in 60 days, no date picked: still exact';
+  assert (select count(*) from public.find_rooms(p_move_in => current_date + 1)) = 0, 'picked date 59 days early: hidden';
+end $$;
+reset role;

@@ -12,12 +12,13 @@ const estimate = estimateMinutes;
 export async function searchRooms(p: SearchParams): Promise<RoomCard[]> {
   const db = supabasePublic();
   if (!db) return searchDemo(p);
-  const { data, error } = await db.rpc("search_rooms", {
+  const { data, error } = await db.rpc("find_rooms", {
     p_mode: p.mode,
     p_move_in: p.moveIn ?? null,
+    p_lat: p.lat ?? null,
+    p_lng: p.lng ?? null,
     p_zone: p.zone ?? null,
-    p_price_min: p.priceMin ?? 0,
-    p_price_max: p.priceMax ?? 10_000_000,
+    p_budget_max: p.budgetMax ?? null,
     p_pref: p.pref ?? "mixed_ok",
     p_room: p.room ?? null,
     p_stay: p.stay ?? "any",
@@ -28,18 +29,21 @@ export async function searchRooms(p: SearchParams): Promise<RoomCard[]> {
   return data as RoomCard[];
 }
 
+/** Demo mode (no Supabase): simple filters over the bundled rooms. */
 function searchDemo(p: SearchParams): RoomCard[] {
-  const zone = p.zone ? ZONES.find((z) => z.id === p.zone) : undefined;
+  const anchor = p.lat != null && p.lng != null ? { lat: p.lat, lng: p.lng } : p.zone ? ZONES.find((z) => z.id === p.zone) : undefined;
   return DEMO_ROOMS.map((r) => ({
     ...r,
-    commute_min: zone ? estimate(r.area_lat!, r.area_lng!, zone.lat, zone.lng) : null,
+    commute_min: anchor ? estimate(r.area_lat!, r.area_lng!, anchor.lat, anchor.lng) : null,
     ease_min: estimate(r.area_lat!, r.area_lng!, CENTRE.lat, CENTRE.lng),
+    exact: true,
+    misses: [],
   }))
-    .filter((r) => r.monthly_total >= (p.priceMin ?? 0) && r.monthly_total <= (p.priceMax ?? Infinity))
+    .filter((r) => r.monthly_total <= (p.budgetMax ?? Infinity))
     .filter((r) => !p.room || r.room_kind === p.room)
     .filter((r) => !p.pref || p.pref === "mixed_ok" || (p.pref === "women_only" ? r.household === "women" : r.household === "men"))
     .filter((r) => !p.stay || p.stay === "any" || (p.stay === "weeks" ? r.open_to_short : p.stay === "short" ? r.min_months <= 3 : r.max_months >= 6))
-    .filter((r) => p.mode !== "camp" || (r.open_to_camp && r.min_months <= 3))
+    .filter((r) => p.mode !== "camp" || (r.open_to_camp && (r.min_months <= 3 || r.open_to_short)))
     .filter((r) => !p.moveIn || !r.available_from || r.available_from <= p.moveIn)
     .filter((r) => !p.maxMinutes || r.commute_min == null || r.commute_min <= p.maxMinutes)
     .sort((a, b) =>
