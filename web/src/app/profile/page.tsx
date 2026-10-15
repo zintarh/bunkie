@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Award, BadgeCheck, ChevronRight, CircleHelp, FileText, Heart, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
+import { HostIcon } from "@/components/icons";
 import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
 import { initial } from "@/lib/format";
@@ -50,6 +51,16 @@ export default function Profile() {
             </span>
           </div>
         )}
+
+        {/* Hosting sits here, like "Become a driver" in Bolt's menu. */}
+        <Link href="/host" className="hostcard">
+          <span className="tile" style={{ background: "rgba(255,255,255,.18)", color: "#fff", width: 48, height: 48, borderRadius: 14 }}><HostIcon size={26} /></span>
+          <span className="stack" style={{ gap: 2, flex: 1 }}>
+            <span style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 18 }}>{me?.profile.is_host ? "Hosting" : "Host your room"}</span>
+            <span style={{ fontSize: 14, opacity: 0.9 }}>{me?.profile.is_host ? "Rooms, requests and payouts" : "Share your space with a corper"}</span>
+          </span>
+          <ChevronRight size={20} />
+        </Link>
 
         <div className="lrows">
           {rows.filter((r) => r.show).map(({ href, label, Icon, tile }) => (

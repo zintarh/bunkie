@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Camera, ChevronRight, CircleDollarSign, House, MapPin, MessageCircle, Plus, ReceiptText, ScrollText, Undo2, Wallet } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, CircleDollarSign, House, MapPin, MessageCircle, Plus, ReceiptText, ScrollText, Undo2, Wallet } from "lucide-react";
 import { BookingRow } from "@/components/BookingRow";
 import { Progress, TabBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
@@ -68,7 +68,7 @@ export default function HostHome() {
     return (
       <main className="screen">
         <div className="body">
-          <div className="hero phero" style={{ margin: "-4px -20px 0" }}><h1 className="h1">Share your room</h1></div>
+          <div className="hero phero" style={{ margin: "-4px -20px 0", paddingTop: 12 }}><Link href="/profile" className="ib" aria-label="Back to profile" style={{ color: "#fff", marginLeft: -8, marginBottom: 6 }}><ChevronLeft size={24} strokeWidth={2.2} /></Link><h1 className="h1">Share your room</h1></div>
           <div className="lrows">
             {steps.map(([label, Icon, tile]) => (
               <div key={label} className="lrow"><span className={`tile ${tile}`}><Icon size={20} /></span><span style={{ fontWeight: 600 }}>{label}</span></div>
@@ -92,7 +92,7 @@ export default function HostHome() {
   return (
     <main className="screen">
       <div className="body" style={{ gap: 16 }}>
-        <div className="hero phero" style={{ margin: "-4px -20px 0" }}><h1 className="h1">Hosting</h1></div>
+        <div className="hero phero" style={{ margin: "-4px -20px 0", paddingTop: 12 }}><Link href="/profile" className="ib" aria-label="Back to profile" style={{ color: "#fff", marginLeft: -8, marginBottom: 6 }}><ChevronLeft size={24} strokeWidth={2.2} /></Link><h1 className="h1">Hosting</h1></div>
         <div className="grid2">
           <div className="card stack" style={{ gap: 2 }}><span className="small">Coming to you</span><span className="price num" style={{ fontSize: 22 }}>{naira(held)}</span></div>
           <div className="card stack" style={{ gap: 2 }}><span className="small">Paid out</span><span className="price num" style={{ fontSize: 22 }}>{naira(paidOut)}</span></div>

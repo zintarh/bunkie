@@ -44,19 +44,12 @@ export function BunkIcon({ size = 24, active }: IconProps) {
   ));
 }
 
-/** Host: a key with a round bow, for opening your home. */
-export function KeyIcon({ size = 24, active }: IconProps) {
-  return svg(size, active ? (
+/** Hosting: the house with a plus, for listing a room. */
+export function HostIcon({ size = 24 }: IconProps) {
+  return svg(size, (
     <>
-      <circle cx="8" cy="15.5" r="5" fill="currentColor" stroke="none" />
-      <circle cx="8" cy="15.5" r="1.6" fill="var(--white)" stroke="none" />
-      <path d="M11.6 11.9 19.5 4M16.2 7.3l2.3 2.3M18.4 5.1l2 2" strokeWidth={2.4} />
-    </>
-  ) : (
-    <>
-      <circle cx="8" cy="15.5" r="4.5" />
-      <circle cx="8" cy="15.5" r="1" fill="currentColor" stroke="none" />
-      <path d="M11.3 12.2 19.5 4M16.2 7.3l2.3 2.3M18.4 5.1l2 2" />
+      <path d="M3.6 10.3 11 4.2a1.6 1.6 0 0 1 2 0l7.4 6.1c.4.3.6.8.6 1.3v7.2a2.2 2.2 0 0 1-2.2 2.2H5.2A2.2 2.2 0 0 1 3 18.8v-7.2c0-.5.2-1 .6-1.3Z" />
+      <path d="M12 11v6M9 14h6" />
     </>
   ));
 }

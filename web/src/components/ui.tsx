@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, Minus, Plus, X } from "lucide-react";
-import { BunkIcon, HomeIcon, KeyIcon, ProfileIcon } from "./icons";
+import { BunkIcon, HomeIcon, ProfileIcon } from "./icons";
 
 /** The bunk-bed mark used in the logo. */
 export function BunkMark({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -42,12 +42,11 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
   );
 }
 
-// Messages is an icon on Home (shows unread replies); Saved is in Profile; hosting gets its own tab.
+// Messages is an icon on Home (shows unread replies); Saved and hosting live in Profile.
 const TABS = [
   { href: "/explore", label: "Home", Icon: HomeIcon, also: ["/rooms", "/inbox"] },
   { href: "/bookings", label: "Bookings", Icon: BunkIcon, also: [] },
-  { href: "/host", label: "Host", Icon: KeyIcon, also: [] },
-  { href: "/profile", label: "Profile", Icon: ProfileIcon, also: ["/saved"] },
+  { href: "/profile", label: "Profile", Icon: ProfileIcon, also: ["/saved", "/host"] },
 ];
 
 export function TabBar() {

@@ -220,8 +220,8 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
 /* ---------- Tab bar ---------- */
 /* Floating nav: one rounded pill lifted off the bottom edge, tabs grouped in the middle. */
-.tabs { flex-shrink: 0; align-self: center; display: flex; justify-content: center; gap: 2px; margin: 0 16px calc(12px + var(--safe-bottom)); padding: 6px; width: calc(100% - 32px); max-width: 360px; background: var(--white); border-radius: 28px; box-shadow: 0 10px 30px rgba(16, 35, 27, 0.14), 0 2px 6px rgba(16, 35, 27, 0.06); border: 1px solid rgba(16, 35, 27, 0.04); }
-.tab { flex: 1; max-width: 84px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: #7a867f; padding: 6px 0 4px; border-radius: 22px; position: relative; transition: color 0.2s ease; }
+.tabs { flex-shrink: 0; align-self: center; display: flex; justify-content: center; gap: 2px; margin: 0 auto calc(12px + var(--safe-bottom)); padding: 6px; width: fit-content; background: var(--white); border-radius: 28px; box-shadow: 0 10px 30px rgba(16, 35, 27, 0.14), 0 2px 6px rgba(16, 35, 27, 0.06); border: 1px solid rgba(16, 35, 27, 0.04); }
+.tab { flex: 0 0 88px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: #7a867f; padding: 6px 0 4px; border-radius: 22px; position: relative; transition: color 0.2s ease; }
 .tab svg { position: relative; z-index: 1; transition: transform 0.2s ease; }
 .tab:active svg { transform: scale(0.9); }
 .tab.on { color: var(--green-text); }
@@ -289,3 +289,5 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .composer textarea:focus { border-color: var(--green); background: var(--white); }
 .composer .send { width: 44px; height: 44px; border-radius: 999px; border: 0; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .composer .send:disabled { background: #cfd8d3; }
+.hostcard { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 22px; color: #fff; background: radial-gradient(120% 120% at 100% 0%, #4be095 0%, rgba(75, 224, 149, 0) 55%), linear-gradient(150deg, #1fb86c 0%, #0e8247 100%); box-shadow: 0 10px 24px rgba(23, 168, 98, 0.28); }
+.hostcard:active { transform: scale(0.98); }
