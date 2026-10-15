@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { CalendarDays, ChevronLeft, House, KeyRound, Minus, Plus, User, X } from "lucide-react";
+import { BedDouble, ChevronLeft, CircleUserRound, DoorOpen, House, Minus, Plus, X } from "lucide-react";
 
 /** The bunk-bed mark used in the logo. */
 export function BunkMark({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -44,9 +44,9 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
 // Saved lives on Home (heart button) and in Profile; hosting gets its own tab.
 const TABS = [
   { href: "/explore", label: "Home", Icon: House, also: ["/saved", "/rooms"] },
-  { href: "/bookings", label: "Bookings", Icon: CalendarDays, also: [] },
-  { href: "/host", label: "Host", Icon: KeyRound, also: [] },
-  { href: "/profile", label: "Profile", Icon: User, also: [] },
+  { href: "/bookings", label: "Bookings", Icon: BedDouble, also: [] },
+  { href: "/host", label: "Host", Icon: DoorOpen, also: [] },
+  { href: "/profile", label: "Profile", Icon: CircleUserRound, also: [] },
 ];
 
 export function TabBar() {
