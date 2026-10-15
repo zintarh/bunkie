@@ -109,7 +109,6 @@ function PhoneStep({ onDone }: { onDone: () => void }) {
             <label className="field"><span className="prefix">+234</span>
               <input id="phone" inputMode="tel" autoComplete="tel-national" placeholder="803 000 0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </label>
-            <span className="small">For WhatsApp updates about your bookings.</span>
           </div>
         ) : (
           <div className="stack">

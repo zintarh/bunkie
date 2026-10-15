@@ -41,7 +41,7 @@ export function HostView({ b, reload }: Props) {
       body = (
         <div className="card row">
           <span className="tile t-mint">{b.viewing_mode === "video_call" ? <Video size={20} /> : <MessageSquare size={20} />}</span>
-          <span className="stack" style={{ gap: 0 }}><b>{b.viewing_at ? slotLabel(b.viewing_at) : ""}</b><span className="small">{b.viewing_mode === "video_call" ? `Video call · call ${t} on WhatsApp at the time` : "In person"}</span></span>
+          <span className="stack" style={{ gap: 0 }}><b>{b.viewing_at ? slotLabel(b.viewing_at) : ""}</b><span className="small">{b.viewing_mode === "video_call" ? "Video call · in Bunkie at the time" : "In person"}</span></span>
         </div>
       );
       foot = (

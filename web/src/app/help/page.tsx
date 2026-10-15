@@ -45,7 +45,7 @@ function Help() {
         <h1 className="h1">Get help</h1>
         <a className="banner red" href="tel:112" style={{ fontWeight: 700 }}><Siren size={22} />In danger? Call 112 now</a>
         {sent ? (
-          <div className="banner green open">Sent. We&apos;ll reply on WhatsApp.</div>
+          <div className="banner green open">Sent. We&apos;ll reply by email.</div>
         ) : (
           <>
             <div className="stack" style={{ gap: 10 }}>

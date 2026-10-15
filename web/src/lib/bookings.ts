@@ -67,7 +67,7 @@ export function useBooking(id: string): [BookingFull | null | undefined, () => P
     void reload();
     const onFocus = () => void reload();
     window.addEventListener("focus", onFocus);
-    // Live updates while the screen is open; WhatsApp covers the rest.
+    // Live updates while the screen is open; it also refetches when the app comes back into view.
     const db = supabaseBrowser();
     const ch = db?.channel(`booking:${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings", filter: `id=eq.${id}` }, () => void reload())

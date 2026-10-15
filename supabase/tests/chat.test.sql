@@ -148,3 +148,14 @@ do $$ declare v_last bigint; begin
   assert not public.sys_chat_should_notify((select id from conv), '00000000-0000-0000-0000-0000000000e1', v_last), 'no second nudge';
 end $$;
 reset role;
+
+-- With WhatsApp off (phase two), nothing is queued for it.
+update public.settings set value = 'false' where key = 'whatsapp_enabled';
+delete from private.jobs where queue = 'whatsapp';
+set role authenticated;
+select tch.as_user('00000000-0000-0000-0000-0000000000e2');
+select public.send_message((select id from conv), gen_random_uuid(), 'anyone there?');
+reset role;
+do $$ begin
+  assert not exists (select 1 from private.jobs where queue = 'whatsapp'), 'no WhatsApp jobs while it is off';
+end $$;

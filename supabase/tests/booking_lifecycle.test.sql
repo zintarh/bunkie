@@ -1,6 +1,9 @@
 -- End-to-end booking rules: request, queue, viewing, agreement, payment, check-in, payout, expiry,
 -- plus the access rules around them. Runs as the real API roles via set role + a fake JWT subject.
 
+-- WhatsApp is off until phase two; these tests also check the alerts that would be queued.
+update public.settings set value = 'true' where key = 'whatsapp_enabled';
+
 create schema t;
 grant usage on schema t to anon, authenticated, service_role;
 

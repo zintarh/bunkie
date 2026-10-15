@@ -193,7 +193,7 @@ function ViewingBooked({ b, reload }: Props) {
               <span className="stack" style={{ gap: 0 }}><span>{addr.address_line}</span><span className="small">{addr.landmark ?? `${b.listing.area_name}, Abuja`}</span></span>
             </div>
           )}
-          {video ? <p className="small" style={{ fontSize: 14 }}>{b.host.first_name} will call you on WhatsApp at the time.</p> : addr && (
+          {video ? <p className="small" style={{ fontSize: 14 }}>Video call in Bunkie at the time.</p> : addr && (
             <a className="btn ghost sm" href={`https://www.google.com/maps/dir/?api=1&destination=${addr.lat},${addr.lng}`} target="_blank" rel="noreferrer"><Navigation size={18} />Get directions</a>
           )}
           {at && (
@@ -222,7 +222,7 @@ function AfterViewing({ b, reload }: Props) {
   const [v, setV] = useState<"yes" | "no" | null>(null);
   const [why, setWhy] = useState<string[]>([]);
   if (b.tenant_matched_at) {
-    return <Simple title={`Waiting for ${b.host.first_name}`} text={`${b.host.first_name} confirms the agreement first. You'll get a WhatsApp message.`} />;
+    return <Simple title={`Waiting for ${b.host.first_name}`} text={`${b.host.first_name} confirms the agreement first.`} />;
   }
   return (
     <>
@@ -362,7 +362,7 @@ function Booked({ b, reload }: Props) {
               disabled={!!busy} onClick={() => run("plan_arrival", { window: w.value })}>{w.label}</button>
           ))}
         </div>
-        {b.arrival_window && <p className="small">{b.host.first_name} has been told. We&apos;ll remind you both on WhatsApp that morning.</p>}
+        {b.arrival_window && <p className="small">{b.host.first_name} has been told.</p>}
         <Err error={error} />
       </Body>
       <Foot><button className="btn ghost" onClick={() => setCheckIn(true)}>I&apos;m at the room</button></Foot>
