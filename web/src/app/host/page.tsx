@@ -15,7 +15,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 
 type MyListing = ProgressFields & { status: string; area_name: string; monthly_total: number; cover_path: string | null };
 const STATUS: Record<string, [string, string]> = {
-  draft: ["Draft", "grey"], live: ["Live", "green"], paused: ["Paused", "amber"], flagged: ["In review", "amber"], archived: ["Archived", "grey"],
+  draft: ["Draft", "grey"], in_review: ["In review", "amber"], live: ["Live", "green"], paused: ["Paused", "amber"], flagged: ["In review", "amber"], archived: ["Archived", "grey"],
 };
 
 export default function HostHome() {

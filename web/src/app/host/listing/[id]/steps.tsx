@@ -16,7 +16,7 @@ import type { BathKind, Household, PaySchedule, PhotoShot, RoomKind } from "@/li
 export const STEPS = HOST_STEPS;
 
 export type Listing = {
-  id: string; status: string; area_name: string; inspection_fee: number; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
+  id: string; status: string; area_name: string; inspection_fee: number; review_note: string | null; approved_at: string | null; room_kind: RoomKind | null; bath_kind: BathKind | null; furnished: boolean | null;
   household: Household | null; open_to_camp: boolean; min_months: number; max_months: number; pay_schedule: PaySchedule;
   available_from: string | null; open_to_short: boolean; weekly_price: number | null; rent_monthly: number | null; deposit: number | null; monthly_total: number; total_varies: boolean;
   early_leave_notice_days: number; redeploy_refund: "all_unused" | "unused_minus_2w"; ask_leave_notice_days: number; allowed_to_share: boolean;

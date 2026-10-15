@@ -59,7 +59,11 @@ export function ReviewStep({ listing, reload }: StepProps) {
     <>
       <TopBar back="/host" />
       <div className="body open">
-        <h1 className="h1">{live ? "Your room is live" : listing.status === "flagged" ? "In review" : listing.status === "paused" ? "Paused" : "Ready to publish?"}</h1>
+        <h1 className="h1">{live ? "Your room is live" : listing.status === "flagged" || listing.status === "in_review" ? "In review" : listing.status === "paused" ? "Paused" : "Ready to publish?"}</h1>
+        {listing.status === "draft" && listing.review_note && (
+          <div className="banner amber" style={{ alignItems: "flex-start" }}><CircleAlert size={20} style={{ flexShrink: 0 }} /><span><b>Bunkie asked for a change:</b> {listing.review_note}</span></div>
+        )}
+        {listing.status === "in_review" && <div className="banner green">Bunkie checks every room before it goes live.</div>}
         <div className="rcard">
           <div className="photo" style={{ height: 180, borderRadius: 18, backgroundImage: cover ? `url(${photoUrl(cover.path)})` : undefined }} />
           <div className="stack" style={{ gap: 2, padding: "0 8px 8px" }}>
@@ -92,10 +96,10 @@ export function ReviewStep({ listing, reload }: StepProps) {
         {error && <p className="err" role="alert">{error}</p>}
       </div>
       <div className="foot">
-        {listing.status === "draft" && <button className="btn" disabled={busy || !missing || missing.length > 0} onClick={publish}>{busy ? <span className="spin" /> : "Publish"}</button>}
+        {listing.status === "draft" && <button className="btn" disabled={busy || !missing || missing.length > 0} onClick={publish}>{busy ? <span className="spin" /> : listing.approved_at ? "Publish" : "Send for review"}</button>}
         {live && <><Link className="btn" href={`/rooms/${listing.id}`}>See it as a bunkie</Link><button className="link" disabled={busy} onClick={() => pause(true)}>Pause listing</button></>}
         {listing.status === "paused" && <button className="btn" disabled={busy} onClick={() => pause(false)}>Turn back on</button>}
-        {listing.status === "flagged" && <button className="btn ghost" onClick={() => router.push("/host")}>Back to hosting</button>}
+        {(listing.status === "flagged" || listing.status === "in_review") && <button className="btn ghost" onClick={() => router.push("/host")}>Back to hosting</button>}
       </div>
     </>
   );

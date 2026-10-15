@@ -107,3 +107,16 @@ end $$;
 
 -- Leave the shared test database as found for the tests that run after this one.
 update public.listings set status = 'archived' where id = '00000000-0000-0000-0000-00000000ad10';
+
+-- Sending a listing back: it returns to the host as a draft with the note; republishing goes back to review.
+update public.listings set status = 'in_review' where id = '00000000-0000-0000-0000-00000000ad10';
+set role authenticated;
+select tad.as_user('00000000-0000-0000-0000-00000000ad01');
+select tad.expect_error($$ select public.admin_listing_decision('00000000-0000-0000-0000-00000000ad10', 'changes', '') $$, '%should change%');
+select public.admin_listing_decision('00000000-0000-0000-0000-00000000ad10', 'changes', 'Add a clear bathroom photo');
+reset role;
+do $$ begin
+  assert (select status = 'draft' and review_note = 'Add a clear bathroom photo' from public.listings
+          where id = '00000000-0000-0000-0000-00000000ad10'), 'back to the host with a note';
+end $$;
+update public.listings set status = 'archived' where id = '00000000-0000-0000-0000-00000000ad10';

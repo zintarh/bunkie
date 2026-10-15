@@ -90,6 +90,17 @@ set role authenticated;
 select public.publish_listing((select listing_id from ids));
 reset role;
 
+-- New listings wait for the team; an admin approves it.
+do $$ begin
+  assert (select status from public.listings where id = (select listing_id from ids)) = 'in_review', 'waits for review';
+end $$;
+insert into auth.users (id, email, raw_user_meta_data) values ('00000000-0000-0000-0000-0000000000ff', 'team@example.com', '{"first_name":"Team"}');
+insert into private.admins (user_id) values ('00000000-0000-0000-0000-0000000000ff');
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000ff');
+select public.admin_listing_decision((select listing_id from ids), 'approve');
+reset role;
+
 do $$ declare l public.listings; begin
   select * into l from public.listings where id = (select listing_id from ids);
   assert l.status = 'live', 'published';
