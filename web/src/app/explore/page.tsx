@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Heart, MapPin, MessageCircle, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
+import { MapPin, MessageCircle, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { useMe } from "@/lib/auth";
@@ -18,7 +18,7 @@ import { useMyAnswers } from "@/lib/useMyAnswers";
 import type { RoomCard as Room } from "@/lib/types";
 
 const topIcon: React.CSSProperties = { position: "relative", width: 44, height: 44, borderRadius: 999, background: "rgba(255,255,255,.18)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" };
-const countDot: React.CSSProperties = { position: "absolute", right: 2, top: 2, minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "var(--amber)", color: "var(--ink)", fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" };
+const countDot: React.CSSProperties = { position: "absolute", right: 2, top: 2, minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" };
 
 export default function Explore() {
   const router = useRouter();
@@ -108,10 +108,6 @@ export default function Explore() {
                 {unreadChats > 0 && <span style={{ ...countDot, background: "var(--red)", color: "#fff" }}>{unreadChats > 9 ? "9+" : unreadChats}</span>}
               </Link>
             )}
-            <Link href="/saved" aria-label={`Saved apartments, ${saved.size}`} style={topIcon}>
-              <Heart size={22} strokeWidth={2.2} />
-              {saved.size > 0 && <span style={countDot}>{saved.size}</span>}
-            </Link>
           </span>
         </div>
         <div className="row" style={{ padding: "10px 16px 4px", gap: 10 }}>

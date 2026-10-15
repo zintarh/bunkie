@@ -41,12 +41,12 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
   );
 }
 
-// Saved and Messages live on Home (top icons, with counts); hosting gets its own tab.
+// Messages is an icon on Home (shows unread replies); Saved is in Profile; hosting gets its own tab.
 const TABS = [
-  { href: "/explore", label: "Home", Icon: House, also: ["/saved", "/rooms", "/inbox"] },
+  { href: "/explore", label: "Home", Icon: House, also: ["/rooms", "/inbox"] },
   { href: "/bookings", label: "Bookings", Icon: BedDouble, also: [] },
   { href: "/host", label: "Host", Icon: DoorOpen, also: [] },
-  { href: "/profile", label: "Profile", Icon: CircleUserRound, also: [] },
+  { href: "/profile", label: "Profile", Icon: CircleUserRound, also: ["/saved"] },
 ];
 
 export function TabBar() {

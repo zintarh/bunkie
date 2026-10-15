@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { ChevronLeft, Heart } from "lucide-react";
 import { RoomCard } from "@/components/RoomCard";
 import { Loading, TabBar } from "@/components/ui";
 import { useSaved } from "@/lib/saved";
@@ -24,7 +24,10 @@ export default function Saved() {
   return (
     <main className="screen">
       <div className="body" style={{ padding: "0 16px 24px" }}>
-        <div className="hero phero" style={{ margin: "0 -16px" }}><h1 className="h1">Saved</h1></div>
+        <div className="hero phero" style={{ margin: "0 -16px", paddingTop: 12 }}>
+          <Link href="/profile" className="ib" aria-label="Back to profile" style={{ color: "#fff", marginLeft: -8, marginBottom: 6 }}><ChevronLeft size={24} strokeWidth={2.2} /></Link>
+          <h1 className="h1">Saved</h1>
+        </div>
         {rooms && list.length === 0 ? (
           <div className="card stack" style={{ alignItems: "center", textAlign: "center", padding: "32px 20px", gap: 10 }}>
             <span className="tile t-coral" style={{ width: 56, height: 56, borderRadius: 999 }}><Heart size={26} /></span>
