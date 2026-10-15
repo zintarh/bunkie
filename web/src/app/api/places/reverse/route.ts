@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const top = data.results?.[0];
   if (data.status !== "OK" || !top) return failed();
 
-  const area = areaName(data.results!.flatMap((r) => r.address_components)) ?? top.formatted_address.split(",")[0];
+  const area = areaName(data.results!.flatMap((r) => r.address_components), top.formatted_address) ?? top.formatted_address.split(",")[0];
   const place: Place = { label: area, area, address: shortAddress(top.formatted_address), lat, lng };
   return NextResponse.json({ place });
 }

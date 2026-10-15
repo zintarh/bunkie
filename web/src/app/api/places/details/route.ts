@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const label = p.displayName?.text ?? p.formattedAddress ?? "Your PPA";
   const place: Place = {
     label,
-    area: areaName(p.addressComponents ?? []) ?? label,
+    area: areaName(p.addressComponents ?? [], p.formattedAddress) ?? label,
     address: shortAddress(p.formattedAddress ?? ""),
     lat: p.location.latitude,
     lng: p.location.longitude,

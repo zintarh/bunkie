@@ -13,8 +13,16 @@ export const inFct = (lat: number, lng: number) =>
 export type Place = { label: string; area: string; address: string; lat: number; lng: number };
 
 type Part = { types: string[]; long_name?: string; longText?: string };
-/** Most specific named area: neighbourhood, then district, then town. Works for both Geocoding and Places parts. */
-export function areaName(parts: Part[]): string | undefined {
+/**
+ * The area people would name. Google's address usually reads "street, AREA, Abuja ...", and that AREA
+ * can differ from Google's own neighbourhood tag (e.g. "Mafemi Cres, Utako" is tagged Mabushi), so the
+ * address wins. Otherwise: neighbourhood, then district, then town. Works for Geocoding and Places parts.
+ */
+export function areaName(parts: Part[], address?: string): string | undefined {
+  const segs = (address ?? "").split(",").map((s) => s.trim());
+  const city = segs.findIndex((s) => /^Abuja\b/i.test(s));
+  const before = city > 0 ? segs[city - 1] : "";
+  if (before && !/\d/.test(before) && !/\b(street|st|road|rd|way|close|crescent|cres|avenue|ave|drive|lane|expressway)\b/i.test(before)) return before;
   for (const t of ["neighborhood", "sublocality_level_1", "sublocality", "locality"]) {
     const p = parts.find((x) => x.types.includes(t));
     const name = p?.long_name ?? p?.longText;
