@@ -53,7 +53,7 @@ serve(async (req) => {
       if (!ownPath(body.path)) throw new HttpError(400, "Take the selfie again.");
       const p = identity();
       const r = await p.liveness(body.path, user.id);
-      await record(user.id, "liveness", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null } });
+      await record(user.id, "liveness", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
       if (!r.passed) throw new HttpError(400, "That didn't work. Try again in good light, face in the oval.");
       return json({ ok: true });
     }
@@ -68,7 +68,7 @@ serve(async (req) => {
       await db.from("profile_private").update({ state_code: code }).eq("user_id", user.id);
       const p = identity();
       const r = await p.callUpLetter(body.path, code, user.id);
-      await record(user.id, "call_up", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null } });
+      await record(user.id, "call_up", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "The name on the letter must match your NIN.");
       return json({ ok: true });
     }
@@ -80,7 +80,7 @@ serve(async (req) => {
       if (kind === "meter" ? !/^\d{11,13}$/.test(value) : !ownPath(value)) throw new HttpError(400, "Check the proof of address.");
       const p = identity();
       const r = await p.proofOfAddress(kind, value, user.id);
-      await record(user.id, "proof_of_address", r.passed, p.name, r.ref, { result: { kind } });
+      await record(user.id, "proof_of_address", r.passed, p.name, r.ref, { result: { kind, path: kind === "meter" ? null : value, meter: kind === "meter" ? value : null } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "We couldn't confirm that address.");
       return json({ ok: true });
     }
@@ -103,10 +103,10 @@ serve(async (req) => {
 
       const p = identity();
       const callUp = await p.callUpLetter(body.call_up_path, code, user.id);
-      await record(user.id, "call_up", callUp.passed, p.name, callUp.ref, { result: { reason: callUp.reason ?? null } });
+      await record(user.id, "call_up", callUp.passed, p.name, callUp.ref, { result: { reason: callUp.reason ?? null, path: body.call_up_path } });
       if (!callUp.passed) throw new HttpError(400, callUp.reason ?? "The name on the call-up letter must match your NIN.");
       const ppa = await p.ppaLetter(body.ppa_path, code, user.id);
-      await record(user.id, "ppa_letter", ppa.passed, p.name, ppa.ref, { result: { reason: ppa.reason ?? null } });
+      await record(user.id, "ppa_letter", ppa.passed, p.name, ppa.ref, { result: { reason: ppa.reason ?? null, path: body.ppa_path } });
       if (!ppa.passed) throw new HttpError(400, ppa.reason ?? "We couldn't confirm your PPA acceptance letter.");
       return json({ ok: true });
     }
@@ -117,7 +117,7 @@ serve(async (req) => {
       if (!ownPath(body.path)) throw new HttpError(400, "Add a photo of your certificate.");
       const p = identity();
       const r = await p.dischargeCertificate(body.path, number, user.id);
-      await record(user.id, "discharge", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null } });
+      await record(user.id, "discharge", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path, certificate_number: number } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "The name on the certificate must match your NIN.");
       return json({ ok: true });
     }
