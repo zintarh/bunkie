@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { CalendarDays, ChevronLeft, Heart, Minus, Plus, Search, User, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, House, KeyRound, Minus, Plus, User, X } from "lucide-react";
 
 /** The bunk-bed mark used in the logo. */
 export function BunkMark({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -41,19 +41,20 @@ export function TopBar({ back, close, title, right }: { back?: string | true; cl
   );
 }
 
+// Saved lives on Home (heart button) and in Profile; hosting gets its own tab.
 const TABS = [
-  { href: "/explore", label: "Explore", Icon: Search },
-  { href: "/saved", label: "Saved", Icon: Heart },
-  { href: "/bookings", label: "Bookings", Icon: CalendarDays },
-  { href: "/profile", label: "Profile", Icon: User },
+  { href: "/explore", label: "Home", Icon: House, also: ["/saved", "/rooms"] },
+  { href: "/bookings", label: "Bookings", Icon: CalendarDays, also: [] },
+  { href: "/host", label: "Host", Icon: KeyRound, also: [] },
+  { href: "/profile", label: "Profile", Icon: User, also: [] },
 ];
 
 export function TabBar() {
   const path = usePathname();
   return (
     <nav className="tabs" aria-label="Main">
-      {TABS.map(({ href, label, Icon }) => {
-        const on = path === href || path.startsWith(href + "/");
+      {TABS.map(({ href, label, Icon, also }) => {
+        const on = [href, ...also].some((h) => path === h || path.startsWith(h + "/"));
         return (
           <Link key={href} href={href} className={on ? "tab on" : "tab"} aria-current={on ? "page" : undefined}>
             <Icon size={24} strokeWidth={on ? 2.3 : 2} />

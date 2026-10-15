@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
+import { Heart, MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { RoomCard } from "@/components/RoomCard";
@@ -92,7 +92,16 @@ export default function Explore() {
   return (
     <main className="screen">
       <div className="hero" style={{ flexShrink: 0, paddingBottom: 16 }}>
-        <div style={{ padding: "14px 20px 2px" }}><Wordmark /></div>
+        <div className="between" style={{ padding: "10px 16px 0 20px" }}>
+          <Wordmark />
+          <Link href="/saved" aria-label={`Saved apartments, ${saved.size}`}
+            style={{ position: "relative", width: 44, height: 44, borderRadius: 999, background: "rgba(255,255,255,.18)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+            <Heart size={22} strokeWidth={2.2} />
+            {saved.size > 0 && (
+              <span style={{ position: "absolute", right: 2, top: 2, minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "var(--amber)", color: "var(--ink)", fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{saved.size}</span>
+            )}
+          </Link>
+        </div>
         <div className="row" style={{ padding: "10px 16px 4px", gap: 10 }}>
           <Link href={inCamp ? "/start" : "/ppa"}
             style={{ flex: 1, minWidth: 0, height: 56, borderRadius: 999, background: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,.18)", display: "flex", alignItems: "center", gap: 12, padding: "0 18px", color: "var(--ink)" }}>
