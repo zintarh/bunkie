@@ -1,10 +1,11 @@
 "use client";
-import { useState, type ReactNode } from "react";
-import { BadgeCheck, Check, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState, type ReactNode } from "react";
+import { BadgeCheck, Check, ChevronDown, Video } from "lucide-react";
 import { QUESTIONS, fit } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
 import { act, type BookingFull, type Person, type Terms } from "@/lib/bookings";
-import { dayLabel, initial, naira, stayLength } from "@/lib/format";
+import { dayLabel, initial, naira, stayLength, timeLabel } from "@/lib/format";
 import { avatarUrl } from "@/lib/photos";
 import type { Answers } from "@/lib/types";
 
@@ -131,4 +132,19 @@ export function Foot({ children }: { children: ReactNode }) {
 
 export function Err({ error }: { error: string | null }) {
   return error ? <p className="err" role="alert">{error}</p> : null;
+}
+
+/** "Join video call" for a video viewing: opens 15 minutes before and stays open for an hour after. */
+export function JoinCall({ b }: { b: BookingFull }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+  if (b.viewing_mode !== "video_call" || !b.viewing_at) return null;
+  const at = new Date(b.viewing_at).getTime();
+  if (now > at + 60 * 60_000) return null;
+  return now >= at - 15 * 60_000
+    ? <Link className="btn" href={`/bookings/${b.id}/call`}><Video size={20} />Join video call</Link>
+    : <button className="btn ghost" disabled><Video size={20} />Call opens at {timeLabel(new Date(at - 15 * 60_000).toISOString())}</button>;
 }

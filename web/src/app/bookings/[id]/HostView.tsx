@@ -5,7 +5,7 @@ import { CLOSE_REASON } from "@/lib/bunkie";
 import type { BookingFull } from "@/lib/bookings";
 import { dayLabel, dayParts, isoDay, naira, slotLabel, stayLength, timeLabel, untilLabel } from "@/lib/format";
 import { useMyAnswers } from "@/lib/useMyAnswers";
-import { Err, Foot, PersonCard, useStep } from "./shared";
+import { Err, Foot, JoinCall, PersonCard, useStep } from "./shared";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
 const WINDOW: Record<string, string> = { morning: "8am–11am", midday: "11am–2pm", afternoon: "2pm–5pm", evening: "5pm–8pm" };
@@ -46,7 +46,8 @@ export function HostView({ b, reload }: Props) {
       );
       foot = (
         <>
-          <button className="btn" disabled={!started || !!busy} onClick={() => run("viewing_done")}>The viewing happened</button>
+          <JoinCall b={b} />
+          <button className={b.viewing_mode === "video_call" ? "btn ghost" : "btn"} disabled={!started || !!busy} onClick={() => run("viewing_done")}>The viewing happened</button>
           <div className="row" style={{ justifyContent: "center", gap: 16 }}>
             {b.reschedules < 1 && <button className="link" disabled={!!busy} onClick={() => run("reschedule")}>Reschedule</button>}
             {started && <button className="link" disabled={!!busy} onClick={() => run("no_show")}>{t} didn&apos;t show up</button>}

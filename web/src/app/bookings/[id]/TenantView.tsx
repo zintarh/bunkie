@@ -11,7 +11,7 @@ import { callFunction } from "@/lib/functions";
 import { shrinkFile } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useMyAnswers } from "@/lib/useMyAnswers";
-import { AgreementParts, Err, Foot, PersonCard, Timeline, useStep } from "./shared";
+import { AgreementParts, Err, Foot, JoinCall, PersonCard, Timeline, useStep } from "./shared";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
 
@@ -193,7 +193,7 @@ function ViewingBooked({ b, reload }: Props) {
               <span className="stack" style={{ gap: 0 }}><span>{addr.address_line}</span><span className="small">{addr.landmark ?? `${b.listing.area_name}, Abuja`}</span></span>
             </div>
           )}
-          {video ? <p className="small" style={{ fontSize: 14 }}>Video call in Bunkie at the time.</p> : addr && (
+          {video ? <JoinCall b={b} /> : addr && (
             <a className="btn ghost sm" href={`https://www.google.com/maps/dir/?api=1&destination=${addr.lat},${addr.lng}`} target="_blank" rel="noreferrer"><Navigation size={18} />Get directions</a>
           )}
           {at && (
