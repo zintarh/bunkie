@@ -100,7 +100,7 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
         <section className={styles.sec}>
           <span className="h2">Room</span>
           <Seg label="Room type" value={f.room ?? "any"} onChange={(v) => set({ room: v === "any" ? null : v })}
-            options={[{ value: "own_room", label: "Own room" }, { value: "shared_room", label: "Shared" }, { value: "any", label: "Any" }]} />
+            options={[{ value: "own_room", label: "Own room" }, { value: "self_contain", label: "Self con" }, { value: "shared_room", label: "Shared" }, { value: "any", label: "Any" }]} />
         </section>
 
         {!inCamp && (

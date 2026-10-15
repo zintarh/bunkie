@@ -1,7 +1,7 @@
 export type Household = "women" | "men" | "mixed";
 export type SharePref = "women_only" | "men_only" | "mixed_ok";
 export type NyscStage = "in_camp" | "have_ppa" | "serving";
-export type RoomKind = "own_room" | "shared_room";
+export type RoomKind = "own_room" | "shared_room" | "self_contain";
 export type BathKind = "own" | "shared";
 export type PaySchedule = "monthly" | "lump_sum";
 export type PhotoShot = "bedroom" | "bathroom" | "kitchen" | "meter" | "entrance" | "extra";

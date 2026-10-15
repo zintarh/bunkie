@@ -188,8 +188,11 @@ export function RoomStep({ listing, reload, next, back }: StepProps) {
         });
         await reload();
       }}>
-      <Seg label="Room" value={room} onChange={setRoom} options={[{ value: "own_room", label: "Own room" }, { value: "shared_room", label: "Shared room" }]} />
-      <Seg label="Bathroom" value={bath} onChange={setBath} options={[{ value: "own", label: "Own bathroom" }, { value: "shared", label: "Shared bathroom" }]} />
+      <Seg label="Room" value={room} onChange={(v) => { setRoom(v); if (v === "self_contain") setBath("own"); }}
+        options={[{ value: "own_room", label: "Own room" }, { value: "self_contain", label: "Self contain" }, { value: "shared_room", label: "Shared room" }]} />
+      {room === "self_contain"
+        ? <span className="small">Own bathroom and kitchen, shared with nobody.</span>
+        : <Seg label="Bathroom" value={bath} onChange={setBath} options={[{ value: "own", label: "Own bathroom" }, { value: "shared", label: "Shared bathroom" }]} />}
       <div className="stack" style={{ gap: 10 }}>
         <span className="h2">Household</span>
         <Seg label="Household" value={who} onChange={setWho} options={[{ value: "women", label: "Women" }, { value: "men", label: "Men" }, { value: "mixed", label: "Mixed" }]} />

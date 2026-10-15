@@ -9,7 +9,7 @@ import { errorText, useMe } from "@/lib/auth";
 import { openChat } from "@/lib/chat";
 import { qs } from "@/lib/url";
 import { HOUSEHOLD_LABEL, QUESTIONS, fit } from "@/lib/bunkie";
-import { CORPER_LABEL, dayLabel, initial, naira, stayRange } from "@/lib/format";
+import { CORPER_LABEL, dayLabel, initial, naira, ROOM_LABEL, stayRange } from "@/lib/format";
 import { avatarUrl, photoUrl } from "@/lib/photos";
 import { usePrefs } from "@/lib/prefs";
 import { useSaved } from "@/lib/saved";
@@ -48,7 +48,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
   const photos = room.photos.length ? room.photos : [{ path: room.cover_path ?? "", shot: "bedroom" as const, taken_at: "" }];
   const n = photos.length;
   const isSaved = saved.has(room.id);
-  const kind = room.room_kind === "own_room" ? "Own room" : "Shared room";
+  const kind = ROOM_LABEL[room.room_kind];
   const inCamp = prefs.stage === "in_camp";
   const commute = !inCamp && prefs.ppa && room.area_lat != null
     ? estimateMinutes(room.area_lat, room.area_lng!, prefs.ppa.lat, prefs.ppa.lng) : null;

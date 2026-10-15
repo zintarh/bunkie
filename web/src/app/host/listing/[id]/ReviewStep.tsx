@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Award, Check, ChevronRight, CircleAlert } from "lucide-react";
 import { TopBar } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
-import { naira } from "@/lib/format";
+import { naira, ROOM_LABEL } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { StepProps } from "./steps";
@@ -64,7 +64,7 @@ export function ReviewStep({ listing, reload }: StepProps) {
           <div className="photo" style={{ height: 180, borderRadius: 18, backgroundImage: cover ? `url(${photoUrl(cover.path)})` : undefined }} />
           <div className="stack" style={{ gap: 2, padding: "0 8px 8px" }}>
             <span className="price num" style={{ fontSize: 20 }}>{listing.total_varies ? "about " : ""}{naira(listing.monthly_total)}<span className="muted" style={{ fontFamily: "var(--body)", fontWeight: 500, fontSize: 14 }}> /month</span></span>
-            <span style={{ fontSize: 14 }}>{listing.room_kind === "shared_room" ? "Shared room" : "Own room"} in {listing.area_name}</span>
+            <span style={{ fontSize: 14 }}>{ROOM_LABEL[listing.room_kind ?? "own_room"]} in {listing.area_name}</span>
           </div>
         </div>
         {listing.status === "flagged" && <div className="banner amber"><CircleAlert size={20} />Some photos were taken far from the pin. We&apos;re checking them before the room goes live.</div>}

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     lng: coord("lng", 6.7, 7.7),
     budgetMax: int("budgetMax") ? Math.ceil(int("budgetMax")! / 5000) * 5000 : undefined,
     pref: pick<SharePref>("pref", ["women_only", "men_only", "mixed_ok"]),
-    room: pick<RoomKind>("room", ["own_room", "shared_room"]),
+    room: pick<RoomKind>("room", ["own_room", "shared_room", "self_contain"]),
     stay: pick("stay", ["weeks", "short", "long", "any"] as const),
     maxMinutes: int("maxMinutes"),
   };

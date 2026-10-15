@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "./supabase/client";
 import type { Answers, Booking, BookingStatus } from "./types";
+import { ROOM_LABEL } from "./format";
 
 export type Person = { id: string; first_name: string; photo_path: string | null; is_verified: boolean };
 export type Agreement = { id: string; version: number; terms: Terms; terms_hash: string; host_confirmed_at: string | null; tenant_confirmed_at: string | null };
@@ -87,5 +88,5 @@ export async function act(b: { id: string; version: number }, action: string, pa
 }
 
 export function roomTitle(b: BookingFull) {
-  return `${b.listing.room_kind === "own_room" ? "Own room" : "Shared room"} · ${b.listing.area_name}`;
+  return `${ROOM_LABEL[b.listing.room_kind] ?? "Room"} · ${b.listing.area_name}`;
 }

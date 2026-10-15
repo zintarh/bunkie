@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Award, BadgeCheck, CalendarDays, CircleAlert, Clock, Eye, Heart } from "lucide-react";
 import { HOUSEHOLD_LABEL } from "@/lib/bunkie";
-import { CORPER_LABEL, missLabel, naira, stayRange } from "@/lib/format";
+import { CORPER_LABEL, missLabel, naira, ROOM_LABEL, stayRange } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import type { RoomCard as Room } from "@/lib/types";
 
@@ -15,7 +15,7 @@ export function RoomCard({
   minutesLabel?: string | null;
   fitScore?: number | null;
 }) {
-  const kind = room.room_kind === "own_room" ? "Own room" : "Shared room";
+  const kind = ROOM_LABEL[room.room_kind];
   const title = `${kind} in ${room.area_name} with ${room.host_first_name}`;
   return (
     <article className="rcard">

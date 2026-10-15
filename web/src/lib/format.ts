@@ -1,3 +1,6 @@
+/** Room types in words. Self contain: own bathroom and kitchen, shared with nobody. */
+export const ROOM_LABEL: Record<string, string> = { own_room: "Own room", shared_room: "Shared room", self_contain: "Self contain" };
+
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -87,7 +90,7 @@ export function missLabel(m: import("./types").Miss): string {
     case "over_budget": return `${nairaK(m.by)} over budget`;
     case "later": return `Free from ${dayLabel(m.on).slice(4)}`;
     case "farther": return `${m.minutes} min away`;
-    case "room": return m.is === "own_room" ? "Own room" : "Shared room";
+    case "room": return ROOM_LABEL[m.is];
     case "no_short": return "No short stays";
     case "min_stay": return `At least ${months(m.months)}`;
     case "max_stay": return `Up to ${months(m.months)}`;
