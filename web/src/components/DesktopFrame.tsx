@@ -90,8 +90,8 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Home's right-hand panel: who you are, your PPA, and a way into hosting. */
-function HomeRail() {
+/** Home's right-hand panel (laptops): who you are, your PPA, and a way into hosting. Rendered by the Home page. */
+export function HomeRail() {
   const [me] = useMe();
   const [prefs] = usePrefs();
   const photo = avatarUrl(me?.profile.photo_path);
@@ -134,7 +134,6 @@ export function DesktopFrame({ children }: { children: ReactNode }) {
       {searching && <><div className="searchpanel-scrim" onClick={() => setSearching(false)} /><SearchPanel onClose={() => setSearching(false)} /></>}
       <div className={`desk-main desk-${mode}`}>
         <div className="app">{children}</div>
-        {mode === "feed" && <HomeRail />}
       </div>
     </>
   );

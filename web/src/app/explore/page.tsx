@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
+import { HomeRail } from "@/components/DesktopFrame";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { ChatIcon } from "@/components/icons";
 import { useMe } from "@/lib/auth";
@@ -162,7 +163,8 @@ export default function Explore() {
         </div>
       </div>
 
-      <div className="body" style={{ padding: "4px 16px 24px", gap: 0 }}>
+      <div className="body feed-body" style={{ padding: "4px 16px 24px", gap: 0 }}>
+        <div className="feed-col">
         <ContinueHosting style={{ marginTop: 14 }} />
         {inCamp && (
           <div className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18 }}>
@@ -228,6 +230,9 @@ export default function Explore() {
             </div>
           </div>
         )}
+        </div>
+        {/* Laptop: the right-hand panel sits beside the feed (hidden on phones). */}
+        <HomeRail />
       </div>
 
       <TabBar />

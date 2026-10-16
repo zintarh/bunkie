@@ -411,3 +411,21 @@ body:has([data-full]) { background: var(--white); }
   .desk-page .phero + * { margin-top: 12px !important; }
   .desk-page .phero .ib { color: var(--ink) !important; }
 }
+/* Home on laptops: a full-width green band, then a wider feed with the panel beside it. */
+.feed-col { display: contents; }
+@media (min-width: 1024px) {
+  .desk-feed > .app { max-width: none; }
+  .desk-feed .hero { border-radius: 0 0 32px 32px; padding: 26px 28px 26px !important; }
+  .desk-feed .hero > * { box-sizing: border-box; max-width: 620px; margin-left: auto; margin-right: auto; width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+  .desk-feed .feed-body { display: flex !important; flex-direction: row; justify-content: center; align-items: flex-start; gap: 48px !important; padding: 8px 28px 56px !important; }
+  .desk-feed .feed-col { display: flex; flex-direction: column; width: 100%; max-width: 620px; min-width: 0; }
+  .desk-feed .homerail { padding-top: 20px; }
+}
+@media (min-width: 1160px) {
+  /* Line the band's search up with the feed column (feed 620 + gap 48 + panel 320). */
+  .desk-feed .hero > * { max-width: 988px; padding-right: 368px !important; }
+}
+@media (min-width: 1024px) {
+  .desk-feed .feed-col { flex: 0 1 620px; }
+  .desk-feed .homerail { flex: 0 0 320px; }
+}
