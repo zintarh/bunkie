@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, adminCall, when } from "../../AdminShell";
+import { AdminShell, Skeleton, adminCall, useAdminCounts, when } from "../../AdminShell";
 import styles from "../../admin.module.css";
 
 type Line = { id: number; sender_id: string | null; sender_name: string | null; kind: string; body: string | null; original: string | null; image_path: string | null; flagged: boolean; created_at: string };
@@ -10,6 +10,7 @@ type Line = { id: number; sender_id: string | null; sender_name: string | null; 
 export default function ChatReview() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { refresh } = useAdminCounts();
   const [lines, setLines] = useState<Line[] | null>(null);
   const [images, setImages] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
@@ -38,12 +39,14 @@ export default function ChatReview() {
     }
     setBusy(false);
     if (e) return setErr(e);
+    refresh();
     router.push("/admin/chats");
   };
 
   return (
-    <AdminShell title="Chat review">
+    <AdminShell title="Chat review" description="Hidden contact details are shown in amber as they were typed.">
       {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
+      {lines === null && <Skeleton rows={4} height={70} />}
       <div className={styles.chat}>
         {(lines ?? []).map((l) => l.kind === "system" ? (
           <div key={l.id} className={`${styles.msg} ${styles.sys}`}>{l.body}</div>

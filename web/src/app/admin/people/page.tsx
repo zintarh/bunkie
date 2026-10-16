@@ -3,7 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { CORPER_LABEL } from "@/lib/format";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, adminCall, when } from "../AdminShell";
+import { AdminShell, Empty, Skeleton, adminCall, when } from "../AdminShell";
 import styles from "../admin.module.css";
 
 type Person = {
@@ -36,16 +36,17 @@ function People() {
   };
 
   return (
-    <AdminShell title="People" actions={<input className={styles.search} placeholder="Name, email, phone or id" value={q} onChange={(e) => setQ(e.target.value)} />}>
+    <AdminShell title="People" description="Corpers and hosts. Suspend someone to stop them requesting, messaging or listing."
+      actions={<input className={styles.search} placeholder="Name, email, phone or id" value={q} onChange={(e) => setQ(e.target.value)} />}>
       {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
-      {rows === null ? null : rows.length === 0 ? <div className={styles.empty}>No one found.</div> : (
-        <div className={styles.scroll}>
+      {rows === null ? <Skeleton rows={1} height={300} /> : rows.length === 0 ? <Empty title="No one found" /> : (
+        <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead><tr><th>Person</th><th>Contact</th><th>Status</th><th>Activity</th><th>Joined</th><th></th></tr></thead>
             <tbody>
               {rows.map((p) => (
                 <tr key={p.id}>
-                  <td><b>{p.first_name} {p.last_name ?? ""}</b><div className={styles.meta}>{p.id.slice(0, 8)}</div></td>
+                  <td><b>{p.first_name} {p.last_name ?? ""}</b></td>
                   <td>{p.email}<div className={styles.meta}>{p.phone ?? "No phone"}</div></td>
                   <td><div className={styles.row}>
                     {p.suspended_at && <span className={`${styles.tag} ${styles.red}`}>Suspended</span>}

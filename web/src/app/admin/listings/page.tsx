@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ROOM_LABEL, naira } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, adminCall, when } from "../AdminShell";
+import { AdminShell, Empty, Skeleton, Tabs, adminCall, useAdminCounts, when } from "../AdminShell";
 import styles from "../admin.module.css";
 
 type Photo = { path: string; shot: string; distance_m: number | null; flagged: boolean };
@@ -16,6 +16,7 @@ const STATUSES = [["in_review", "Waiting"], ["live", "Live"], ["paused", "Paused
 
 export default function Listings() {
   const [status, setStatus] = useState<string>("in_review");
+  const { refresh } = useAdminCounts();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [rows, setRows] = useState<Listing[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -30,15 +31,14 @@ export default function Listings() {
     setErr(await adminCall("admin_listing_decision", { p_listing: l.id, p_outcome: outcome, p_note: notes[l.id] ?? null }));
     setBusy(null);
     load();
+    refresh();
   };
 
   return (
-    <AdminShell title="Listings" actions={
-      <div className={styles.actions}>
-        {STATUSES.map(([v, label]) => <button key={v} className={`${styles.btn} ${status === v ? styles.primary : ""}`} onClick={() => setStatus(v)}>{label}</button>)}
-      </div>}>
+    <AdminShell title="Listings" description="New rooms wait here until you approve them."
+      actions={<Tabs value={status} onChange={setStatus} options={STATUSES} />}>
       {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
-      {rows === null ? null : rows.length === 0 ? <div className={styles.empty}>Nothing here.</div> : (
+      {rows === null ? <Skeleton height={260} /> : rows.length === 0 ? <Empty title={status === "in_review" ? "No listings waiting" : "Nothing here"} /> : (
         <div className={styles.list}>
           {rows.map((l) => (
             <div key={l.id} className={styles.item}>

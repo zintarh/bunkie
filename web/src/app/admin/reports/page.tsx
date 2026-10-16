@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { naira } from "@/lib/format";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, adminCall, when } from "../AdminShell";
+import { AdminShell, Empty, Skeleton, Tabs, adminCall, useAdminCounts, when } from "../AdminShell";
 import styles from "../admin.module.css";
 
 type Report = {
@@ -23,6 +23,7 @@ export default function Reports() {
   const [keeps, setKeeps] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const { refresh } = useAdminCounts();
   const load = useCallback(() => {
     supabaseBrowser()?.rpc("admin_reports", { p_open: open }).then(({ data }) => setRows((data ?? []) as Report[]));
   }, [open]);
@@ -33,16 +34,14 @@ export default function Reports() {
     setErr(await adminCall("admin_resolve_report", { p_report: r.id, p_outcome: outcome, p_note: notes[r.id] ?? null }));
     setBusy(null);
     load();
+    refresh();
   };
 
   return (
-    <AdminShell title="Reports" actions={
-      <div className={styles.actions}>
-        <button className={`${styles.btn} ${open ? styles.primary : ""}`} onClick={() => setOpen(true)}>Open</button>
-        <button className={`${styles.btn} ${!open ? styles.primary : ""}`} onClick={() => setOpen(false)}>Closed</button>
-      </div>}>
+    <AdminShell title="Reports" description="Problems people raised about a stay, a room or a person."
+      actions={<Tabs value={open} onChange={setOpen} options={[[true, "Open"], [false, "Closed"]] as const} />}>
       {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
-      {rows === null ? null : rows.length === 0 ? <div className={styles.empty}>No {open ? "open" : "closed"} reports.</div> : (
+      {rows === null ? <Skeleton /> : rows.length === 0 ? <Empty title={open ? "No open reports" : "No closed reports yet"} /> : (
         <div className={styles.list}>
           {rows.map((r) => (
             <div key={r.id} className={styles.item}>

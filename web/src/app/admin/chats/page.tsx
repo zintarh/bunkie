@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, when } from "../AdminShell";
+import { AdminShell, Empty, Skeleton, when } from "../AdminShell";
 import styles from "../admin.module.css";
 
 type Flagged = { conversation_id: string; reasons: string[]; flagged_at: string; tenant_name: string; host_name: string; area_name: string | null; contacts_unlocked: boolean };
@@ -14,8 +14,8 @@ export default function Chats() {
     supabaseBrowser()?.rpc("admin_flagged_chats").then(({ data }) => setRows((data ?? []) as Flagged[]));
   }, []);
   return (
-    <AdminShell title="Flagged chats">
-      {rows === null ? null : rows.length === 0 ? <div className={styles.empty}>No chats waiting.</div> : (
+    <AdminShell title="Flagged chats" description="Chats where someone asked for money outside Bunkie, or a person reported them.">
+      {rows === null ? <Skeleton /> : rows.length === 0 ? <Empty title="No chats waiting" /> : (
         <div className={styles.list}>
           {rows.map((c) => (
             <Link key={c.conversation_id} href={`/admin/chats/${c.conversation_id}`} className={styles.item} style={{ color: "var(--ink)" }}>

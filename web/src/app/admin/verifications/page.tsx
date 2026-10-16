@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import { AdminShell, adminCall, when } from "../AdminShell";
+import { AdminShell, Empty, Skeleton, Tabs, adminCall, when } from "../AdminShell";
 import styles from "../admin.module.css";
 
 type V = { id: string; user_id: string; first_name: string; kind: string; status: string; provider: string | null; masked_name: string | null; path: string | null; result: Record<string, unknown>; created_at: string };
@@ -34,15 +34,11 @@ export default function Verifications() {
   };
 
   return (
-    <AdminShell title="ID checks" actions={
-      <div className={styles.actions}>
-        {([["failed", "Failed"], ["passed", "Passed"], [null, "All"]] as const).map(([v, label]) => (
-          <button key={label} className={`${styles.btn} ${status === v ? styles.primary : ""}`} onClick={() => setStatus(v)}>{label}</button>
-        ))}
-      </div>}>
+    <AdminShell title="ID checks" description="Open the document, then pass or fail it by hand."
+      actions={<Tabs value={status} onChange={setStatus} options={[["failed", "Failed"], ["passed", "Passed"], [null, "All"]] as const} />}>
       {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
-      {rows === null ? null : rows.length === 0 ? <div className={styles.empty}>Nothing here.</div> : (
-        <div className={styles.scroll}>
+      {rows === null ? <Skeleton rows={1} height={300} /> : rows.length === 0 ? <Empty title="Nothing here" /> : (
+        <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead><tr><th>When</th><th>Person</th><th>Check</th><th>Result</th><th>By</th><th>Document</th><th></th></tr></thead>
             <tbody>
