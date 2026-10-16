@@ -25,12 +25,12 @@
 /* Hero */
 .hero { position: relative; padding: 72px 0 0; text-align: center; overflow: hidden; }
 .hero h1 {
-  font-family: var(--display); font-weight: 800; font-size: clamp(42px, 7.6vw, 92px); line-height: 1; letter-spacing: -0.045em;
+  font-family: var(--display); font-weight: 800; font-size: clamp(38px, 6.4vw, 78px); line-height: 1; letter-spacing: -0.045em;
   margin: 28px auto 0; max-width: 980px; text-wrap: balance;
 }
 .rotate { display: grid; justify-items: center; color: var(--green); margin-top: 0.06em; }
 .accent { display: block; color: var(--green); margin-top: 0.06em; }
-.rotateBand { color: var(--amber); }
+.bandAccent { display: block; color: var(--amber); }
 .rotate > span {
   grid-area: 1 / 1; opacity: 0; transform: translateY(0.35em);
   transition: opacity 0.45s ease, transform 0.45s ease;
@@ -232,3 +232,13 @@
 .hostCtas { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; }
 .ctaLine { display: inline-flex; align-items: center; gap: 6px; color: #fff; font-weight: 700; opacity: 0.85; }
 .ctaLine:hover { opacity: 1; }
+
+/* NYSC spirit */
+.legacy { display: grid; grid-template-columns: auto 1fr; gap: 64px; align-items: center; padding: 72px; border-radius: 36px; background: var(--soft); }
+.legacyYear { font-family: var(--display); font-weight: 800; font-size: clamp(88px, 13vw, 168px); line-height: 0.9; letter-spacing: -0.05em; color: var(--green); }
+.page .legacy h2 { margin-bottom: 20px; }
+.page .legacy p { font-size: 18px; max-width: 560px; }
+@media (max-width: 900px) {
+  .legacy { grid-template-columns: 1fr; gap: 28px; padding: 44px 28px; }
+}
+.flushBottom { padding-bottom: 0 !important; }

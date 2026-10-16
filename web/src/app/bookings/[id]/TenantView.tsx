@@ -332,7 +332,6 @@ function Pay({ b, reload }: Props) {
           {fee != null && <div className="kv num"><span>Paystack charge</span><span>{naira(fee)}</span></div>}
           <div className="divider" />
           <div className="kv num" style={{ fontWeight: 800, fontSize: 18 }}><span style={{ color: "var(--ink)" }}>Total</span><span>{naira(net + (fee ?? 0))}</span></div>
-          <span className="small">{b.host.first_name} gets {naira(Math.round(net * 0.98))} after you move in · Bunkie fee 2%</span>
         </div>
         <div className="banner green"><Wallet size={20} style={{ flexShrink: 0 }} />Held by Paystack until you move in. Full refund if {b.host.first_name} cancels or the room isn&apos;t as listed.</div>
         <p className="note"><CircleAlert size={16} style={{ flexShrink: 0, marginTop: 1 }} />Only pay here. We never ask you to transfer to a personal account.</p>

@@ -52,12 +52,12 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Hosting sits here, like "Become a driver" in Bolt's menu. */}
-        <Link href="/host" className="hostcard">
+        {/* Hosting sits here, like "Become a driver" in Bolt's menu. New hosts read the partner page first. */}
+        <Link href={me?.profile.is_host ? "/host" : "/partners"} className="hostcard">
           <span className="tile" style={{ background: "rgba(255,255,255,.18)", color: "#fff", width: 48, height: 48, borderRadius: 14 }}><HostIcon size={26} /></span>
           <span className="stack" style={{ gap: 2, flex: 1 }}>
-            <span style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 18 }}>Host a corper</span>
-            <span style={{ fontSize: 14, opacity: 0.9 }}>{me?.profile.is_host ? "Your rooms, requests and payouts" : "List your room"}</span>
+            <span style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 18 }}>{me?.profile.is_host ? "Hosting" : "Become a host partner"}</span>
+            <span style={{ fontSize: 14, opacity: 0.9 }}>{me?.profile.is_host ? "Your rooms, requests and payouts" : "Be someone’s bunkie"}</span>
           </span>
           <ChevronRight size={20} />
         </Link>

@@ -9,16 +9,16 @@ import { RotatingWord } from "@/components/RotatingWord";
 import styles from "./landing.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Bunkie · Start your service year with a friend" },
+  title: { absolute: "Bunkie · Leave NYSC camp with your bunkie" },
   description: "Start your service year with a friend. Bunkie pairs new corp members with corpers already serving in Abuja.",
   openGraph: {
-    title: "Bunkie · Start your service year with a friend",
+    title: "Bunkie · Leave NYSC camp with your bunkie",
     description: "Start your service year with a friend, not alone.",
     type: "website",
   },
 };
 
-const WORDS = ["your bunkie.", "a friend.", "a place to stay.", "a head start."];
+const WORDS = ["your bunkie.", "a friend.", "a head start.", "a place to stay."];
 
 const WORRIES = [
   { q: "“I don’t know anyone in Abuja.”", Icon: BunkIcon, a: "You’ll know your bunkie. And your bunkie knows the city." },
@@ -36,19 +36,18 @@ const YEAR = [
 ];
 
 const SAFETY = [
-  { Icon: VerifiedIcon, tone: styles.tMint, title: "Verified bunkies", text: "ID and selfie checks. Every room is reviewed before it goes live." },
+  { Icon: VerifiedIcon, tone: styles.tMint, title: "Verified bunkies", text: "Every host and every room is checked before going live." },
   { Icon: WalletIcon, tone: styles.tAmber, title: "Pay only in Bunkie", text: "Your money is held until you move in." },
   { Icon: LockIcon, tone: styles.tSky, title: "Numbers private", text: "Phone numbers stay hidden until you book." },
   { Icon: BunkIcon, tone: styles.tLilac, title: "Your choice of home", text: "Women only, men only or mixed." },
 ];
 
 const FAQ = [
-  { q: "Will I stay with a corper?", a: "Corper hosts come first and wear a badge. Other verified hosts in Abuja are there too." },
+  { q: "Will I stay with a corper?", a: "Corper hosts come first and wear a badge. Other hosts in Abuja are there too." },
   { q: "How long can I stay?", a: "From one week to the rest of your service year. Stay until you’re settled." },
   { q: "Can I book while I’m still in camp?", a: "Yes. Meet your bunkie by video call and move in on your camp exit day." },
   { q: "How do I pay?", a: "Only inside Bunkie, by card, transfer or USSD through Paystack. Never to a personal account." },
   { q: "Is Bunkie only in Abuja?", a: <>For now, yes. <Link href="/waitlist">Join the waitlist</Link> for your state.</> },
-  { q: "What does it cost to use?", a: "Searching, chatting and requesting are free. Paystack’s charge is added when you pay." },
 ];
 
 /** Pinterest-style collage: four columns of moments from a first service year, drifting slowly. */
@@ -112,8 +111,10 @@ export default function Landing() {
       <section className={styles.hero}>
         <div className={styles.wrap}>
           <span className={styles.eyebrow}><CampIcon size={15} />For corp members in Abuja</span>
-          <h1>Start your service year <span className={styles.accent}>with a friend.</span></h1>
-          <p className={styles.lede}>Bunkie pairs you with a corper who’s already serving in Abuja. Someone in your corner from day one.</p>
+          <h1 aria-label="Leave NYSC camp with your bunkie.">
+            Leave NYSC camp with <RotatingWord words={WORDS} className={styles.rotate} />
+          </h1>
+          <p className={styles.lede}>Your bunkie is a corper who’s already serving in Abuja. Someone in your corner from day one.</p>
 
           <Link href="/welcome" className={styles.search}>
             <span className={styles.searchText}>
@@ -193,6 +194,18 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className={`${styles.section} ${styles.flushBottom}`}>
+        <div className={styles.wrap}>
+          <div className={styles.legacy}>
+            <span className={styles.legacyYear} aria-hidden="true">1973</span>
+            <div>
+              <h2>Corpers looking out for corpers.</h2>
+              <p>NYSC began in 1973 to build common ties among young Nigerians. Every batch, corpers land in a new state, often far from home. Bunkie keeps that spirit going, one corper welcoming the next.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="hosts" className={styles.section}>
         <div className={`${styles.wrap} ${styles.hosts}`}>
           <div>
@@ -201,12 +214,12 @@ export default function Landing() {
             <h2>Already settled in?<br />Be someone’s bunkie.</h2>
             <ul className={styles.hostList}>
               <li><CheckIcon size={18} />Give a new corper a soft landing</li>
-              <li><CheckIcon size={18} />Verified corpers only</li>
+              <li><CheckIcon size={18} />Host a fellow corper</li>
               <li><CheckIcon size={18} />Your house rules, in writing</li>
               <li><CheckIcon size={18} />Rent paid in the app</li>
             </ul>
             <div className={styles.hostCtas}>
-              <Link href="/host" className={styles.ctaGreen}>Become a host partner</Link>
+              <Link href="/partners" className={styles.ctaGreen}>Become a host partner</Link>
               <Link href="/partners" className={styles.ctaLine}>See what it involves <ArrowIcon size={16} /></Link>
             </div>
           </div>
@@ -229,9 +242,7 @@ export default function Landing() {
 
       <section className={styles.band}>
         <div className={styles.wrap}>
-          <h2 aria-label="Leave camp with your bunkie.">
-            Leave camp with <RotatingWord words={WORDS} className={`${styles.rotate} ${styles.rotateBand}`} />
-          </h2>
+          <h2>Start your service year <span className={styles.bandAccent}>with a friend.</span></h2>
           <Link href="/welcome" className={styles.ctaWhite}>Find your bunkie</Link>
         </div>
       </section>

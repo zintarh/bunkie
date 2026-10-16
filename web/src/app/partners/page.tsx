@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowIcon, BankIcon, CalendarIcon, CameraIcon, CheckIcon, ChevronDownIcon, DocIcon, HomeIcon, KeyIcon,
-  LockIcon, PauseIcon, PinIcon, ProfileIcon, ShieldIcon, SparkIcon, VerifiedIcon, VideoIcon, WalletIcon,
+  ArrowIcon, BankIcon, BunkIcon, CalendarIcon, CameraIcon, CheckIcon, ChevronDownIcon, DocIcon, HomeIcon, KeyIcon,
+  LockIcon, PauseIcon, PinIcon, ProfileIcon, ShieldIcon, SparkIcon, VideoIcon, WalletIcon,
 } from "@/components/icons";
 import { LandingFooter, LandingNav } from "@/components/LandingChrome";
 import base from "../landing.module.css";
@@ -16,26 +16,26 @@ export const metadata: Metadata = {
 
 const WHY = [
   { Icon: SparkIcon, tone: styles.whyGreen, title: "Be the welcome you’d want", text: "You’re not just renting out a room. You’re giving a new corper a friend in Abuja." },
-  { Icon: VerifiedIcon, tone: styles.whyAmber, title: "Corpers you can trust", text: "Every corper is verified with their ID, a selfie and their call-up letter." },
-  { Icon: WalletIcon, tone: styles.whyInk, title: "Share your rent", text: "Your bunkie pays in the app, and you keep 98%." },
+  { Icon: BunkIcon, tone: styles.whyAmber, title: "Someone like you", text: "Your bunkie is a fellow corper, a few months behind you." },
+  { Icon: WalletIcon, tone: styles.whyInk, title: "Share your rent", text: "Your bunkie pays their share in the app. No chasing, no cash." },
 ];
 
 const DEAL = {
   you: ["A friendly face for their first weeks", "A welcoming, safe space, as listed", "Honest photos, taken in the app", "Keeping to the agreement"],
-  us: ["Verifying every corper", "Holding rent until move-in", "Keeping your number private", "A team that steps in on reports and deposits"],
+  us: ["Corpers who fit your home", "Holding rent until move-in", "Keeping your number private", "A team that steps in on reports and deposits"],
 };
 
 const STEPS = [
   { Icon: ProfileIcon, title: "Sign up", text: "With email or Google." },
-  { Icon: ShieldIcon, title: "Verify", text: "Your NIN, a selfie and your call-up letter for the Corper host badge." },
+  { Icon: ShieldIcon, title: "Get verified", text: "Quick, and kept private." },
   { Icon: CameraIcon, title: "List your space", text: "Photos in the app, price and house rules." },
   { Icon: KeyIcon, title: "Go live", text: "We review every room before it’s live." },
 ];
 
 const NEEDS = [
   { Icon: PinIcon, text: "A room in Abuja" },
-  { Icon: VerifiedIcon, text: "Your NIN" },
   { Icon: CameraIcon, text: "A phone with a camera" },
+  { Icon: HomeIcon, text: "A warm welcome" },
   { Icon: BankIcon, text: "A Nigerian bank account" },
 ];
 
@@ -47,9 +47,8 @@ const WAYS = [
 ];
 
 const FAQ = [
-  { q: "I’m still serving. Can I host?", a: "Yes. Bunkie is built around serving corpers hosting the next batch. Add your call-up letter for the Corper host badge." },
-  { q: "Do I have to be a corper to host?", a: "No. Any verified host in Abuja can list. Corper hosts wear a badge and get a boost in search." },
-  { q: "How much does Bunkie take?", a: "2% of each payment. Listing your room is free." },
+  { q: "I’m still serving. Can I host?", a: "Yes. Bunkie is built around serving corpers hosting the next batch. You’ll wear a Corper host badge." },
+  { q: "Do I have to be a corper to host?", a: "No. Anyone with a room in Abuja can host. Corper hosts wear a badge and get a boost in search." },
   { q: "When do I get paid?", a: "After the corper moves in, then for each week or month of the stay." },
   { q: "What about the deposit?", a: "Bunkie holds it until move-out. You can propose deductions. If you can’t agree, the Bunkie team decides." },
   { q: "Can I charge for inspections?", a: "Yes, up to ₦5,000, or keep them free. You keep the fee if the corper doesn’t show up." },
@@ -76,8 +75,8 @@ export default function Partners() {
               <a href="#start" className={styles.ctaGhost}>How it works</a>
             </div>
             <ul className={styles.ticks}>
-              <li><CheckIcon size={16} />Verified corpers</li>
-              <li><CheckIcon size={16} />Free to list</li>
+              <li><CheckIcon size={16} />Fellow corpers</li>
+              <li><CheckIcon size={16} />Your house rules</li>
               <li><CheckIcon size={16} />Rent paid in the app</li>
             </ul>
           </div>
@@ -87,7 +86,7 @@ export default function Partners() {
               <span className={styles.avatar}>T</span>
               <div>
                 <b>Tolu wants to bunk with you</b>
-                <span><VerifiedIcon size={13} />Verified corper · just out of camp</span>
+                <span><SparkIcon size={13} />Corper · just out of camp</span>
               </div>
             </div>
             <div className={`${styles.card} ${styles.room}`}>
@@ -126,7 +125,7 @@ export default function Partners() {
       <section className={base.statement}>
         <div className={base.wrap}>
           <h2>You’ve found your feet.<br /><span>Help someone find theirs.</span></h2>
-          <p>Bunkie handles verification, payments and the agreement, so you can focus on being a good bunkie.</p>
+          <p>It’s the spirit NYSC started with: common ties, one batch to the next. Bunkie handles payments and the agreement, so you can focus on being a good bunkie.</p>
         </div>
       </section>
 
@@ -171,9 +170,9 @@ export default function Partners() {
       <section className={base.section}>
         <div className={base.wrap}>
           <div className={styles.corper}>
-            <span className={styles.corperTag}><HomeIcon size={14} />Every verified host</span>
+            <span className={styles.corperTag}><HomeIcon size={14} />Everyone’s welcome</span>
             <h2>Not a corper?<br />You’re welcome too.</h2>
-            <p>Any verified host in Abuja can list a room. Corper hosts wear a badge and get a boost in search.</p>
+            <p>Anyone with a room in Abuja can host. Corper hosts wear a badge and get a boost in search.</p>
           </div>
         </div>
       </section>

@@ -113,7 +113,7 @@ export default function Intro() {
         {last ? (
           <div className="stack" style={{ gap: 4 }}>
             <Link className="btn" href="/start" onClick={finish}>Find my bunkie</Link>
-            <Link className="link" href="/host" onClick={finish}>I have a room to share</Link>
+            <Link className="link" href="/partners" onClick={finish}>I have a room to share</Link>
           </div>
         ) : (
           <div className="stack" style={{ gap: 4 }}>
