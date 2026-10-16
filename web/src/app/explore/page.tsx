@@ -34,6 +34,8 @@ export default function Explore() {
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState<SearchIntent | null>(null);
+  // A search typed in the laptop top bar arrives as ?q=.
+  const [initialQ] = useState(() => (typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("q") ?? ""));
 
   useEffect(() => {
     if (ready && !prefs.stage) router.replace("/start");
@@ -125,7 +127,7 @@ export default function Explore() {
   return (
     <main className="screen">
       <div className="hero" style={{ flexShrink: 0, paddingBottom: 16 }}>
-        <div className="between" style={{ padding: "10px 16px 0 20px" }}>
+        <div className="between mob-only" style={{ padding: "10px 16px 0 20px" }}>
           <Wordmark />
           <span className="row" style={{ gap: 8 }}>
             {me && (
@@ -156,7 +158,7 @@ export default function Explore() {
           </button>
         </div>
         <div style={{ padding: "8px 16px 0" }}>
-          <SmartSearch value={search} onChange={setSearch} />
+          <SmartSearch value={search} onChange={setSearch} initialText={initialQ} />
         </div>
       </div>
 
@@ -186,7 +188,7 @@ export default function Explore() {
         {error && <p className="err" role="alert">{error}</p>}
         {ranked == null && !error && <Skeletons />}
         {exact && exact.length > 0 && (
-          <div className="rise stack" style={{ gap: 16 }}>
+          <div className="rise stack roomgrid" style={{ gap: 16 }}>
             {exact.map(({ r, fit }) => (
               <RoomCard key={r.id} room={r} saved={saved.has(r.id)} onToggleSave={() => toggleSave(r.id)} fitScore={fit}
                 minutesLabel={inCamp ? (r.ease_min != null ? `${r.ease_min} min to centre` : null) : r.commute_min != null ? `${r.commute_min} min` : null} />
@@ -194,7 +196,7 @@ export default function Explore() {
           </div>
         )}
         {close.length > 0 && (
-          <div className="rise stack" style={{ gap: 16, paddingTop: exact?.length ? 24 : 0 }}>
+          <div className="rise stack roomgrid" style={{ gap: 16, paddingTop: exact?.length ? 24 : 0 }}>
             <span className="stack" style={{ gap: 2, padding: "12px 2px 0" }}>
               <span className="h2">{exact?.length ? "Close matches" : "Nothing exact yet. These are close"}</span>
               <span className="small">Each one says what&apos;s different.</span>

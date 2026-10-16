@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Sparkles, X } from "lucide-react";
 import { ROOM_LABEL, months, nairaK, weeks } from "@/lib/format";
 import type { SearchIntent } from "@/lib/types";
@@ -24,8 +24,8 @@ function parts(s: SearchIntent): { key: keyof U | "place"; label: string }[] {
 }
 
 /** Type what you want ("self con near Utako under 80k"); shows what Bunkie understood. */
-export function SmartSearch({ value, onChange }: { value: SearchIntent | null; onChange: (s: SearchIntent | null) => void }) {
-  const [text, setText] = useState(value?.text ?? "");
+export function SmartSearch({ value, onChange, initialText }: { value: SearchIntent | null; onChange: (s: SearchIntent | null) => void; initialText?: string }) {
+  const [text, setText] = useState(value?.text ?? initialText ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +47,11 @@ export function SmartSearch({ value, onChange }: { value: SearchIntent | null; o
       setBusy(false);
     }
   };
+
+  // Arrived with a search (from the laptop top bar): run it once.
+  useEffect(() => {
+    if (initialText && !value) void run();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const remove = (key: keyof U | "place") => {
     if (!value) return;

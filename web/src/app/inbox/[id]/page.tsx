@@ -121,7 +121,7 @@ function Chat() {
   return (
     <main className="screen" style={{ background: "#F4F7F5" }}>
       <header className="topbar" style={{ background: "#fff", borderBottom: "1px solid var(--line)", padding: "0 6px", height: 64 }}>
-        <Link className="ib" href="/inbox" aria-label="Back to messages"><ChevronLeft size={24} strokeWidth={2.2} /></Link>
+        <Link className="ib mob-only" href="/inbox" aria-label="Back to messages"><ChevronLeft size={24} strokeWidth={2.2} /></Link>
         <span className="avatar" style={{ width: 40, height: 40 }}>{photo ? <img src={photo} alt="" /> : initial(other.first_name)}</span>
         <span className="stack" style={{ gap: 0, flex: 1, minWidth: 0 }}>
           <span className="row" style={{ gap: 4, fontWeight: 800 }}>

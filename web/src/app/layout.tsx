@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { DesktopFrame } from "@/components/DesktopFrame";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-NG" className={`${bricolage.variable} ${figtree.variable}`}>
       <body>
-        <div className="app">{children}</div>
+        <DesktopFrame>{children}</DesktopFrame>
         <ServiceWorker />
       </body>
     </html>

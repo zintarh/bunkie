@@ -298,3 +298,94 @@ body:has([data-full]) { background: var(--white); }
 .smart { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 6px 0 16px; border-radius: 999px; background: var(--white); color: var(--ink); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16); }
 .smart input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 15px; height: 100%; }
 .smart .go { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* ---------- Laptop and desktop, Instagram-for-web style (phones are unchanged) ---------- */
+.sidenav, .searchpanel, .searchpanel-scrim, .homerail, .desk-only { display: none; }
+@media (min-width: 1024px) {
+  :root { --nav: 76px; }
+  .mob-only { display: none !important; }
+  .desk-only { display: revert; }
+  .screen.desk-only { display: flex; }
+  .tabs { display: none; }
+  body:not(:has([data-full])) { background: var(--white); }
+
+  /* Sidebar: icons only up to 1264px, icons and labels above. */
+  .sidenav { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; z-index: 40; width: var(--nav); padding: 26px 12px 20px; background: var(--white); border-right: 1px solid var(--line); }
+  .sidenav-brand { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 8px; margin-bottom: 18px; color: var(--ink); font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .sidenav-brand i { width: 36px; height: 36px; border-radius: 11px; background: var(--green); color: var(--amber); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sidenav-items { display: flex; flex-direction: column; gap: 4px; }
+  .sidenav-bottom { margin-top: auto; }
+  .sidenav-item { display: flex; align-items: center; gap: 16px; height: 50px; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 15.5px; font-weight: 500; text-align: left; width: 100%; transition: background 0.15s; }
+  .sidenav-item:hover { background: #f2f5f1; }
+  .sidenav-item:hover .sidenav-icon { transform: scale(1.06); }
+  .sidenav-item.on { font-weight: 800; }
+  .sidenav-item.on .sidenav-icon { color: var(--green-text); }
+  .sidenav-icon { position: relative; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
+  .sidenav-badge { position: absolute; top: -6px; right: -9px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid var(--white); }
+  .sidenav-create { width: 24px; height: 24px; border-radius: 7px; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; }
+  .sidenav-create.big { width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--amber); color: var(--ink); flex-shrink: 0; }
+  .sidenav-avatar { width: 26px; height: 26px; border-radius: 999px; background: #fce9be; color: var(--ink); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .sidenav-avatar.on { box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--green); }
+  .sidenav-avatar.big { width: 48px; height: 48px; font-size: 18px; flex-shrink: 0; }
+  .sidenav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sidenav-signup { height: 44px; border-radius: 12px; background: var(--green); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .sidenav-label, .sidenav-signup .sidenav-label { display: none; }
+  .sidenav-signup-short { font-size: 13px; }
+
+  /* Search slides out beside the sidebar. */
+  .searchpanel-scrim { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(16, 35, 27, 0.08); }
+  .searchpanel { display: flex; flex-direction: column; gap: 18px; position: fixed; top: 0; bottom: 0; left: var(--nav); z-index: 36; width: 400px; padding: 26px 22px; background: var(--white); border-right: 1px solid var(--line); border-radius: 0 24px 24px 0; box-shadow: 16px 0 40px rgba(16, 35, 27, 0.1); animation: slidein 0.22s ease both; }
+  @keyframes slidein { from { transform: translateX(-24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .searchpanel-title { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: -0.02em; }
+  .searchpanel-box { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 12px 0 14px; border-radius: 12px; background: var(--soft); color: var(--muted); }
+  .searchpanel-box input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 15px; color: var(--ink); }
+  .searchpanel-list { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .searchpanel-label { font-weight: 800; font-size: 15px; padding: 0 4px 8px; }
+  .searchpanel-idea { display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 10px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 15px; text-align: left; }
+  .searchpanel-idea:hover { background: var(--soft); }
+  .searchpanel-idea svg { color: var(--muted); flex-shrink: 0; }
+
+  /* The page beside the sidebar. */
+  .desk-main { margin-left: var(--nav); min-height: 100dvh; display: flex; justify-content: center; gap: 48px; }
+  .desk-main > .app { width: 100%; max-width: 600px; margin: 0; box-shadow: none; min-height: 0; background: var(--white); }
+  .desk-main .screen { height: 100dvh; }
+  .desk-feed > .app { max-width: 520px; }
+  .desk-dm > .app { max-width: none; }
+  .desk-page > .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+
+  /* Home: the search header keeps its colour but reads as the top of a feed. */
+  .desk-feed .hero { border-radius: 0 0 28px 28px; }
+  .desk-feed .body { padding: 6px 0 48px !important; }
+
+  /* Home's right-hand panel. */
+  .homerail { display: flex; flex-direction: column; gap: 14px; width: 320px; padding-top: 34px; position: sticky; top: 0; align-self: flex-start; }
+  .homerail-me { display: flex; align-items: center; gap: 12px; color: var(--ink); padding: 4px; }
+  .homerail-card, .homerail-host { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 18px; border: 1px solid var(--line); background: var(--white); color: var(--ink); }
+  .homerail-card:hover, .homerail-host:hover { border-color: #cfe9da; }
+  .homerail-host { flex-direction: row; align-items: center; gap: 12px; background: var(--soft); border-color: transparent; }
+  .homerail-foot { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 4px; font-size: 12.5px; color: #8a978f; }
+  .homerail-foot a { color: #8a978f; }
+}
+@media (min-width: 1264px) {
+  :root { --nav: 244px; }
+  .sidenav-label { display: inline; }
+  .sidenav-signup .sidenav-label { display: inline; }
+  .sidenav-signup-short { display: none; }
+  .sidenav.narrow { width: 76px; }
+  .sidenav.narrow .sidenav-label { display: none; }
+}
+@media (min-width: 1024px) and (max-width: 1159px) {
+  .homerail { display: none; }
+}
+/* Messages: two panes on laptops. */
+.dm, .dm-pane { display: contents; }
+@media (min-width: 1024px) {
+  .dm { display: grid; grid-template-columns: 380px minmax(0, 1fr); height: 100dvh; }
+  .dm-list { display: block; border-right: 1px solid var(--line); overflow: hidden; }
+  .dm-list .topbar { display: none; }
+  .dm-list .h1 { padding-top: 26px !important; }
+  .dm-pane { display: block; min-width: 0; }
+}
+@media (min-width: 1264px) {
+  .searchpanel { left: 76px; }
+}
