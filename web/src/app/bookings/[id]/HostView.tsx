@@ -7,6 +7,7 @@ import { dayLabel, dayParts, isoDay, naira, slotLabel, stayLength, timeLabel, un
 import { useMyAnswers } from "@/lib/useMyAnswers";
 import { Err, Foot, JoinCall, PersonCard, useStep } from "./shared";
 import { ReviewForm } from "@/components/ReviewForm";
+import { DepositCard, MoveOutPhotos, RentCard } from "@/components/StayMoney";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
 const WINDOW: Record<string, string> = { morning: "8am–11am", midday: "11am–2pm", afternoon: "2pm–5pm", evening: "5pm–8pm" };
@@ -96,16 +97,23 @@ export function HostView({ b, reload }: Props) {
       break;
     case "active":
       title = `${t} lives here`;
-      body = <p className="small" style={{ fontSize: 15 }}>Stay ends {dayLabel(b.move_out, true)}.</p>;
+      body = <><p className="small" style={{ fontSize: 15 }}>Stay ends {dayLabel(b.move_out, true)}.</p><RentCard b={b} role="host" /></>;
       foot = <button className="link" disabled={!!busy} onClick={() => run("ask_to_leave")}>Ask {t} to leave (notice applies)</button>;
       break;
     case "ending":
       title = `${t}'s last night is ${dayLabel(new Date(new Date(b.move_out).getTime() - 86400000))}`;
+      body = <MoveOutPhotos b={b} me={b.host_id} />;
       foot = <button className="btn" disabled={!!busy} onClick={() => run("move_out_done")}>{t} has moved out</button>;
       break;
     case "moved_out": case "completed":
       title = "Stay finished";
-      body = <ReviewForm bookingId={b.id} role="host" otherName={t} moveOut={b.move_out} />;
+      body = (
+        <>
+          <DepositCard b={b} role="host" reload={reload} />
+          {b.status === "moved_out" && <MoveOutPhotos b={b} me={b.host_id} />}
+          <ReviewForm bookingId={b.id} role="host" otherName={t} moveOut={b.move_out} />
+        </>
+      );
       break;
     case "closed":
       title = "Closed";

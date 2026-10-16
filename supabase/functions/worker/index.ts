@@ -36,22 +36,26 @@ Deno.serve(async (req) => {
 // Payouts: release the host's share once the delay has passed and nothing is reported.
 // ---------------------------------------------------------------------------
 async function payout(job: Job) {
-  const { data } = await admin.rpc("sys_payout_ready", { p_payment: job.payload.payment_id });
-  const p = data?.[0];
-  if (!p) return;                                       // cancelled, already sent, or a problem is open
-  if (new Date(p.release_after) > new Date()) throw new Error("not yet");
-  // Inspection fees are paid out once the inspection happened (the database only schedules them then);
-  // stay payments wait for move-in.
-  const { data: pay } = await admin.from("payments").select("kind").eq("id", job.payload.payment_id).maybeSingle();
-  if (pay?.kind !== "inspection" && !["moved_in", "active", "ending", "moved_out", "completed"].includes(p.booking_status)) return;
-  if (!p.recipient_code) throw new Error("host has no payout account");
-  await admin.rpc("sys_set_money_status", { p_table: "payouts", p_id: p.payout_id, p_status: "processing", p_ref: null, p_error: null });
-  const t = await paystack<{ transfer_code: string }>("/transfer", {
-    method: "POST",
-    body: { source: "balance", amount: p.amount_kobo, recipient: p.recipient_code, reference: p.payout_id, reason: "Bunkie payout" },
-  });
-  // transfer.success / transfer.failed webhooks finish it.
-  await admin.rpc("sys_set_money_status", { p_table: "payouts", p_id: p.payout_id, p_status: "processing", p_ref: t.transfer_code, p_error: null });
+  // One payout = one period's share (or an inspection fee, or a kept deposit). Older jobs carry only payment_id.
+  const ids: string[] = job.payload.payout_id
+    ? [job.payload.payout_id]
+    : ((await admin.from("payouts").select("id").eq("payment_id", job.payload.payment_id).eq("status", "scheduled")).data ?? []).map((r) => r.id);
+  for (const id of ids) {
+    const { data } = await admin.rpc("sys_payout_due", { p_payout: id });
+    const p = data?.[0];
+    if (!p) continue;                                     // cancelled, already sent, or a problem is open
+    if (new Date(p.release_after) > new Date()) throw new Error("not yet");
+    // Rent waits for a confirmed move-in; inspection fees and agreed deposit deductions don't.
+    if (p.kind === "rent" && !["moved_in", "active", "ending", "moved_out", "completed"].includes(p.booking_status)) continue;
+    if (!p.recipient_code) throw new Error("host has no payout account");
+    await admin.rpc("sys_set_money_status", { p_table: "payouts", p_id: p.payout_id, p_status: "processing", p_ref: null, p_error: null });
+    const t = await paystack<{ transfer_code: string }>("/transfer", {
+      method: "POST",
+      body: { source: "balance", amount: p.amount_kobo, recipient: p.recipient_code, reference: p.payout_id, reason: "Bunkie payout" },
+    });
+    // transfer.success / transfer.failed webhooks finish it.
+    await admin.rpc("sys_set_money_status", { p_table: "payouts", p_id: p.payout_id, p_status: "processing", p_ref: t.transfer_code, p_error: null });
+  }
 }
 
 async function refund(job: Job) {

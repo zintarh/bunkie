@@ -190,7 +190,8 @@ do $$ declare p record; begin
   -- Monthly: first month 53,000 + deposit 20,000 = 73,000 naira.
   assert p.amount_kobo = 7300000, format('amount %s', p.amount_kobo);
   assert p.paystack_fee_kobo between 120000 and 125000, format('paystack fee about 1.5%% + 100, got %s', p.paystack_fee_kobo);
-  assert p.bunkie_fee_kobo = 146000, '2% fee';
+  assert p.bunkie_fee_kobo = 106000, '2% of rent only (not the deposit)';
+  assert p.rent_kobo = 5300000 and p.deposit_kobo = 2000000, 'rent and deposit recorded separately';
 end $$;
 
 set role service_role;
@@ -216,7 +217,8 @@ select public.booking_action((select id from b1), 'check_in', null, '{"as_listed
 reset role;
 do $$ begin
   assert (select status from public.bookings where id = (select id from b1)) = 'moved_in', 'moved in';
-  assert (select amount_kobo from public.payouts where booking_id = (select id from b1)) = 7300000 - 146000, 'host gets 98%';
+  assert (select amount_kobo from public.payouts where booking_id = (select id from b1) and kind = 'rent') = 5300000 - 106000, 'host gets 98% of the rent; the deposit stays held';
+  assert not exists (select 1 from public.payouts where booking_id = (select id from b1) and kind = 'deposit'), 'deposit not paid out at move-in';
   assert (select count(*) from private.jobs where queue = 'payout') = 1, 'payout job';
 end $$;
 

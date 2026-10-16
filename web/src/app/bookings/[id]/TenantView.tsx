@@ -12,6 +12,7 @@ import { shrinkFile } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useMyAnswers } from "@/lib/useMyAnswers";
 import { ReviewForm } from "@/components/ReviewForm";
+import { DepositCard, MoveOutPhotos, RentCard } from "@/components/StayMoney";
 import { AgreementParts, Err, Foot, JoinCall, PersonCard, Timeline, useStep } from "./shared";
 
 type Props = { b: BookingFull; reload: () => Promise<void> };
@@ -31,6 +32,8 @@ export function TenantView({ b, reload }: Props) {
       <Body>
         <h1 className="h1">Stay finished</h1>
         <p className="sub">Thanks for bunking with {host}.</p>
+        <DepositCard b={b} role="tenant" reload={reload} />
+        {b.status === "moved_out" && <MoveOutPhotos b={b} me={b.tenant_id} />}
         <ReviewForm bookingId={b.id} role="tenant" otherName={host} moveOut={b.move_out} />
       </Body>
     );
@@ -488,6 +491,8 @@ function MyStay({ b, reload }: Props) {
           <span className="progress" style={{ borderRadius: 4 }}><span style={{ width: `${Math.min(100, (day / total) * 100)}%`, borderRadius: 4 }} /></span>
         </div>
         {b.status === "moved_in" && <div className="banner amber">Waiting for {b.host.first_name} to confirm you moved in.</div>}
+        <RentCard b={b} role="tenant" />
+        {b.status === "ending" && <MoveOutPhotos b={b} me={b.tenant_id} />}
         {b.status === "ending" && <div className="banner amber">Your last night is {dayLabel(new Date(new Date(b.move_out).getTime() - 86400000))}.</div>}
         <div className="lrows">
           <Link className="lrow" href="/ppa"><span className="tile t-mint"><MapPin size={20} /></span><span className="stack" style={{ gap: 0 }}><b>Got your PPA? Add it</b><span className="small">See your commute.</span></span></Link>

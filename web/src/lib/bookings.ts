@@ -14,7 +14,10 @@ export type Terms = {
   refunds: { early_leave_notice_days: number; redeploy_refund: string; ask_leave_notice_days: number; short_stay_no_refund_last_days?: number };
   platform: { min_notice_days: number };
 };
-export type Payment = { id: string; amount_kobo: number; paystack_fee_kobo: number; bunkie_fee_kobo: number; paystack_reference: string; status: string; paid_at: string | null };
+export type Payment = {
+  id: string; kind: string; amount_kobo: number; rent_kobo: number; deposit_kobo: number; period_start: string | null;
+  paystack_fee_kobo: number; bunkie_fee_kobo: number; paystack_reference: string; status: string; paid_at: string | null;
+};
 
 export type BookingFull = Booking & {
   message: string | null;
@@ -43,7 +46,7 @@ export async function fetchBooking(id: string): Promise<BookingFull | null> {
   const [ans, agr, pay, ref] = await Promise.all([
     db.from("bunkie_answers").select("sleep, guests, cooking, cleaning, noise").eq("user_id", b.tenant_id).maybeSingle(),
     db.from("agreement_versions").select("*").eq("booking_id", id).order("version", { ascending: false }).limit(1).maybeSingle(),
-    db.from("payments").select("id, amount_kobo, paystack_fee_kobo, bunkie_fee_kobo, paystack_reference, status, paid_at").eq("booking_id", id).order("created_at"),
+    db.from("payments").select("id, kind, amount_kobo, rent_kobo, deposit_kobo, period_start, paystack_fee_kobo, bunkie_fee_kobo, paystack_reference, status, paid_at").eq("booking_id", id).order("created_at"),
     db.from("refunds").select("amount_kobo, status, reason").eq("booking_id", id),
   ]);
   return { ...b, tenantAnswers: (ans.data as Answers) ?? null, agreement: agr.data ?? null, payments: pay.data ?? [], refunds: ref.data ?? [] } as BookingFull;

@@ -20,6 +20,7 @@ export default function Reports() {
   const [open, setOpen] = useState(true);
   const [rows, setRows] = useState<Report[] | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [keeps, setKeeps] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const load = useCallback(() => {
@@ -58,6 +59,18 @@ export default function Reports() {
                 <Link href={`/admin/people?q=${r.reporter_id}`} className={styles.meta}>Reporter</Link>
                 {r.other_id && <Link href={`/admin/people?q=${r.other_id}`} className={styles.meta}>Other person</Link>}
               </div>
+              {r.status !== "closed" && r.details?.startsWith("Deposit dispute") && r.booking_id && (
+                <div className={styles.actions}>
+                  <input className={styles.note} inputMode="numeric" placeholder="Host keeps ₦ (0 = all back to the corper)"
+                    value={keeps[r.id] ?? ""} onChange={(e) => setKeeps({ ...keeps, [r.id]: e.target.value.replace(/\D/g, "") })} />
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busy === r.id || keeps[r.id] === undefined} onClick={async () => {
+                    setBusy(r.id);
+                    setErr(await adminCall("admin_settle_deposit", { p_booking: r.booking_id, p_host_keeps: Number(keeps[r.id] || 0), p_note: notes[r.id] ?? null }));
+                    setBusy(null);
+                    load();
+                  }}>Settle deposit</button>
+                </div>
+              )}
               {r.status !== "closed" ? (
                 <div className={styles.actions}>
                   <input className={styles.note} placeholder="Note for the log" value={notes[r.id] ?? ""} onChange={(e) => setNotes({ ...notes, [r.id]: e.target.value })} />
