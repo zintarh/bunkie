@@ -10,25 +10,25 @@ import styles from "./partners.module.css";
 
 export const metadata: Metadata = {
   title: "Host partners",
-  description: "Partner with Bunkie. Host verified corp members in Abuja and keep 98% of your rent.",
-  openGraph: { title: "Become a Bunkie host partner", description: "Host verified corp members in Abuja.", type: "website" },
+  description: "Already settled in Abuja? Give a new corp member a soft landing. Become a Bunkie host partner.",
+  openGraph: { title: "Become a Bunkie host partner", description: "Give the next batch a soft landing.", type: "website" },
 };
 
 const WHY = [
-  { Icon: VerifiedIcon, tone: styles.whyGreen, title: "Corpers you can trust", text: "Every corper is verified with their ID, a selfie and their call-up letter." },
-  { Icon: WalletIcon, tone: styles.whyAmber, title: "Rent that arrives", text: "Corpers pay in the app. You’re paid after move-in and keep 98%." },
-  { Icon: DocIcon, tone: styles.whyInk, title: "Your house, your rules", text: "Set your rules and who you host. Both of you agree to them in writing." },
+  { Icon: SparkIcon, tone: styles.whyGreen, title: "Be the welcome you’d want", text: "You’re not just renting out a room. You’re giving a new corper a friend in Abuja." },
+  { Icon: VerifiedIcon, tone: styles.whyAmber, title: "Corpers you can trust", text: "Every corper is verified with their ID, a selfie and their call-up letter." },
+  { Icon: WalletIcon, tone: styles.whyInk, title: "Share your rent", text: "Your bunkie pays in the app, and you keep 98%." },
 ];
 
 const DEAL = {
-  you: ["A clean, safe room, as listed", "Honest photos, taken in the app", "Quick replies to requests", "Keeping to the agreement"],
+  you: ["A friendly face for their first weeks", "A welcoming, safe space, as listed", "Honest photos, taken in the app", "Keeping to the agreement"],
   us: ["Verifying every corper", "Holding rent until move-in", "Keeping your number private", "A team that steps in on reports and deposits"],
 };
 
 const STEPS = [
   { Icon: ProfileIcon, title: "Sign up", text: "With email or Google." },
-  { Icon: ShieldIcon, title: "Verify your ID", text: "Your NIN and a selfie." },
-  { Icon: CameraIcon, title: "List your room", text: "Photos in the app, price and house rules." },
+  { Icon: ShieldIcon, title: "Verify", text: "Your NIN, a selfie and your call-up letter for the Corper host badge." },
+  { Icon: CameraIcon, title: "List your space", text: "Photos in the app, price and house rules." },
   { Icon: KeyIcon, title: "Go live", text: "We review every room before it’s live." },
 ];
 
@@ -40,14 +40,15 @@ const NEEDS = [
 ];
 
 const WAYS = [
-  { Icon: CalendarIcon, tone: base.tMint, title: "Long stays", text: "1 to 12 months, paid in the app." },
-  { Icon: HomeIcon, tone: base.tAmber, title: "Short stays", text: "1 to 4 weeks, if you opt in. Paid upfront." },
+  { Icon: DocIcon, tone: base.tMint, title: "Your house rules", text: "Set them once. Your bunkie agrees in writing." },
+  { Icon: CalendarIcon, tone: base.tAmber, title: "Any length", text: "A few weeks, if you opt in, up to 12 months." },
   { Icon: VideoIcon, tone: base.tSky, title: "Viewings", text: "Video calls, or inspections that are free or up to ₦5,000." },
   { Icon: PauseIcon, tone: base.tLilac, title: "Pause any time", text: "Take your room off search and back on." },
 ];
 
 const FAQ = [
-  { q: "Do I have to be a corper to host?", a: "No. Anyone with a room in Abuja can host. Serving and ex-corpers get a Corper host badge." },
+  { q: "I’m still serving. Can I host?", a: "Yes. Bunkie is built around serving corpers hosting the next batch. Add your call-up letter for the Corper host badge." },
+  { q: "Do I have to be a corper to host?", a: "No. Any verified host in Abuja can list. Corper hosts wear a badge and get a boost in search." },
   { q: "How much does Bunkie take?", a: "2% of each payment. Listing your room is free." },
   { q: "When do I get paid?", a: "After the corper moves in, then for each week or month of the stay." },
   { q: "What about the deposit?", a: "Bunkie holds it until move-out. You can propose deductions. If you can’t agree, the Bunkie team decides." },
@@ -68,16 +69,16 @@ export default function Partners() {
         <div className={`${base.wrap} ${styles.heroGrid}`}>
           <div className={styles.heroText}>
             <span className={base.eyebrow}><SparkIcon size={15} />Bunkie host partners</span>
-            <h1>Turn your spare room into steady rent.</h1>
-            <p className={styles.lede}>Partner with Bunkie and host verified corp members in Abuja.</p>
+            <h1>Give the next batch a soft landing.</h1>
+            <p className={styles.lede}>You’ve found your feet in Abuja. Share your space with a new corper while they find theirs.</p>
             <div className={styles.ctas}>
               <Link href="/host" className={styles.ctaMain}>Become a host partner</Link>
               <a href="#start" className={styles.ctaGhost}>How it works</a>
             </div>
             <ul className={styles.ticks}>
-              <li><CheckIcon size={16} />Free to list</li>
-              <li><CheckIcon size={16} />Keep 98%</li>
               <li><CheckIcon size={16} />Verified corpers</li>
+              <li><CheckIcon size={16} />Free to list</li>
+              <li><CheckIcon size={16} />Rent paid in the app</li>
             </ul>
           </div>
 
@@ -85,20 +86,20 @@ export default function Partners() {
             <div className={`${styles.card} ${styles.request}`}>
               <span className={styles.avatar}>T</span>
               <div>
-                <b>Tolu wants your room</b>
-                <span><VerifiedIcon size={13} />Verified corper · 6 months</span>
+                <b>Tolu wants to bunk with you</b>
+                <span><VerifiedIcon size={13} />Verified corper · just out of camp</span>
               </div>
             </div>
             <div className={`${styles.card} ${styles.room}`}>
               <div className={styles.roomImg} style={{ backgroundImage: "url(/demo/room-1.svg)" }}>
-                <span className={styles.live}>Live</span>
+                <span className={styles.live}><SparkIcon size={12} />Corper host</span>
               </div>
-              <div className={styles.roomRow}><b>₦72,000<small> /month</small></b><span>Utako</span></div>
+              <div className={styles.roomRow}><b>Your place</b><span>Utako</span></div>
             </div>
             <div className={`${styles.card} ${styles.payout}`}>
-              <WalletIcon size={20} />
-              <b>₦70,560</b>
-              <span>Paid out after move-in</span>
+              <KeyIcon size={20} />
+              <b>Exit day</b>
+              <span>Tolu moves in</span>
             </div>
             <div className={`${styles.card} ${styles.signed}`}>
               <span className={styles.dot}><DocIcon size={15} /></span>House rules agreed
@@ -124,8 +125,8 @@ export default function Partners() {
 
       <section className={base.statement}>
         <div className={base.wrap}>
-          <h2>You give a corper a soft landing.<br /><span>We handle the rest.</span></h2>
-          <p>Verification, payments, the agreement and chat, in one app.</p>
+          <h2>You’ve found your feet.<br /><span>Help someone find theirs.</span></h2>
+          <p>Bunkie handles verification, payments and the agreement, so you can focus on being a good bunkie.</p>
         </div>
       </section>
 
@@ -170,9 +171,9 @@ export default function Partners() {
       <section className={base.section}>
         <div className={base.wrap}>
           <div className={styles.corper}>
-            <span className={styles.corperTag}><SparkIcon size={14} />Corper host</span>
-            <h2>Served or serving?<br />Get the Corper host badge.</h2>
-            <p>Add your call-up letter or discharge certificate. Corper hosts come up top in search.</p>
+            <span className={styles.corperTag}><HomeIcon size={14} />Every verified host</span>
+            <h2>Not a corper?<br />You’re welcome too.</h2>
+            <p>Any verified host in Abuja can list a room. Corper hosts wear a badge and get a boost in search.</p>
           </div>
         </div>
       </section>
@@ -208,7 +209,7 @@ export default function Partners() {
 
       <section className={base.band}>
         <div className={base.wrap}>
-          <h2>Ready to host a corper?</h2>
+          <h2>Ready to be someone’s bunkie?</h2>
           <Link href="/host" className={base.ctaWhite}>Become a host partner <ArrowIcon size={18} /></Link>
         </div>
       </section>

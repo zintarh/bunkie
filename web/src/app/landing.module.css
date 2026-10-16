@@ -26,9 +26,11 @@
 .hero { position: relative; padding: 72px 0 0; text-align: center; overflow: hidden; }
 .hero h1 {
   font-family: var(--display); font-weight: 800; font-size: clamp(42px, 7.6vw, 92px); line-height: 1; letter-spacing: -0.045em;
-  margin: 28px auto 0; max-width: 980px;
+  margin: 28px auto 0; max-width: 980px; text-wrap: balance;
 }
 .rotate { display: grid; justify-items: center; color: var(--green); margin-top: 0.06em; }
+.accent { display: block; color: var(--green); margin-top: 0.06em; }
+.rotateBand { color: var(--amber); }
 .rotate > span {
   grid-area: 1 / 1; opacity: 0; transform: translateY(0.35em);
   transition: opacity 0.45s ease, transform 0.45s ease;

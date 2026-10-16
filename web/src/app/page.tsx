@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowIcon, BunkIcon, CalendarIcon, CampIcon, ChatIcon, CheckIcon, ChevronDownIcon, ClockIcon, HomeIcon, HostIcon,
+  ArrowIcon, BunkIcon, CampIcon, ChatIcon, CheckIcon, ChevronDownIcon, HomeIcon, HostIcon,
   KeyIcon, LockIcon, PinIcon, SearchIcon, ShieldIcon, SparkIcon, VerifiedIcon, VideoIcon, WalletIcon,
 } from "@/components/icons";
 import { LandingFooter, LandingNav } from "@/components/LandingChrome";
@@ -9,84 +9,85 @@ import { RotatingWord } from "@/components/RotatingWord";
 import styles from "./landing.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Bunkie · Leave camp with a place to stay" },
-  description: "Verified rooms for corp members in Abuja. Book from camp, pay monthly, move in on exit day.",
+  title: { absolute: "Bunkie · Start your service year with a friend" },
+  description: "Start your service year with a friend. Bunkie pairs new corp members with corpers already serving in Abuja.",
   openGraph: {
-    title: "Bunkie · Leave camp with a place to stay",
-    description: "Verified rooms for corp members in Abuja.",
+    title: "Bunkie · Start your service year with a friend",
+    description: "Start your service year with a friend, not alone.",
     type: "website",
   },
 };
 
-const WORDS = ["a place to stay.", "your bunkie.", "a soft landing.", "peace of mind."];
+const WORDS = ["your bunkie.", "a friend.", "a place to stay.", "a head start."];
 
 const WORRIES = [
-  { q: "“The agent wants one year upfront, plus agency and legal.”", Icon: CalendarIcon, a: "Pay monthly. Stay 1 week to 12 months. No agency fee." },
-  { q: "“How do I see the room from camp?”", Icon: VideoIcon, a: "Video call the host from camp. Move in on exit day." },
-  { q: "“What if it’s a scam?”", Icon: ShieldIcon, a: "Every host is verified. Your money is held until you move in." },
-  { q: "“Who will I be living with?”", Icon: BunkIcon, a: "Meet your bunkie first. Choose women only, men only or mixed." },
+  { q: "“I don’t know anyone in Abuja.”", Icon: BunkIcon, a: "You’ll know your bunkie. And your bunkie knows the city." },
+  { q: "“Where do I even start after camp?”", Icon: KeyIcon, a: "With your bunkie. Move in on exit day and settle in at your pace." },
+  { q: "“Can I see the place from camp?”", Icon: VideoIcon, a: "Yes. Video call your bunkie before you leave camp." },
+  { q: "“Will I be safe?”", Icon: ShieldIcon, a: "Every bunkie is verified. Choose women only, men only or mixed." },
 ];
 
 const YEAR = [
-  { Icon: CampIcon, when: "In camp", text: "Browse rooms. Video call hosts." },
-  { Icon: PinIcon, when: "Posting day", text: "Add your PPA. See rooms by commute." },
-  { Icon: KeyIcon, when: "Exit day", text: "Move in." },
-  { Icon: WalletIcon, when: "Every month", text: "Pay rent in the app." },
-  { Icon: HomeIcon, when: "Passing out", text: "Move out. Deposit settled in the app." },
+  { Icon: CampIcon, when: "In camp", text: "Meet your bunkie on a video call." },
+  { Icon: KeyIcon, when: "Exit day", text: "Move in with someone who knows the way." },
+  { Icon: PinIcon, when: "First weeks", text: "Settle in at your own pace." },
+  { Icon: HomeIcon, when: "When you’re ready", text: "Stay on, or find your own place." },
+  { Icon: SparkIcon, when: "Next batch", text: "Be someone’s bunkie." },
 ];
 
 const SAFETY = [
-  { Icon: VerifiedIcon, tone: styles.tMint, title: "Verified hosts", text: "ID and selfie checks. Every room is reviewed before it goes live." },
-  { Icon: WalletIcon, tone: styles.tAmber, title: "Money held", text: "Paid through Paystack. Released after you move in." },
-  { Icon: LockIcon, tone: styles.tSky, title: "Numbers private", text: "Phone numbers and account details stay hidden until you pay." },
-  { Icon: SparkIcon, tone: styles.tLilac, title: "Corper hosts", text: "Hosts who are serving or have served get a badge." },
+  { Icon: VerifiedIcon, tone: styles.tMint, title: "Verified bunkies", text: "ID and selfie checks. Every room is reviewed before it goes live." },
+  { Icon: WalletIcon, tone: styles.tAmber, title: "Pay only in Bunkie", text: "Your money is held until you move in." },
+  { Icon: LockIcon, tone: styles.tSky, title: "Numbers private", text: "Phone numbers stay hidden until you book." },
+  { Icon: BunkIcon, tone: styles.tLilac, title: "Your choice of home", text: "Women only, men only or mixed." },
 ];
 
 const FAQ = [
-  { q: "Is Bunkie only in Abuja?", a: <>For now, yes. <Link href="/waitlist">Join the waitlist</Link> for your state.</> },
-  { q: "Can I book while I’m still in camp?", a: "Yes. View the room by video call and move in on your camp exit day." },
+  { q: "Will I stay with a corper?", a: "Corper hosts come first and wear a badge. Other verified hosts in Abuja are there too." },
+  { q: "How long can I stay?", a: "From one week to the rest of your service year. Stay until you’re settled." },
+  { q: "Can I book while I’m still in camp?", a: "Yes. Meet your bunkie by video call and move in on your camp exit day." },
   { q: "How do I pay?", a: "Only inside Bunkie, by card, transfer or USSD through Paystack. Never to a personal account." },
-  { q: "When does the host get paid?", a: "After you move in, if nothing is wrong." },
-  { q: "What’s an inspection fee?", a: "Some hosts charge up to ₦5,000 to inspect in person. Bunkie holds it, refunds it if the host cancels, and takes it off your rent if you book." },
+  { q: "Is Bunkie only in Abuja?", a: <>For now, yes. <Link href="/waitlist">Join the waitlist</Link> for your state.</> },
   { q: "What does it cost to use?", a: "Searching, chatting and requesting are free. Paystack’s charge is added when you pay." },
 ];
 
-/** Pinterest-style collage: four columns of app moments that drift slowly. */
+/** Pinterest-style collage: four columns of moments from a first service year, drifting slowly. */
 function Collage() {
-  const room = (img: string, badge: React.ReactNode, price: string, sub: string, tall = false) => (
+  const person = (img: string, badge: React.ReactNode, name: string, sub: string, tall = false) => (
     <div className={styles.pin}>
       <div className={`${styles.pinImg} ${tall ? styles.tall : ""}`} style={{ backgroundImage: `url(${img})` }}>{badge}</div>
-      <div className={styles.pinRow}><b>{price}<small> /month</small></b></div>
+      <div className={styles.pinRow}><b>{name}</b></div>
       <span className={styles.pinSub}>{sub}</span>
     </div>
   );
+  const corper = <span className={styles.badgeAmber}><SparkIcon size={11} />Corper host</span>;
   const cols = [
     [
-      room("/demo/room-1.svg", <span className={styles.badgeAmber}><SparkIcon size={11} />Corper host</span>, "₦72,000", "Self contain · Utako", true),
+      person("/demo/room-1.svg", corper, "Amaka", "Serving · Utako", true),
       <div key="chat" className={`${styles.pin} ${styles.chat}`}>
-        <span className={styles.bubbleMe}>I’m in camp till Friday. Can we video call?</span>
-        <span className={styles.bubbleThem}>Sure. 4pm?</span>
+        <span className={styles.bubbleMe}>Just got my posting. Garki!</span>
+        <span className={styles.bubbleThem}>Welcome! That’s close to mine.</span>
       </div>,
     ],
     [
       <div key="id" className={`${styles.pin} ${styles.person}`}>
         <span className={styles.avatar}>A</span>
-        <b>Amaka</b>
-        <span className={styles.personTag}><VerifiedIcon size={13} />Ex-corper host</span>
+        <b>Meet Amaka</b>
+        <span className={styles.personTag}><SparkIcon size={13} />Your bunkie</span>
       </div>,
-      room("/demo/room-3.svg", <span className={styles.badgeWhite}><VerifiedIcon size={11} />Verified</span>, "₦65,000", "Shared room · Jabi"),
-      <div key="mins" className={`${styles.pin} ${styles.stat} ${styles.statGreen}`}><ClockIcon size={20} /><b>8 min</b><span>to your PPA</span></div>,
+      person("/demo/room-3.svg", <span className={styles.badgeWhite}><VerifiedIcon size={11} />Verified</span>, "Tunde", "Served · Jabi"),
+      <div key="exit" className={`${styles.pin} ${styles.stat} ${styles.statGreen}`}><KeyIcon size={20} /><b>Exit day</b><span>Move in with your bunkie</span></div>,
     ],
     [
-      <div key="held" className={`${styles.pin} ${styles.stat} ${styles.statAmber}`}><WalletIcon size={20} /><b>Held</b><span>until you move in</span></div>,
-      room("/demo/room-2.svg", <span className={styles.badgeWhite}><VideoIcon size={11} />Video viewing</span>, "₦80,000", "Self contain · Wuse 2", true),
+      <div key="week" className={`${styles.pin} ${styles.stat} ${styles.statAmber}`}><HomeIcon size={20} /><b>Week one</b><span>Settling in</span></div>,
+      person("/demo/room-2.svg", <span className={styles.badgeWhite}><VideoIcon size={11} />Video call from camp</span>, "Ngozi", "Serving · Wuse 2", true),
     ],
     [
-      room("/demo/room-4.svg", <span className={styles.badgeAmber}><SparkIcon size={11} />Corper host</span>, "₦55,000", "Shared room · Gwarinpa"),
+      person("/demo/room-4.svg", corper, "Ifeanyi", "Serving · Gwarinpa"),
       <div key="ok" className={`${styles.pin} ${styles.note}`}>
-        <span className={styles.dotGreen}><ChatIcon size={14} /></span>Tolu accepted your request
+        <span className={styles.dotGreen}><ChatIcon size={14} /></span>Amaka accepted your request
       </div>,
-      <div key="move" className={`${styles.pin} ${styles.stat} ${styles.statInk}`}><KeyIcon size={20} /><b>Exit day</b><span>Move in</span></div>,
+      <div key="next" className={`${styles.pin} ${styles.stat} ${styles.statInk}`}><SparkIcon size={20} /><b>Next batch</b><span>Be someone’s bunkie</span></div>,
     ],
   ];
   return (
@@ -105,33 +106,31 @@ export default function Landing() {
     <div className={styles.page} data-full>
       <LandingNav
         links={[{ href: "#year", label: "How it works" }, { href: "#safety", label: "Safety" }, { href: "/partners", label: "Host partners" }]}
-        cta={{ href: "/welcome", label: "Find a room" }}
+        cta={{ href: "/welcome", label: "Find your bunkie" }}
       />
 
       <section className={styles.hero}>
         <div className={styles.wrap}>
           <span className={styles.eyebrow}><CampIcon size={15} />For corp members in Abuja</span>
-          <h1 aria-label="Leave camp with a place to stay.">
-            Leave camp with <RotatingWord words={WORDS} className={styles.rotate} />
-          </h1>
-          <p className={styles.lede}>Verified rooms near your PPA. Book from camp. Pay monthly.</p>
+          <h1>Start your service year <span className={styles.accent}>with a friend.</span></h1>
+          <p className={styles.lede}>Bunkie pairs you with a corper who’s already serving in Abuja. Someone in your corner from day one.</p>
 
           <Link href="/welcome" className={styles.search}>
             <span className={styles.searchText}>
-              <b>Where’s your PPA?</b>
-              <span>Garki, Wuse, Utako, Jabi…</span>
+              <b>Find your bunkie</b>
+              <span>Where’s your PPA? Garki, Wuse, Utako…</span>
             </span>
             <span className={styles.searchBtn} aria-hidden="true"><SearchIcon size={20} /></span>
           </Link>
-          <Link href="/partners" className={styles.heroHost}>Got a spare room? Become a host partner <ArrowIcon size={16} /></Link>
+          <Link href="/partners" className={styles.heroHost}>Already serving? Be someone’s bunkie <ArrowIcon size={16} /></Link>
         </div>
         <Collage />
       </section>
 
       <section className={styles.statement}>
         <div className={styles.wrap}>
-          <h2>Abuja rent is yearly.<br /><span>Your service year isn’t.</span></h2>
-          <p>Rooms by the week or the month, from people who get it.</p>
+          <h2>A room gives you a bed.<br /><span>A bunkie gives you a start.</span></h2>
+          <p>Someone to ask about the city, your PPA and everything in between. Someone who’s been exactly where you are.</p>
         </div>
       </section>
 
@@ -151,7 +150,7 @@ export default function Landing() {
 
       <section id="year" className={`${styles.section} ${styles.soft}`}>
         <div className={styles.wrap}>
-          <h2>Built around your service year.</h2>
+          <h2>From camp to settled.</h2>
           <ol className={styles.year}>
             {YEAR.map(({ Icon, when, text }) => (
               <li key={when}>
@@ -167,14 +166,14 @@ export default function Landing() {
       <section className={styles.section}>
         <div className={`${styles.wrap} ${styles.split}`}>
           <div className={`${styles.feature} ${styles.featureGreen}`}>
-            <span className={styles.featureTag}><SparkIcon size={14} />Corper host</span>
-            <h3>Bunk with someone who’s been there.</h3>
-            <p>Hosts who are serving or have served know camp, PPA and allawee. They come up top.</p>
+            <span className={styles.featureTag}><BunkIcon size={14} />Your bunkie</span>
+            <h3>Not alone, from day one.</h3>
+            <p>Your bunkie has done camp, posting and their first weeks in Abuja. Now you start yours together.</p>
           </div>
           <div className={`${styles.feature} ${styles.featureAmber}`}>
-            <span className={styles.featureTag}><CalendarIcon size={14} />Short stays</span>
-            <h3>Just need a week or two?</h3>
-            <p>Stay 1 to 4 weeks while you find your feet. Paid upfront, no deposit.</p>
+            <span className={styles.featureTag}><HomeIcon size={14} />Your pace</span>
+            <h3>Stay as long as you need.</h3>
+            <p>A week, a few months or the whole year. Move on when you’re settled.</p>
           </div>
         </div>
       </section>
@@ -199,12 +198,12 @@ export default function Landing() {
           <div>
             <span className={styles.hostIcon}><HostIcon size={30} /></span>
             <span className={styles.hostKicker}>Bunkie host partners</span>
-            <h2>Got a spare room?<br />Partner with Bunkie.</h2>
+            <h2>Already settled in?<br />Be someone’s bunkie.</h2>
             <ul className={styles.hostList}>
+              <li><CheckIcon size={18} />Give a new corper a soft landing</li>
               <li><CheckIcon size={18} />Verified corpers only</li>
               <li><CheckIcon size={18} />Your house rules, in writing</li>
-              <li><CheckIcon size={18} />Keep 98% of your rent</li>
-              <li><CheckIcon size={18} />Paid after move-in</li>
+              <li><CheckIcon size={18} />Rent paid in the app</li>
             </ul>
             <div className={styles.hostCtas}>
               <Link href="/host" className={styles.ctaGreen}>Become a host partner</Link>
@@ -230,8 +229,10 @@ export default function Landing() {
 
       <section className={styles.band}>
         <div className={styles.wrap}>
-          <h2>Camp ends soon.<br />Find your bunkie.</h2>
-          <Link href="/welcome" className={styles.ctaWhite}>Find a room</Link>
+          <h2 aria-label="Leave camp with your bunkie.">
+            Leave camp with <RotatingWord words={WORDS} className={`${styles.rotate} ${styles.rotateBand}`} />
+          </h2>
+          <Link href="/welcome" className={styles.ctaWhite}>Find your bunkie</Link>
         </div>
       </section>
 

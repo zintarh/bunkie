@@ -9,7 +9,7 @@ import { errorText, useMe } from "@/lib/auth";
 import { useUnreadChats } from "@/lib/chat";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 import { naira } from "@/lib/format";
-import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, type ProgressFields } from "@/lib/hosting";
+import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, stepsDone, type ProgressFields } from "@/lib/hosting";
 import { photoUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
@@ -32,7 +32,8 @@ export default function HostHome() {
     const db = supabaseBrowser();
     if (!me || !db) return;
     db.from("listings").select(`status, area_name, monthly_total, cover_path, ${LISTING_PROGRESS}`).eq("host_id", me.user.id).order("created_at", { ascending: false })
-      .then(({ data }) => setListings((data ?? []) as unknown as MyListing[]));
+      // A draft nobody has filled in yet (just tapped Start) isn't shown; Start picks it up again.
+      .then(({ data }) => setListings(((data ?? []) as unknown as MyListing[]).filter((l) => l.status !== "draft" || stepsDone(l).size > 0)));
     fetchMyBookings("host").then(setBookings, () => setBookings([]));
     db.from("payouts").select("amount_kobo, status").then(({ data }) => setPayouts(data ?? []));
   }, [me]);
