@@ -158,3 +158,23 @@ export function ArrowIcon({ size = 24 }: IconProps) {
 export function ChevronDownIcon({ size = 24 }: IconProps) {
   return svg(size, <path d="m6 9.5 6 6 6-6" />);
 }
+
+/** Agreement: a page with a folded corner and lines. */
+export function DocIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M6.5 3h7.2L19 8.3v9.9A2.8 2.8 0 0 1 16.2 21H7.8A2.8 2.8 0 0 1 5 18.2V4.5C5 3.7 5.7 3 6.5 3Z" /><path d="M13.5 3v3.8c0 .8.7 1.5 1.5 1.5h4M8.5 13h7M8.5 16.5h4.5" /></>);
+}
+
+/** Payouts: a bank. */
+export function BankIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M3.5 9.2 11.2 4.4a1.5 1.5 0 0 1 1.6 0l7.7 4.8Z" /><path d="M6 12v5.5M10 12v5.5M14 12v5.5M18 12v5.5M3.5 20.5h17" /></>);
+}
+
+/** In-app photos: a camera. */
+export function CameraIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M4 8.8A2.8 2.8 0 0 1 6.8 6h1.4l1.3-1.9c.3-.4.7-.6 1.2-.6h2.6c.5 0 .9.2 1.2.6L15.8 6h1.4A2.8 2.8 0 0 1 20 8.8v8.4a2.8 2.8 0 0 1-2.8 2.8H6.8A2.8 2.8 0 0 1 4 17.2Z" /><circle cx="12" cy="12.8" r="3.3" /></>);
+}
+
+/** Pause a listing. */
+export function PauseIcon({ size = 24 }: IconProps) {
+  return svg(size, <><circle cx="12" cy="12" r="8.5" /><path d="M10 9.5v5M14 9.5v5" /></>);
+}

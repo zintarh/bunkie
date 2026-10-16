@@ -4,8 +4,8 @@ import {
   ArrowIcon, BunkIcon, CalendarIcon, CampIcon, ChatIcon, CheckIcon, ChevronDownIcon, ClockIcon, HomeIcon, HostIcon,
   KeyIcon, LockIcon, PinIcon, SearchIcon, ShieldIcon, SparkIcon, VerifiedIcon, VideoIcon, WalletIcon,
 } from "@/components/icons";
+import { LandingFooter, LandingNav } from "@/components/LandingChrome";
 import { RotatingWord } from "@/components/RotatingWord";
-import { BunkMark } from "@/components/ui";
 import styles from "./landing.module.css";
 
 export const metadata: Metadata = {
@@ -103,19 +103,10 @@ function Collage() {
 export default function Landing() {
   return (
     <div className={styles.page} data-full>
-      <header className={styles.nav}>
-        <div className={styles.wrap}>
-          <Link href="/" className={styles.brand} aria-label="Bunkie home">
-            <i><BunkMark /></i>bunkie
-          </Link>
-          <nav className={styles.links} aria-label="Sections">
-            <a href="#year">How it works</a>
-            <a href="#safety">Safety</a>
-            <a href="#hosts">Host a corper</a>
-          </nav>
-          <Link href="/welcome" className={styles.navCta}>Find a room</Link>
-        </div>
-      </header>
+      <LandingNav
+        links={[{ href: "#year", label: "How it works" }, { href: "#safety", label: "Safety" }, { href: "/partners", label: "Host partners" }]}
+        cta={{ href: "/welcome", label: "Find a room" }}
+      />
 
       <section className={styles.hero}>
         <div className={styles.wrap}>
@@ -132,7 +123,7 @@ export default function Landing() {
             </span>
             <span className={styles.searchBtn} aria-hidden="true"><SearchIcon size={20} /></span>
           </Link>
-          <Link href="/host" className={styles.heroHost}>Got a spare room? Host a corper <ArrowIcon size={16} /></Link>
+          <Link href="/partners" className={styles.heroHost}>Got a spare room? Become a host partner <ArrowIcon size={16} /></Link>
         </div>
         <Collage />
       </section>
@@ -151,7 +142,7 @@ export default function Landing() {
             {WORRIES.map(({ q, a, Icon }) => (
               <div key={q} className={styles.worry}>
                 <p className={styles.quote}>{q}</p>
-                <p className={styles.answer}><span><Icon size={18} /></span>{a}</p>
+                <p className={styles.answer}><span><Icon size={20} /></span>{a}</p>
               </div>
             ))}
           </div>
@@ -164,7 +155,7 @@ export default function Landing() {
           <ol className={styles.year}>
             {YEAR.map(({ Icon, when, text }) => (
               <li key={when}>
-                <span className={styles.yearIcon}><Icon size={22} /></span>
+                <span className={styles.yearIcon}><Icon size={28} /></span>
                 <h3>{when}</h3>
                 <p>{text}</p>
               </li>
@@ -194,7 +185,7 @@ export default function Landing() {
           <div className={styles.grid4}>
             {SAFETY.map(({ Icon, tone, title, text }) => (
               <div key={title} className={styles.tile}>
-                <span className={`${styles.tileIcon} ${tone}`}><Icon size={22} /></span>
+                <span className={`${styles.tileIcon} ${tone}`}><Icon size={26} /></span>
                 <h3>{title}</h3>
                 <p>{text}</p>
               </div>
@@ -207,14 +198,18 @@ export default function Landing() {
         <div className={`${styles.wrap} ${styles.hosts}`}>
           <div>
             <span className={styles.hostIcon}><HostIcon size={30} /></span>
-            <h2>Got a spare room?<br />Host a corper.</h2>
+            <span className={styles.hostKicker}>Bunkie host partners</span>
+            <h2>Got a spare room?<br />Partner with Bunkie.</h2>
             <ul className={styles.hostList}>
               <li><CheckIcon size={18} />Verified corpers only</li>
               <li><CheckIcon size={18} />Your house rules, in writing</li>
-              <li><CheckIcon size={18} />Free or paid inspections</li>
+              <li><CheckIcon size={18} />Keep 98% of your rent</li>
               <li><CheckIcon size={18} />Paid after move-in</li>
             </ul>
-            <Link href="/host" className={styles.ctaGreen}>Host a corper</Link>
+            <div className={styles.hostCtas}>
+              <Link href="/host" className={styles.ctaGreen}>Become a host partner</Link>
+              <Link href="/partners" className={styles.ctaLine}>See what it involves <ArrowIcon size={16} /></Link>
+            </div>
           </div>
         </div>
       </section>
@@ -240,18 +235,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className={styles.footer}>
-        <div className={`${styles.wrap} ${styles.footGrid}`}>
-          <span className={styles.brand}><i><BunkMark /></i>bunkie</span>
-          <nav aria-label="Footer">
-            <Link href="/help">Help</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/waitlist">Other states</Link>
-          </nav>
-          <p>[Company name] · RC [CAC number] · Not affiliated with or endorsed by NYSC.</p>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }
