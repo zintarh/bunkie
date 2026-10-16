@@ -220,6 +220,12 @@ body:has([data-full]) { background: var(--white); }
 .photo { background-color: #eaf6ef; background-position: center; background-size: cover; background-repeat: no-repeat; }
 .heart { position: absolute; right: 16px; top: 16px; width: 40px; height: 40px; border: 0; border-radius: 999px; background: rgba(16, 35, 27, 0.28); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; color: var(--white); transition: transform 0.2s; }
 .heart:active { transform: scale(0.85); }
+/* Bunkie card header: the person leads */
+.bhead { display: flex; align-items: center; gap: 12px; padding: 8px 8px 0; color: var(--ink); }
+.bname { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; line-height: 1.1; }
+.btag { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; }
+.bfit { height: 30px; padding: 0 11px; border-radius: 999px; background: var(--green-soft); color: var(--green-text); font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; flex-shrink: 0; }
+.bhabits { padding: 0 8px; margin-top: -2px; font-size: 14px; color: var(--muted); }
 
 /* ---------- Tab bar ---------- */
 /* Floating nav: one rounded pill lifted off the bottom edge, tabs grouped in the middle. */
@@ -351,7 +357,8 @@ body:has([data-full]) { background: var(--white); }
   .desk-main .screen { height: 100dvh; }
   .desk-feed > .app { max-width: 520px; }
   .desk-dm > .app { max-width: none; }
-  .desk-page > .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  /* No edge lines on page columns: one page beside the sidebar, not strips. */
+  .desk-page > .app { max-width: 680px; }
 
   /* Home: the search header keeps its colour but reads as the top of a feed. */
   .desk-feed .hero { border-radius: 0 0 28px 28px; }
@@ -388,4 +395,19 @@ body:has([data-full]) { background: var(--white); }
 }
 @media (min-width: 1264px) {
   .searchpanel { left: 76px; }
+}
+/* Filters on laptops: a panel beside the sidebar, like Search. */
+@media (min-width: 1024px) {
+  .scrim.side { z-index: 35; background: rgba(16, 35, 27, 0.08); align-items: stretch; justify-content: flex-start; }
+  .sheet.side { position: fixed; top: 0; bottom: 0; left: var(--nav); width: 420px; max-width: none; max-height: none; border-radius: 0 24px 24px 0; box-shadow: 16px 0 40px rgba(16, 35, 27, 0.1); border-right: 1px solid var(--line); animation: slidein 0.22s ease both; }
+  .sheet.side .grab { display: none; }
+  .sheet.side .topbar { height: 72px; padding-top: 10px !important; }
+}
+/* Laptop pages: a plain bold title instead of the green header block (phones keep the green). */
+@media (min-width: 1024px) {
+  .desk-page .phero { background: none; color: var(--ink); border-radius: 0; padding: 40px 0 8px !important; margin: 0 !important; }
+  .desk-page .phero::after { display: none; }
+  .desk-page .phero .h1 { font-size: 30px; }
+  .desk-page .phero + * { margin-top: 12px !important; }
+  .desk-page .phero .ib { color: var(--ink) !important; }
 }

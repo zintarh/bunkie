@@ -131,15 +131,16 @@ export function useToast(): [ReactNode, (msg: string) => void] {
   return [msg ? <div className="toast" role="status">{msg}</div> : null, show];
 }
 
-export function Sheet({ onClose, children, label }: { onClose: () => void; children: ReactNode; label: string }) {
+/** Bottom sheet on phones. `side`: on laptops it slides out beside the sidebar instead (like Search). */
+export function Sheet({ onClose, children, label, side }: { onClose: () => void; children: ReactNode; label: string; side?: boolean }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return (
-    <div className="scrim" onClick={onClose}>
-      <div className="sheet" role="dialog" aria-modal="true" aria-label={label} onClick={(e) => e.stopPropagation()}>
+    <div className={side ? "scrim side" : "scrim"} onClick={onClose}>
+      <div className={side ? "sheet side" : "sheet"} role="dialog" aria-modal="true" aria-label={label} onClick={(e) => e.stopPropagation()}>
         <span className="grab" />
         {children}
       </div>

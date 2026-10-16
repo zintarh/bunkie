@@ -36,7 +36,7 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
   const monthStart = (n: number) => isoDay(addMonths(new Date(today.getFullYear(), today.getMonth(), 1), n));
 
   return (
-    <Sheet onClose={onClose} label="Filters">
+    <Sheet onClose={onClose} label="Filters" side>
       <div className="topbar" style={{ padding: "0 8px" }}>
         <button className="ib" onClick={onClose} aria-label="Close"><X size={22} strokeWidth={2.4} /></button>
         <span style={{ flex: 1, textAlign: "center", fontWeight: 700 }}>Filters</span>
