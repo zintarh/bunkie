@@ -17,7 +17,7 @@ import { Loading, TabBar, Wordmark } from "@/components/ui";
 import { fit } from "@/lib/bunkie";
 import { dayLabel } from "@/lib/format";
 import { BATCHES } from "@/lib/places";
-import { usePrefs } from "@/lib/prefs";
+import { usePrefs, type StayLength } from "@/lib/prefs";
 import { useSaved } from "@/lib/saved";
 import { useMyAnswers } from "@/lib/useMyAnswers";
 import type { Miss, RoomCard as Room, SearchIntent } from "@/lib/types";
@@ -47,6 +47,10 @@ export default function Explore() {
   const inCamp = prefs.stage === "in_camp";
   const batch = BATCHES.find((b) => b.id === prefs.batchId);
   const f = prefs.filters;
+  // Exact stay length: a typed search ("3 months") beats the saved filter. Camp stays have their own rules.
+  const u0 = search?.understood;
+  const length: StayLength | null = inCamp ? null
+    : u0?.weeks ? { unit: "weeks", n: u0.weeks } : u0?.months ? { unit: "months", n: u0.months } : f.length;
 
   const query = useMemo(() => {
     const q = new URLSearchParams();
@@ -59,10 +63,11 @@ export default function Explore() {
       q.set("lng", prefs.ppa.lng.toFixed(3));
       q.set("zone", String(prefs.ppa.zoneId));
     }
-    if (f.priceMax < 150000) q.set("budgetMax", String(f.priceMax));
+    if (f.budget) q.set("budgetMax", String(f.budget));
     if (prefs.pref) q.set("pref", prefs.pref);
     if (f.room) q.set("room", f.room);
-    q.set("stay", inCamp ? "any" : f.stay);
+    // The search knows stay buckets; the exact length is checked per room below.
+    q.set("stay", !length ? "any" : length.unit === "weeks" ? "weeks" : length.n <= 3 ? "short" : length.n >= 6 ? "long" : "any");
     if (f.maxMinutes && !inCamp) q.set("maxMinutes", String(f.maxMinutes));
     // A typed search overrides the saved choices for this search only.
     if (search) {
@@ -75,13 +80,12 @@ export default function Explore() {
       }
       if (u.budgetMax) q.set("budgetMax", String(u.budgetMax));
       if (u.room) q.set("room", u.room);
-      const stay = u.weeks ? "weeks" : u.months ? (u.months <= 3 ? "short" : u.months >= 6 ? "long" : null) : u.stay;
-      if (stay && !inCamp) q.set("stay", stay);
+      if (!u.weeks && !u.months && u.stay && !inCamp) q.set("stay", u.stay);
       if (u.pref) q.set("pref", u.pref);
       if (u.maxMinutes) q.set("maxMinutes", String(u.maxMinutes));
     }
     return q.toString();
-  }, [inCamp, batch, prefs.ppa, prefs.pref, f, search]);
+  }, [inCamp, batch, prefs.ppa, prefs.pref, f, search, length?.unit, length?.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!ready || !prefs.stage) return;
@@ -112,13 +116,19 @@ export default function Explore() {
       const extra: Miss[] = [];
       if (want?.ownBath && r0.bath_kind !== "own" && r0.room_kind !== "self_contain") extra.push({ kind: "shared_bath" });
       if (want?.furnished && !r0.furnished) extra.push({ kind: "unfurnished" });
+      // Exact stay length: rooms that don't allow it become close matches that say why.
+      const has = (k: Miss["kind"]) => (r0.misses ?? []).some((m) => m.kind === k);
+      if (length?.unit === "months") {
+        if (r0.min_months > length.n && !has("min_stay")) extra.push({ kind: "min_stay", months: r0.min_months });
+        if (r0.max_months < length.n && !has("max_stay")) extra.push({ kind: "max_stay", months: r0.max_months });
+      } else if (length?.unit === "weeks" && !r0.open_to_short && !has("no_short")) extra.push({ kind: "no_short" });
       const r = extra.length ? { ...r0, exact: false, misses: [...(r0.misses ?? []), ...extra] } : r0;
       const f = fit(myAnswers, r.host_answers)?.score ?? null;
       return { r, fit: f, score: (r.match_score ?? 0) - 8 * extra.length + (f != null ? (15 * f) / 100 : 0) };
     });
     withFit.sort((a, b) => Number(b.r.exact !== false) - Number(a.r.exact !== false) || b.score - a.score);
     return withFit;
-  }, [rooms, myAnswers, search]);
+  }, [rooms, myAnswers, search, length?.unit, length?.n]);
   const exact = ranked?.filter(({ r }) => r.exact !== false) ?? null;
   const close = ranked?.filter(({ r }) => r.exact === false) ?? [];
 
@@ -176,7 +186,7 @@ export default function Explore() {
             <span style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>View by video call from camp. Free switch once you get your PPA.</span>
           </div>
         )}
-        {ranked == null && !error && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>Finding apartments…</span>}
+        {ranked == null && !error && <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>Finding bunkies…</span>}
         {ranked != null && hidden > 0 && (
           <Link href="/start" className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18, color: "var(--ink)", gap: 12 }}>
             <span className="tile t-lilac"><Users size={20} /></span>
@@ -188,7 +198,7 @@ export default function Explore() {
         )}
         {exact && exact.length > 0 && (
           <span className="lbl" style={{ display: "block", padding: "12px 2px" }}>
-            {exact.length} {exact.length === 1 ? "apartment" : "apartments"}{inCamp ? " free on your camp exit day" : ""}
+            {exact.length} {exact.length === 1 ? "bunkie" : "bunkies"} {inCamp ? "free on your camp exit day" : search?.place ? `near ${search.place.label}` : prefs.ppa ? "near your PPA" : "in Abuja"}
           </span>
         )}
         {error && <p className="err" role="alert">{error}</p>}
@@ -216,7 +226,7 @@ export default function Explore() {
         )}
         {ranked && ranked.length === 0 && (
           <div className="stack" style={{ padding: "32px 8px", alignItems: "center", textAlign: "center", gap: 12 }}>
-            <span className="h2">No apartments match</span>
+            <span className="h2">No bunkies match yet</span>
             <PostWantLink style={{ width: "100%", textAlign: "left" }} />
             {/* Say what's narrowing the search, so a hidden listing never looks like a missing one. */}
             <div className="lrows" style={{ width: "100%", textAlign: "left" }}>
@@ -237,9 +247,9 @@ export default function Explore() {
           </div>
         )}
         </div>
-        {/* Laptop: the right-hand panel sits beside the feed (hidden on phones). */}
-        <HomeRail />
       </div>
+      {/* Laptop: the right-hand panel beside the band and feed (hidden on phones). */}
+      <HomeRail />
 
       <TabBar />
       {showFilters && <Filters inCamp={inCamp} onClose={() => setShowFilters(false)} />}

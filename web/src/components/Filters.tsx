@@ -1,19 +1,20 @@
 "use client";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { Chips, Seg, Sheet } from "@/components/ui";
 import { addMonths, isoDay, nairaK } from "@/lib/format";
-import { DEFAULT_FILTERS, setPrefs, usePrefs, type Prefs } from "@/lib/prefs";
+import { DEFAULT_FILTERS, setPrefs, usePrefs, type Prefs, type StayLength } from "@/lib/prefs";
 import type { SharePref } from "@/lib/types";
 import styles from "./filters.module.css";
 
-const MIN = 20000;
-const MAX = 150000;
+/** Highest budget anyone can type; rooms on Bunkie are far below it. */
+const BUDGET_CAP = 2_000_000;
+const LIMITS = { weeks: 4, months: 12 } as const;
 
 export function activeFilterCount(f: Prefs["filters"], inCamp: boolean): number {
   let n = 0;
-  if (f.priceMax < MAX) n++;
-  if (!inCamp && f.stay !== "any") n++;
+  if (f.budget) n++;
+  if (!inCamp && f.length) n++;
   if (f.room) n++;
   if (!inCamp && f.maxMinutes) n++;
   if (!inCamp && f.moveIn) n++;
@@ -27,7 +28,6 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
   const [moveChoice, setMoveChoice] = useState<string>(() => (f.moveIn ? "pick" : "any"));
   const set = (patch: Partial<Prefs["filters"]>) => setF((x) => ({ ...x, ...patch }));
 
-  const pct = (v: number) => (v - MIN) / (MAX - MIN);
   const apply = () => {
     setPrefs({ filters: f, pref });
     onClose();
@@ -44,22 +44,21 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
       </div>
       <div className={styles.body}>
         <section className={styles.sec}>
-          <div className="between">
-            <span className="h2">Monthly budget</span>
-            <span className="num" style={{ fontWeight: 700 }}>{f.priceMax >= MAX ? "Any" : `Up to ${nairaK(f.priceMax)}`}</span>
-          </div>
-          {/* One "up to" slider: a cheaper room is never a problem, so there's no minimum. */}
-          <div className={styles.range}>
-            <span className={styles.track} />
-            <span className={styles.fill} style={{ left: 14, right: `calc(14px + ${(1 - pct(f.priceMax)) * 100}% - ${(1 - pct(f.priceMax)) * 28}px)` }} />
-            <label htmlFor="bmax" className="sr-only">Monthly budget</label>
-            <input id="bmax" type="range" min={MIN} max={MAX} step={5000} value={f.priceMax}
-              onChange={(e) => set({ priceMin: DEFAULT_FILTERS.priceMin, priceMax: Number(e.target.value) })} />
-          </div>
+          <label className="h2" htmlFor="budget">Monthly budget</label>
+          {/* "Up to" only: a cheaper room is never a problem, so there's no minimum. Empty means any. */}
+          <label className="field">
+            <span className="prefix">₦</span>
+            <input id="budget" inputMode="numeric" placeholder="Any amount" autoComplete="off"
+              value={f.budget ? f.budget.toLocaleString("en-NG") : ""}
+              onChange={(e) => {
+                const n = Number(e.target.value.replace(/\D/g, "").slice(0, 7));
+                set({ budget: n > 0 ? Math.min(n, BUDGET_CAP) : null });
+              }} />
+          </label>
           <div className="chips">
-            {[40000, 60000, 80000, 100000, MAX].map((v) => (
-              <button key={v} className={f.priceMax === v ? "chip on" : "chip"} aria-pressed={f.priceMax === v}
-                onClick={() => set({ priceMin: DEFAULT_FILTERS.priceMin, priceMax: v })}>{v >= MAX ? "Any" : nairaK(v)}</button>
+            {[40000, 60000, 80000, 100000, null].map((v) => (
+              <button key={v ?? "any"} className={f.budget === v ? "chip on" : "chip"} aria-pressed={f.budget === v}
+                onClick={() => set({ budget: v })}>{v == null ? "Any" : nairaK(v)}</button>
             ))}
           </div>
           <span className="small">All in: rent share and bills. A bit over still shows as a close match.</span>
@@ -68,8 +67,10 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
         {!inCamp && (
           <section className={styles.sec}>
             <span className="h2">How long</span>
-            <Seg label="Stay length" value={f.stay} onChange={(v) => set({ stay: v })}
-              options={[{ value: "weeks", label: "1–4 weeks" }, { value: "short", label: "1–3 months" }, { value: "long", label: "6–12 mo" }, { value: "any", label: "Any" }]} />
+            <Seg label="Stay length" value={f.length?.unit ?? "any"}
+              onChange={(v) => set({ length: v === "any" ? null : { unit: v, n: Math.min(f.length?.n ?? (v === "weeks" ? 2 : 3), LIMITS[v]) } })}
+              options={[{ value: "weeks", label: "Weeks" }, { value: "months", label: "Months" }, { value: "any", label: "Any" }]} />
+            {f.length && <LengthInput value={f.length} onChange={(length) => set({ length })} />}
           </section>
         )}
 
@@ -115,5 +116,37 @@ export function Filters({ inCamp, onClose }: { inCamp: boolean; onClose: () => v
         <button className="btn" onClick={apply}>Show rooms</button>
       </div>
     </Sheet>
+  );
+}
+
+/** A number you can type or step: 1-4 weeks or 1-12 months. */
+function LengthInput({ value, onChange }: { value: StayLength; onChange: (v: StayLength) => void }) {
+  const max = LIMITS[value.unit];
+  const [text, setText] = useState(String(value.n));
+  const commit = (n: number) => {
+    const v = Math.max(1, Math.min(max, n || 1));
+    setText(String(v));
+    onChange({ ...value, n: v });
+  };
+  return (
+    <div className="row" style={{ gap: 12 }}>
+      <button type="button" className="step" disabled={value.n <= 1} onClick={() => commit(value.n - 1)} aria-label={`Fewer ${value.unit}`}>
+        <Minus size={18} strokeWidth={2.4} />
+      </button>
+      <label className="field" style={{ width: 132, flex: "none" }}>
+        <span className="sr-only">Number of {value.unit}</span>
+        <input inputMode="numeric" value={text} style={{ textAlign: "center", fontWeight: 700 }}
+          onChange={(e) => {
+            const t = e.target.value.replace(/\D/g, "").slice(0, 2);
+            setText(t);
+            if (t) onChange({ ...value, n: Math.max(1, Math.min(max, Number(t))) });
+          }}
+          onBlur={() => commit(Number(text))} />
+        <span className="muted" style={{ fontSize: 15 }}>{value.unit === "weeks" ? (value.n === 1 ? "week" : "weeks") : value.n === 1 ? "month" : "months"}</span>
+      </label>
+      <button type="button" className="step" disabled={value.n >= max} onClick={() => commit(value.n + 1)} aria-label={`More ${value.unit}`}>
+        <Plus size={18} strokeWidth={2.4} />
+      </button>
+    </div>
   );
 }

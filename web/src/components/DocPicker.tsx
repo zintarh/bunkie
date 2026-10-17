@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import { Camera, Check, FileUp, Trash2 } from "lucide-react";
-import { shrinkFile } from "@/lib/image";
+import { PhotoError, shrinkFile } from "@/lib/image";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 /** Take a photo of a document or upload one (image or PDF). */
@@ -37,8 +37,9 @@ export async function uploadDoc(userId: string, name: string, file: File): Promi
   const db = supabaseBrowser()!;
   let blob: Blob = file;
   let ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  if (file.type.startsWith("image/")) {
-    const s = await shrinkFile(file, 2000, 0.85);
+  if (file.type === "application/pdf" && file.size > 5 * 1024 * 1024) throw new PhotoError("That PDF is too big. Pick one under 5 MB, or take a photo of it.");
+  if (file.type !== "application/pdf") {
+    const s = await shrinkFile(file, 2000, 0.85, 4_500_000);
     blob = s.blob;
     ext = s.ext;
   }

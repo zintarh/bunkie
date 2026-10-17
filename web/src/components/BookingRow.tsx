@@ -39,4 +39,3 @@ export function BookingRow({ b, role }: { b: BookingFull; role: "tenant" | "host
     </Link>
   );
 }
-

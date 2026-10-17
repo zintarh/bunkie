@@ -42,7 +42,9 @@ function Looking() {
   useEffect(() => {
     if (rooms === null) return;
     setRows(null);
-    supabaseBrowser()?.rpc("want_feed", { p_listing: room }).then(({ data }) => setRows(((data ?? []) as Want[]).filter((w) => !w.mine)));
+    // Your own post stays in the list (first, marked as yours) so it's clear who each card belongs to.
+    supabaseBrowser()?.rpc("want_feed", { p_listing: room })
+      .then(({ data }) => setRows(((data ?? []) as Want[]).sort((a, b) => Number(b.mine) - Number(a.mine))));
   }, [room, rooms]);
 
   const offer = async (w: Want) => {
@@ -57,13 +59,14 @@ function Looking() {
   };
 
   if (rows === null || rooms === null) return <Loading />;
+  const others = rows.filter((w) => !w.mine).length;
   return (
     <main className="screen">
       <TopBar back="/host" />
       <div className="body" style={{ gap: 14 }}>
         <div className="stack" style={{ gap: 4 }}>
           <h1 className="h1">Corpers looking</h1>
-          <p className="sub">{rows.length} {rows.length === 1 ? "corper is" : "corpers are"} looking for a room.</p>
+          <p className="sub">{others} {others === 1 ? "corper is" : "corpers are"} looking for a room.</p>
         </div>
 
         {rooms.length > 1 && (
@@ -89,6 +92,15 @@ function Looking() {
           const length = w.weeks ? weeksLabel(w.weeks) : w.months ? monthsLabel(w.months) : null;
           const facts = [w.budget_max ? `Under ${nairaK(w.budget_max)}` : null, w.move_in ? `From ${dayLabel(w.move_in).slice(4)}` : null, length,
             w.room_kind ? ROOM_LABEL[w.room_kind] : null, PREF[w.pref]].filter(Boolean) as string[];
+          if (w.mine) {
+            return (
+              <div key={w.id} className="card stack" style={{ gap: 6, background: "var(--soft)", boxShadow: "none" }}>
+                <span className="badge grey" style={{ alignSelf: "flex-start" }}>Your post</span>
+                <span style={{ fontSize: 16, lineHeight: 1.4 }}>You&apos;re looking for a room in <b>{w.area_label}</b></span>
+                {facts.length > 0 && <span className="small" style={{ fontSize: 14 }}>{facts.join(" · ")}</span>}
+              </div>
+            );
+          }
           return (
             <div key={w.id} className="card stack" style={{ gap: 10 }}>
               <span style={{ fontSize: 16, lineHeight: 1.4 }}>

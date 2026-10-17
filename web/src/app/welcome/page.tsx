@@ -2,14 +2,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BadgeCheck, Clock, Home, ShieldCheck, Wallet } from "lucide-react";
+import { BadgeCheck, Clock, Home, Wallet } from "lucide-react";
 import { BunkMark } from "@/components/ui";
 import { setPrefs, usePrefs } from "@/lib/prefs";
 import styles from "./intro.module.css";
 
 const SLIDES = [
   { title: "Find your bunkie", sub: "Share a room near your PPA." },
-  { title: "Every host is verified", sub: "Real people. Real rooms." },
+  { title: "Every host is verified", sub: "Real people, real rooms. Corpers first." },
   { title: "See it, then pay", sub: "Your money is held until you move in." },
 ];
 
@@ -39,9 +39,9 @@ export default function Intro() {
   return (
     <main className="screen" style={{ background: "#fff" }}>
       <div className={styles.top}>
-        <span className="wordmark" style={{ gap: 8 }}>
+        <Link href="/" className="wordmark" aria-label="Bunkie home" style={{ gap: 8, color: "var(--ink)" }}>
           <i style={{ background: "var(--green)", color: "var(--amber)", borderRadius: 8 }}><BunkMark /></i>bunkie
-        </span>
+        </Link>
         {last ? <Link className="link" href="/signup">Sign up</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
       </div>
 
@@ -74,7 +74,6 @@ export default function Intro() {
           <section className={styles.slide} aria-hidden={i !== 1}>
             <div className={`${styles.art} ${styles.dark}`}>
               <span className={styles.spark} style={{ left: 34, top: 40 }} />
-              <span className={`${styles.fchip} ${styles.bob2}`} style={{ left: 22, bottom: 44 }}><ShieldCheck size={15} strokeWidth={2.6} color="#17A862" />NIN checked</span>
               <div className={`${styles.profile} ${styles.bob}`}>
                 <div className="photo" style={{ height: 110, borderRadius: 14, backgroundImage: "url(/demo/room-1.svg)" }} />
                 <div className="row" style={{ gap: 10 }}>

@@ -59,6 +59,13 @@ do $$ begin
   assert exists (select 1 from public.messages where conversation_id = (select id from cv) and meta ->> 'type' = 'offer'), 'offer in the chat';
   assert (select tenant_id from public.conversations where id = (select id from cv)) = '00000000-0000-0000-0000-0000000007a1', 'chat with the corper';
 end $$;
+-- The host's own offer note is read for them; it's new for the corper.
+set role authenticated;
+select twn.as_user('00000000-0000-0000-0000-0000000007b1');
+do $$ begin assert public.unread_chats() = 0, 'own offer note is not unread for the host'; end $$;
+select twn.as_user('00000000-0000-0000-0000-0000000007a1');
+do $$ begin assert public.unread_chats() = 1, 'offer is unread for the corper'; end $$;
+reset role;
 set role authenticated;
 select twn.as_user('00000000-0000-0000-0000-0000000007a1');
 do $$ begin assert (select offers from public.my_want()) = 1, 'corper sees the offer count'; end $$;

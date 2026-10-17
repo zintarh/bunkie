@@ -195,6 +195,10 @@ body:has([data-full]) { background: var(--white); }
 .mins { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--green-soft); color: var(--green-text); font-size: 13px; font-weight: 800; }
 .avatar { width: 40px; height: 40px; border-radius: 999px; background: #fce9be; color: var(--ink); display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; overflow: hidden; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+/* Your own photo: tap to add or change it. */
+.avatar-pick { position: relative; display: block; border-radius: 999px; cursor: pointer; flex-shrink: 0; }
+.avatar-pick:focus-within { outline: 3px solid rgba(23, 168, 98, 0.45); outline-offset: 2px; }
+.avatar-pick-badge { position: absolute; right: -2px; bottom: -2px; width: 22px; height: 22px; border-radius: 999px; background: var(--green); color: #fff; border: 2px solid var(--white); display: flex; align-items: center; justify-content: center; }
 
 /* ---------- Hero header ---------- */
 .hero {
@@ -411,23 +415,19 @@ body:has([data-full]) { background: var(--white); }
   .desk-page .phero + * { margin-top: 12px !important; }
   .desk-page .phero .ib { color: var(--ink) !important; }
 }
-/* Home on laptops: a full-width green band, then a wider feed with the panel beside it. */
+/* Home on laptops: two panes. The middle pane is the green band with the feed under it;
+   the right-hand panel sits beside them from the top. */
 .feed-col { display: contents; }
 @media (min-width: 1024px) {
   .desk-feed > .app { max-width: none; }
-  .desk-feed .hero { border-radius: 0 0 32px 32px; padding: 26px 28px 26px !important; }
-  .desk-feed .hero > * { box-sizing: border-box; max-width: 620px; margin-left: auto; margin-right: auto; width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
-  .desk-feed .feed-body { display: flex !important; flex-direction: row; justify-content: center; align-items: flex-start; gap: 48px !important; padding: 8px 28px 56px !important; }
-  .desk-feed .feed-col { display: flex; flex-direction: column; width: 100%; max-width: 620px; min-width: 0; }
-  .desk-feed .homerail { padding-top: 20px; }
+  .desk-feed .screen { display: grid; grid-template-columns: minmax(0, 620px); grid-template-rows: auto minmax(0, 1fr); column-gap: 48px; justify-content: center; padding: 0 28px; }
+  .desk-feed .screen > .hero { grid-column: 1; grid-row: 1; border-radius: 0 0 32px 32px; padding: 22px 8px 24px !important; }
+  .desk-feed .feed-body { grid-column: 1; grid-row: 2; padding: 8px 0 56px !important; }
+  .desk-feed .feed-col { display: flex; flex-direction: column; min-width: 0; }
 }
 @media (min-width: 1160px) {
-  /* Line the band's search up with the feed column (feed 620 + gap 48 + panel 320). */
-  .desk-feed .hero > * { max-width: 988px; padding-right: 368px !important; }
-}
-@media (min-width: 1024px) {
-  .desk-feed .feed-col { flex: 0 1 620px; }
-  .desk-feed .homerail { flex: 0 0 320px; }
+  .desk-feed .screen { grid-template-columns: minmax(0, 620px) 320px; }
+  .desk-feed .screen > .homerail { grid-column: 2; grid-row: 1 / 3; position: static; align-self: start; padding-top: 26px; }
 }
 
 /* Add to home screen / notifications prompt: a lock-screen notification preview on a soft green panel. */
@@ -440,3 +440,12 @@ body:has([data-full]) { background: var(--white); }
 @keyframes nprev { from { opacity: 0; transform: translateY(-10px) scale(0.97); } to { opacity: 1; transform: none; } }
 .istep { width: 24px; height: 24px; border-radius: 99px; background: var(--ink); color: var(--white); font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) { .nprev-card { animation: none; } }
+
+/* Long legal pages (privacy, terms): comfortable reading. */
+.legal p { line-height: 1.6; color: var(--ink); }
+.legal ul, .legal ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; line-height: 1.55; }
+.legal ul ul { margin-top: 6px; }
+.legal li::marker { color: var(--muted); }
+.legal-toc a { color: var(--green-text); font-weight: 600; }
+.legal a { text-decoration: underline; text-underline-offset: 2px; }
+.legal-toc a { text-decoration: none; }

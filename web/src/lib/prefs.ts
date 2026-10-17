@@ -10,9 +10,10 @@ export type Prefs = {
   batchId: string | null;
   ppa: { label: string; lat: number; lng: number; zoneId: number } | null;
   filters: {
-    priceMin: number;
-    priceMax: number;
-    stay: "weeks" | "short" | "long" | "any";
+    /** Monthly budget, all in; null = any. */
+    budget: number | null;
+    /** Exact stay length; null = any. */
+    length: StayLength | null;
     room: RoomKind | null;
     maxMinutes: number | null;
     moveIn: string | null;
@@ -20,9 +21,22 @@ export type Prefs = {
   saved: string[];
 };
 
+export type StayLength = { unit: "weeks" | "months"; n: number };
+
 export const DEFAULT_FILTERS: Prefs["filters"] = {
-  priceMin: 20000, priceMax: 150000, stay: "any", room: null, maxMinutes: null, moveIn: null,
+  budget: null, length: null, room: null, maxMinutes: null, moveIn: null,
 };
+
+/** Saved filters from before exact budgets and lengths: priceMax 150000 meant "any". */
+function migrateFilters(raw: Record<string, unknown> | undefined): Prefs["filters"] {
+  const f = { ...DEFAULT_FILTERS, ...(raw ?? {}) } as Prefs["filters"] & { priceMax?: number; priceMin?: number; stay?: string };
+  if (raw && !("budget" in raw)) f.budget = typeof f.priceMax === "number" && f.priceMax < 150000 ? f.priceMax : null;
+  if (raw && !("length" in raw)) f.length = null;
+  delete f.priceMax;
+  delete f.priceMin;
+  delete f.stay;
+  return f;
+}
 
 const DEFAULTS: Prefs = { introSeen: false, stage: null, pref: null, batchId: null, ppa: null, filters: DEFAULT_FILTERS, saved: [] };
 const KEY = "bunkie.prefs.v1";
@@ -36,7 +50,10 @@ function load() {
   loaded = true;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (raw) current = { ...DEFAULTS, ...JSON.parse(raw), filters: { ...DEFAULT_FILTERS, ...JSON.parse(raw).filters } };
+    if (raw) {
+      const saved = JSON.parse(raw);
+      current = { ...DEFAULTS, ...saved, filters: migrateFilters(saved.filters) };
+    }
   } catch {
     // Private mode or blocked storage: keep defaults for this visit.
   }

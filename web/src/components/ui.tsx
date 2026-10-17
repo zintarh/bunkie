@@ -14,11 +14,12 @@ export function BunkMark({ size = 16, color = "currentColor" }: { size?: number;
   );
 }
 
+/** The logo. It always leads to the home page. */
 export function Wordmark() {
   return (
-    <span className="wordmark">
+    <Link href="/" className="wordmark" aria-label="Bunkie home" style={{ color: "inherit" }}>
       <i><BunkMark /></i>bunkie
-    </span>
+    </Link>
   );
 }
 

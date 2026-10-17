@@ -10,8 +10,12 @@ export function photoUrl(path: string | null | undefined, width: 400 | 1080 = 40
   return `${SUPABASE_URL}/storage/v1/render/image/public/listing-photos/${path}?width=${width}&quality=70&resize=contain`;
 }
 
+/**
+ * A person's photo as a centred square, sharp up to a 96px circle on 2x screens.
+ * Both sides are needed: with width alone Supabase keeps the original height and squashes the face.
+ */
 export function avatarUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (path.startsWith("/") || path.startsWith("http")) return path;
-  return `${SUPABASE_URL}/storage/v1/render/image/public/avatars/${path}?width=160&quality=70`;
+  return `${SUPABASE_URL}/storage/v1/render/image/public/avatars/${path}?width=192&height=192&resize=cover&quality=75`;
 }

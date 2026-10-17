@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowIcon, BunkIcon, CampIcon, ChatIcon, CheckIcon, ChevronDownIcon, HomeIcon, HostIcon,
+  ArrowIcon, BunkIcon, CampIcon, CheckIcon, ChevronDownIcon, HomeIcon, HostIcon,
   KeyIcon, LockIcon, PinIcon, SearchIcon, ShieldIcon, SparkIcon, VerifiedIcon, VideoIcon, WalletIcon,
 } from "@/components/icons";
 import { LandingFooter, LandingNav } from "@/components/LandingChrome";
 import { RotatingWord } from "@/components/RotatingWord";
+import { StoryReel } from "@/components/StoryReel";
 import styles from "./landing.module.css";
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ const YEAR = [
 ];
 
 const SAFETY = [
-  { Icon: VerifiedIcon, tone: styles.tMint, title: "Verified bunkies", text: "Every host and every room is checked before going live." },
+  { Icon: VerifiedIcon, tone: styles.tMint, title: "Every host is verified", text: "Real people, real rooms. Corper hosts come first." },
   { Icon: WalletIcon, tone: styles.tAmber, title: "Pay only in Bunkie", text: "Your money is held until you move in." },
   { Icon: LockIcon, tone: styles.tSky, title: "Numbers private", text: "Phone numbers stay hidden until you book." },
   { Icon: BunkIcon, tone: styles.tLilac, title: "Your choice of home", text: "Women only, men only or mixed." },
@@ -49,56 +50,6 @@ const FAQ = [
   { q: "How do I pay?", a: "Only inside Bunkie, by card, transfer or USSD through Paystack. Never to a personal account." },
   { q: "Is Bunkie only in Abuja?", a: <>For now, yes. <Link href="/waitlist">Join the waitlist</Link> for your state.</> },
 ];
-
-/** Pinterest-style collage: four columns of moments from a first service year, drifting slowly. */
-function Collage() {
-  const person = (img: string, badge: React.ReactNode, name: string, sub: string, tall = false) => (
-    <div className={styles.pin}>
-      <div className={`${styles.pinImg} ${tall ? styles.tall : ""}`} style={{ backgroundImage: `url(${img})` }}>{badge}</div>
-      <div className={styles.pinRow}><b>{name}</b></div>
-      <span className={styles.pinSub}>{sub}</span>
-    </div>
-  );
-  const corper = <span className={styles.badgeAmber}><SparkIcon size={11} />Corper host</span>;
-  const cols = [
-    [
-      person("/demo/room-1.svg", corper, "Amaka", "Serving · Utako", true),
-      <div key="chat" className={`${styles.pin} ${styles.chat}`}>
-        <span className={styles.bubbleMe}>Just got my posting. Garki!</span>
-        <span className={styles.bubbleThem}>Welcome! That’s close to mine.</span>
-      </div>,
-    ],
-    [
-      <div key="id" className={`${styles.pin} ${styles.person}`}>
-        <span className={styles.avatar}>A</span>
-        <b>Meet Amaka</b>
-        <span className={styles.personTag}><SparkIcon size={13} />Your bunkie</span>
-      </div>,
-      person("/demo/room-3.svg", <span className={styles.badgeWhite}><VerifiedIcon size={11} />Verified</span>, "Tunde", "Served · Jabi"),
-      <div key="exit" className={`${styles.pin} ${styles.stat} ${styles.statGreen}`}><KeyIcon size={20} /><b>Exit day</b><span>Move in with your bunkie</span></div>,
-    ],
-    [
-      <div key="week" className={`${styles.pin} ${styles.stat} ${styles.statAmber}`}><HomeIcon size={20} /><b>Week one</b><span>Settling in</span></div>,
-      person("/demo/room-2.svg", <span className={styles.badgeWhite}><VideoIcon size={11} />Video call from camp</span>, "Ngozi", "Serving · Wuse 2", true),
-    ],
-    [
-      person("/demo/room-4.svg", corper, "Ifeanyi", "Serving · Gwarinpa"),
-      <div key="ok" className={`${styles.pin} ${styles.note}`}>
-        <span className={styles.dotGreen}><ChatIcon size={14} /></span>Amaka accepted your request
-      </div>,
-      <div key="next" className={`${styles.pin} ${styles.stat} ${styles.statInk}`}><SparkIcon size={20} /><b>Next batch</b><span>Be someone’s bunkie</span></div>,
-    ],
-  ];
-  return (
-    <div className={styles.collage} aria-hidden="true">
-      {cols.map((c, i) => (
-        <div key={i} className={styles.col}>
-          {c.map((el, j) => <div key={j}>{el}</div>)}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function Landing() {
   return (
@@ -125,7 +76,7 @@ export default function Landing() {
           </Link>
           <Link href="/partners" className={styles.heroHost}>Already serving? Be someone’s bunkie <ArrowIcon size={16} /></Link>
         </div>
-        <Collage />
+        <div className={styles.showcase}><StoryReel /></div>
       </section>
 
       <section className={styles.statement}>
@@ -161,21 +112,6 @@ export default function Landing() {
               </li>
             ))}
           </ol>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={`${styles.wrap} ${styles.split}`}>
-          <div className={`${styles.feature} ${styles.featureGreen}`}>
-            <span className={styles.featureTag}><BunkIcon size={14} />Your bunkie</span>
-            <h3>Not alone, from day one.</h3>
-            <p>Your bunkie has done camp, posting and their first weeks in Abuja. Now you start yours together.</p>
-          </div>
-          <div className={`${styles.feature} ${styles.featureAmber}`}>
-            <span className={styles.featureTag}><HomeIcon size={14} />Your pace</span>
-            <h3>Stay as long as you need.</h3>
-            <p>A week, a few months or the whole year. Move on when you’re settled.</p>
-          </div>
         </div>
       </section>
 

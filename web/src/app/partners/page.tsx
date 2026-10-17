@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowIcon, BankIcon, BunkIcon, CalendarIcon, CameraIcon, CheckIcon, ChevronDownIcon, DocIcon, HomeIcon, KeyIcon,
-  LockIcon, PauseIcon, PinIcon, ProfileIcon, ShieldIcon, SparkIcon, VideoIcon, WalletIcon,
+  PauseIcon, PinIcon, ProfileIcon, ShieldIcon, SparkIcon, VideoIcon, WalletIcon,
 } from "@/components/icons";
 import { LandingFooter, LandingNav } from "@/components/LandingChrome";
 import base from "../landing.module.css";
@@ -20,9 +20,10 @@ const WHY = [
   { Icon: WalletIcon, tone: styles.whyInk, title: "Share your rent", text: "Your bunkie pays their share in the app. No chasing, no cash." },
 ];
 
+// The NYSC goal comes first: common ties across Nigeria.
 const DEAL = {
-  you: ["A friendly face for their first weeks", "A welcoming, safe space, as listed", "Honest photos, taken in the app", "Keeping to the agreement"],
-  us: ["Corpers who fit your home", "Holding rent until move-in", "Keeping your number private", "A team that steps in on reports and deposits"],
+  you: ["A first friend in a new state", "The city as you know it: routes, markets, your PPA tips", "A home where they’re welcome, wherever they’re from", "A safe space, just as listed"],
+  us: ["A new corper who fits your home and habits", "A friend, often from another part of Nigeria", "Ties that last beyond the service year", "Your part in what NYSC set out to build"],
 };
 
 const STEPS = [
@@ -85,7 +86,7 @@ export default function Partners() {
             <div className={`${styles.card} ${styles.request}`}>
               <span className={styles.avatar}>T</span>
               <div>
-                <b>Tolu wants to bunk with you</b>
+                <b>Corper Tolu wants to bunk with you</b>
                 <span><SparkIcon size={13} />Corper · just out of camp</span>
               </div>
             </div>
@@ -98,7 +99,7 @@ export default function Partners() {
             <div className={`${styles.card} ${styles.payout}`}>
               <KeyIcon size={20} />
               <b>Exit day</b>
-              <span>Tolu moves in</span>
+              <span>Corper Tolu moves in</span>
             </div>
             <div className={`${styles.card} ${styles.signed}`}>
               <span className={styles.dot}><DocIcon size={15} /></span>House rules agreed
@@ -132,13 +133,14 @@ export default function Partners() {
       <section className={base.section}>
         <div className={base.wrap}>
           <h2 className={base.center}>A real partnership.</h2>
+          <p className={styles.dealIntro}>NYSC began so young Nigerians would build ties across the country. Hosting a bunkie is that, up close.</p>
           <div className={styles.deal}>
             <div className={styles.dealCol}>
               <span className={styles.dealHead}><HomeIcon size={22} />You bring</span>
               <ul>{DEAL.you.map((t) => <li key={t}><CheckIcon size={18} />{t}</li>)}</ul>
             </div>
             <div className={`${styles.dealCol} ${styles.dealUs}`}>
-              <span className={styles.dealHead}><LockIcon size={22} />Bunkie brings</span>
+              <span className={styles.dealHead}><SparkIcon size={22} />Bunkie brings</span>
               <ul>{DEAL.us.map((t) => <li key={t}><CheckIcon size={18} />{t}</li>)}</ul>
             </div>
           </div>

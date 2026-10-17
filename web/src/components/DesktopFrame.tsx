@@ -18,10 +18,10 @@ import { PostWantLink } from "./Wants";
  *  feed   Home: one column of rooms with a right-hand panel
  *  dm     Messages: conversations and the open chat side by side
  *  page   everything else: a centred column
- *  full   pages with their own frame (landing, admin)
+ *  full   pages with their own frame (landing, host partners, admin)
  */
 function modeFor(path: string): "feed" | "dm" | "page" | "full" {
-  if (path === "/" || path.startsWith("/admin")) return "full";
+  if (path === "/" || path === "/partners" || path.startsWith("/admin")) return "full";
   if (path === "/explore") return "feed";
   if (path.startsWith("/inbox")) return "dm";
   return "page";
@@ -39,7 +39,7 @@ function SideNav({ path, onSearch, searching }: { path: string; onSearch: () => 
   );
   return (
     <nav className={`sidenav${searching ? " narrow" : ""}`} aria-label="Main">
-      <Link href="/explore" className="sidenav-brand" aria-label="Bunkie home">
+      <Link href="/" className="sidenav-brand" aria-label="Bunkie home">
         <i><BunkMark /></i><span className="sidenav-label">bunkie</span>
       </Link>
       <div className="sidenav-items">
@@ -51,7 +51,9 @@ function SideNav({ path, onSearch, searching }: { path: string; onSearch: () => 
           unread > 0 ? <span className="sidenav-badge">{unread > 9 ? "9+" : unread}</span> : null)}
         {item("/bookings", "Bookings", <BunkIcon size={24} active={is("/bookings")} />)}
         {item("/saved", "Saved", <Heart size={24} strokeWidth={is("/saved") ? 2.6 : 2} fill={is("/saved") ? "currentColor" : "none"} />)}
-        {item("/host", "Host a corper", <span className="sidenav-create"><Plus size={17} strokeWidth={2.6} /></span>)}
+        {me?.profile.is_host
+          ? item("/host", "Hosting", <span className="sidenav-create"><Plus size={17} strokeWidth={2.6} /></span>)
+          : item("/partners", "Host a corper", <span className="sidenav-create"><Plus size={17} strokeWidth={2.6} /></span>)}
       </div>
       <div className="sidenav-items sidenav-bottom">
         {me
@@ -112,9 +114,12 @@ export function HomeRail() {
         <span className="link" style={{ height: "auto", alignSelf: "flex-start", padding: 0 }}>Change</span>
       </Link>
       <PostWantLink />
-      <Link href="/host" className="homerail-host">
+      <Link href={me?.profile.is_host ? "/host" : "/partners"} className="homerail-host">
         <span className="sidenav-create big"><Plus size={20} strokeWidth={2.6} /></span>
-        <span className="stack" style={{ gap: 0 }}><b>Host a corper</b><span className="small">List your room</span></span>
+        <span className="stack" style={{ gap: 0 }}>
+          <b>{me?.profile.is_host ? "Hosting" : "Become a host partner"}</b>
+          <span className="small">{me?.profile.is_host ? "Your rooms, requests and payouts" : "Be someone’s bunkie"}</span>
+        </span>
       </Link>
       <nav className="homerail-foot" aria-label="About">
         <Link href="/help">Help</Link><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/waitlist">Other states</Link>

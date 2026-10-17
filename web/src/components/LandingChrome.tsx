@@ -23,7 +23,7 @@ export function LandingFooter() {
   return (
     <footer className={styles.footer}>
       <div className={`${styles.wrap} ${styles.footGrid}`}>
-        <span className={styles.brand}><i><BunkMark /></i>bunkie</span>
+        <Link href="/" className={styles.brand} aria-label="Bunkie home"><i><BunkMark /></i>bunkie</Link>
         <nav aria-label="Footer">
           <Link href="/partners">Host partners</Link>
           <Link href="/help">Help</Link>
@@ -31,7 +31,7 @@ export function LandingFooter() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/waitlist">Other states</Link>
         </nav>
-        <p>[Company name] · RC [CAC number] · Not affiliated with or endorsed by NYSC.</p>
+        <p>Not affiliated with or endorsed by NYSC.</p>
       </div>
     </footer>
   );
