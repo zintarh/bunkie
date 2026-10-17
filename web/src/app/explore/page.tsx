@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
 import { MyWantCard, PostWantLink } from "@/components/Wants";
+import { InstallCard } from "@/components/InstallPrompt";
 import { HomeRail } from "@/components/DesktopFrame";
 import { Filters, activeFilterCount } from "@/components/Filters";
 import { ChatIcon } from "@/components/icons";
@@ -168,6 +169,7 @@ export default function Explore() {
         <div className="feed-col">
         <ContinueHosting style={{ marginTop: 14 }} />
         <MyWantCard style={{ marginTop: 14 }} />
+        <InstallCard style={{ marginTop: 14 }} />
         {inCamp && (
           <div className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18 }}>
             <span className="tile t-amber"><Video size={20} strokeWidth={2.2} /></span>

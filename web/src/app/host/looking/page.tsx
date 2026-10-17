@@ -6,6 +6,7 @@ import { Check, Clock, Plus } from "lucide-react";
 import { RequireAuth } from "@/components/auth";
 import { Loading, TopBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
+import { nudge } from "@/lib/install";
 import { ROOM_LABEL, dayLabel, months as monthsLabel, nairaK, weeks as weeksLabel } from "@/lib/format";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { RoomKind, SharePref } from "@/lib/types";
@@ -51,6 +52,7 @@ function Looking() {
     const { data, error } = await db.rpc("offer_room", { p_want: w.id, p_listing: room });
     setBusy(null);
     if (error) return showToast(errorText(error));
+    nudge("reply", w.first_name);
     router.push(`/inbox/${data}`);
   };
 

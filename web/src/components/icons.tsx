@@ -178,3 +178,23 @@ export function CameraIcon({ size = 24 }: IconProps) {
 export function PauseIcon({ size = 24 }: IconProps) {
   return svg(size, <><circle cx="12" cy="12" r="8.5" /><path d="M10 9.5v5M14 9.5v5" /></>);
 }
+
+/** Notifications: a bell. */
+export function BellIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5Z" /><path d="M10 21h4" /></>);
+}
+
+/** iPhone's Share button: a tray with an arrow up. */
+export function ShareIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M8.5 9.5H7A2.5 2.5 0 0 0 4.5 12v6.5A2.5 2.5 0 0 0 7 21h10a2.5 2.5 0 0 0 2.5-2.5V12A2.5 2.5 0 0 0 17 9.5h-1.5" /><path d="M12 14V3M8.5 6.3 12 2.8l3.5 3.5" /></>);
+}
+
+/** "Add to Home Screen": a rounded square with a plus. */
+export function AddSquareIcon({ size = 24 }: IconProps) {
+  return svg(size, <><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" /><path d="M12 8.5v7M8.5 12h7" /></>);
+}
+
+/** Android's browser menu: three dots. */
+export function MenuDotsIcon({ size = 24 }: IconProps) {
+  return svg(size, <><circle cx="12" cy="5.5" r="1.2" fill="currentColor" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /><circle cx="12" cy="18.5" r="1.2" fill="currentColor" /></>);
+}

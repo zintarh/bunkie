@@ -1,4 +1,5 @@
 "use client";
+import { nudge } from "./install";
 import { useCallback, useEffect, useState } from "react";
 import { supabaseBrowser } from "./supabase/client";
 import type { Answers, Booking, BookingStatus } from "./types";
@@ -88,6 +89,8 @@ export async function act(b: { id: string; version: number }, action: string, pa
   if (!db) throw new Error("Connect Supabase first.");
   const { error } = await db.rpc("booking_action", { p_booking: b.id, p_action: action, p_version: b.version, p_payload: payload });
   if (error) throw error;
+  if (action === "book_viewing") nudge("viewing");
+  else if (action === "accept") nudge("reply");
 }
 
 export function roomTitle(b: BookingFull) {

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import { DesktopFrame } from "@/components/DesktopFrame";
+import { InstallHost } from "@/components/InstallPrompt";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <DesktopFrame>{children}</DesktopFrame>
         <ServiceWorker />
+        <InstallHost />
       </body>
     </html>
   );

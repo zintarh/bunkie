@@ -7,6 +7,7 @@ import { TopBar } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { naira, ROOM_LABEL } from "@/lib/format";
 import { photoUrl } from "@/lib/photos";
+import { nudge } from "@/lib/install";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { StepProps } from "./steps";
 import { qs } from "@/lib/url";
@@ -43,6 +44,7 @@ export function ReviewStep({ listing, reload }: StepProps) {
     const { error } = (await supabaseBrowser()?.rpc("publish_listing", { p_listing: listing.id })) ?? {};
     setBusy(false);
     if (error) return setError(errorText(error));
+    nudge("host");
     await reload();
   };
   const pause = async (paused: boolean) => {

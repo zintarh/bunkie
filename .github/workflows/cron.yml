@@ -1,0 +1,27 @@
+# Runs the Supabase worker every 5 minutes: phone notifications (viewing reminders, quiet-hours
+# holds, anything the instant send missed), plus payouts, refunds and commute times.
+# Repo secrets: SUPABASE_FUNCTIONS_URL (https://<project>.supabase.co/functions/v1) and CRON_SECRET
+# (the same value as the CRON_SECRET Supabase function secret).
+name: cron
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: cron
+  cancel-in-progress: false
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Run the worker
+        env:
+          URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
+          SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 60 --retry 2 --retry-delay 5 \
+            -X POST "$URL/worker" -H "x-cron-secret: $SECRET" -H "Content-Type: application/json" -d '{}'

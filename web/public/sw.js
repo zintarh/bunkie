@@ -1,9 +1,12 @@
-// Bunkie service worker: keeps the app shell and room photos available on weak connections.
-// API calls, auth and payments always go to the network.
-const SHELL = "bunkie-shell-v2";
+// Bunkie service worker: keeps the app shell and room photos available on weak connections, and
+// shows phone notifications. API calls, auth and payments always go to the network.
+// On localhost it only handles notifications (no caching, so dev builds never go stale).
+const SHELL = "bunkie-shell-v3";
+const DEV = ["localhost", "127.0.0.1"].includes(self.location.hostname);
 const PHOTOS = "bunkie-photos-v1";
 
 self.addEventListener("install", (e) => {
+  if (DEV) return void self.skipWaiting();
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(["/welcome", "/explore", "/icons/icon-192.png"])).then(() => self.skipWaiting()));
 });
 
@@ -17,7 +20,7 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET") return;
+  if (DEV || req.method !== "GET") return;
   const url = new URL(req.url);
 
   // Room photos never change at a given URL: cache first.
@@ -34,4 +37,36 @@ self.addEventListener("fetch", (e) => {
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).catch(() => caches.match(req).then((r) => r || caches.match("/explore"))));
   }
+});
+
+// Notifications. If that chat (or page) is already open and in view, don't show it.
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
+  const url = d.url || "/explore";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      if (wins.some((w) => w.visibilityState === "visible" && new URL(w.url).pathname === url)) return;
+      return self.registration.showNotification(d.title || "Bunkie", {
+        body: d.body || "",
+        tag: d.tag,
+        renotify: !!d.tag,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/badge-96.png",
+        data: { url },
+      });
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || "/explore";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      const win = wins.find((w) => new URL(w.url).origin === self.location.origin);
+      if (win) return win.focus().then((w) => w.navigate(url));
+      return self.clients.openWindow(url);
+    }),
+  );
 });

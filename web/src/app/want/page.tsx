@@ -6,6 +6,7 @@ import { PlaceSearch, type Place } from "@/components/PlaceSearch";
 import { RequireAuth } from "@/components/auth";
 import { Loading, Seg, Stepper, TopBar } from "@/components/ui";
 import { errorText } from "@/lib/auth";
+import { nudge } from "@/lib/install";
 import { ROOM_LABEL, dayLabel, months as monthsLabel, naira, weeks as weeksLabel } from "@/lib/format";
 import { nearestZone } from "@/lib/places";
 import { usePrefs } from "@/lib/prefs";
@@ -68,6 +69,7 @@ function Want() {
     });
     setBusy(false);
     if (error) return setError(errorText(error));
+    if (!mine) nudge("offer");
     setEditing(false);
     await load();
   };

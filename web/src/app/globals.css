@@ -429,3 +429,14 @@ body:has([data-full]) { background: var(--white); }
   .desk-feed .feed-col { flex: 0 1 620px; }
   .desk-feed .homerail { flex: 0 0 320px; }
 }
+
+/* Add to home screen / notifications prompt: a lock-screen notification preview on a soft green panel. */
+.nprev { border-radius: 22px; padding: 26px 16px; background: radial-gradient(120% 90% at 50% 0%, #c9f1da 0%, var(--green-soft) 55%, #f3fbf6 100%); }
+.nprev-card { display: flex; gap: 10px; align-items: center; padding: 11px 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.86); box-shadow: 0 6px 22px rgba(16, 35, 27, 0.12); backdrop-filter: blur(8px); animation: nprev 0.5s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.nprev-card b { font-size: 14px; }
+.nprev-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--amber); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 0 0 3px var(--green); }
+.nprev-time { font-size: 12px; color: var(--muted); }
+.nprev-body { font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes nprev { from { opacity: 0; transform: translateY(-10px) scale(0.97); } to { opacity: 1; transform: none; } }
+.istep { width: 24px; height: 24px; border-radius: 99px; background: var(--ink); color: var(--white); font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+@media (prefers-reduced-motion: reduce) { .nprev-card { animation: none; } }

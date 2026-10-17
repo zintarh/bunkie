@@ -7,6 +7,7 @@ import { RequireAuth } from "@/components/auth";
 import { Loading, Sheet, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { useChat, useChatImages, type Message } from "@/lib/chat";
+import { nudge } from "@/lib/install";
 import { chatDay, initial, timeLabel } from "@/lib/format";
 import { avatarUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -94,6 +95,7 @@ function Chat() {
     if (!text.trim()) return;
     atBottom.current = true;
     chat.send(text);
+    nudge("reply", other.first_name);
     setText("");
     requestAnimationFrame(() => box.current?.focus());
   };

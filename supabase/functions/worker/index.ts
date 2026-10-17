@@ -1,26 +1,30 @@
-// Drains the job queue. Called by pg_cron every 10 seconds with the service key.
+// Drains the job queue. Called by pg_cron every 10 seconds with the service key, and by GitHub Actions
+// every 5 minutes with CRON_SECRET (.github/workflows/cron.yml).
 // Each queue is claimed in a batch; failures go back with growing waits and die after 5 tries.
 import { admin, json } from "../_shared/clients.ts";
 import { paystack } from "../_shared/paystack.ts";
+import { pushJob } from "../_shared/push.ts";
 
 type Job = { id: number; payload: Record<string, any>; attempts: number };
 const SITE = Deno.env.get("SITE_URL") ?? "http://localhost:3000";
 
 Deno.serve(async (req) => {
-  // Only pg_cron (service key) may run the worker.
-  if (req.headers.get("Authorization") !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) {
+  // Only pg_cron (service key) or GitHub Actions (cron secret) may run the worker.
+  const auth = req.headers.get("Authorization");
+  const cron = Deno.env.get("CRON_SECRET");
+  if (auth !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` && !(cron && req.headers.get("x-cron-secret") === cron)) {
     return new Response("forbidden", { status: 403 });
   }
   const started = Date.now();
   const done: Record<string, number> = {};
   for (const [queue, handler, batch] of [
-    ["payout", payout, 20], ["refund", refund, 20], ["whatsapp", whatsapp, 50], ["commute", commute, 5],
+    ["payout", payout, 20], ["refund", refund, 20], ["whatsapp", whatsapp, 50], ["commute", commute, 5], ["push", push, 100],
   ] as const) {
     const { data: jobs } = await admin.rpc("sys_claim_jobs", { p_queue: queue, p_limit: batch });
     for (const job of (jobs ?? []) as Job[]) {
       if (Date.now() - started > 20000) break;   // leave room before the 25s timeout
       try {
-        await handler(job);
+        if ((await handler(job)) === "deferred") continue;   // held for quiet hours
         await admin.rpc("sys_finish_job", { p_id: job.id, p_error: null });
         done[queue] = (done[queue] ?? 0) + 1;
       } catch (e) {
@@ -137,6 +141,11 @@ async function whatsapp(job: Job) {
   });
   if (res.status === 429) throw new Error("whatsapp rate limited");
   if (!res.ok) throw new Error(`whatsapp ${res.status}: ${(await res.text()).slice(0, 200)}`);
+}
+
+// Phone notifications (see _shared/push.ts).
+async function push(job: Job) {
+  return await pushJob(job);
 }
 
 // ---------------------------------------------------------------------------

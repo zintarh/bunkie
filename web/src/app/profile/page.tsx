@@ -3,8 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Award, BadgeCheck, ChevronRight, CircleHelp, FileText, Heart, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
 import { HostIcon } from "@/components/icons";
+import { NotificationsRow } from "@/components/InstallPrompt";
 import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
+import { forgetPush } from "@/lib/install";
 import { initial } from "@/lib/format";
 import { avatarUrl } from "@/lib/photos";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -70,8 +72,10 @@ export default function Profile() {
               <ChevronRight size={18} color="var(--muted)" />
             </Link>
           ))}
+          {me && <NotificationsRow />}
           {me && (
             <button className="lrow" onClick={async () => {
+              await forgetPush().catch(() => undefined);
               await supabaseBrowser()?.auth.signOut();
               await refreshMe();
               router.replace("/explore");

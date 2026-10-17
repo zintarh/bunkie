@@ -8,6 +8,7 @@ import { TopBar } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { clearDraft, loadDraft, type RequestDraft } from "@/lib/draft";
 import { addMonths, dayLabel, parseDay, stayLength } from "@/lib/format";
+import { nudge } from "@/lib/install";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
 
@@ -57,6 +58,7 @@ function Send() {
     setBusy(false);
     if (error) return setError(errorText(error));
     clearDraft();
+    nudge("request", draft.hostName);
     router.replace(`/bookings/${(data as { id: string }).id}?sent=1`);
   };
 
