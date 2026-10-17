@@ -195,6 +195,15 @@ function Bubble({ m, mine, grouped, image, onRetry, seen, bookingId }: {
   m: Message; mine: boolean; grouped: boolean; image?: string; onRetry: () => void; seen: boolean; bookingId: string | null;
 }) {
   if (m.kind === "system") {
+    if (m.meta?.type === "offer" && typeof m.meta.listing_id === "string") {
+      return (
+        <Link href={`/rooms/${m.meta.listing_id}`} className="card stack" style={{ alignSelf: "center", maxWidth: 320, gap: 6, padding: 14, margin: "8px 0", color: "var(--ink)" }}>
+          <span className="small" style={{ fontWeight: 700, color: "var(--green-text)" }}>Room offered</span>
+          <span style={{ fontSize: 15 }}>{m.body}</span>
+          <span className="btn sm" style={{ marginTop: 4 }}>See room</span>
+        </Link>
+      );
+    }
     const safety = m.meta?.type === "pay_safety";
     const link = m.meta?.type === "booking" && bookingId ? `/bookings/${bookingId}` : null;
     const inner = (

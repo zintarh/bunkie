@@ -7,6 +7,7 @@ import { BookingRow } from "@/components/BookingRow";
 import { Progress, TabBar, useToast } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { useUnreadChats } from "@/lib/chat";
+import { LookingCard } from "@/components/Wants";
 import { LIVE, OPEN, fetchMyBookings, type BookingFull } from "@/lib/bookings";
 import { naira } from "@/lib/format";
 import { LISTING_PROGRESS, draftLabel, draftProgress, resumeHref, stepsDone, type ProgressFields } from "@/lib/hosting";
@@ -76,6 +77,7 @@ export default function HostHome() {
             ))}
           </div>
           <p className="small">You&apos;ll be at the room to take photos.</p>
+          <LookingCard />
         </div>
         <div className="foot"><button className="btn" disabled={busy} onClick={start}>{busy ? <span className="spin" /> : "Start"}</button></div>
         <TabBar />
@@ -99,6 +101,7 @@ export default function HostHome() {
           <div className="card stack" style={{ gap: 2 }}><span className="small">Paid out</span><span className="price num" style={{ fontSize: 22 }}>{naira(paidOut)}</span></div>
         </div>
 
+        <LookingCard />
         {unreadChats > 0 && (
           <Link href="/inbox" className="card row" style={{ gap: 12, padding: "12px 14px", color: "var(--ink)" }}>
             <span className="tile t-mint"><MessageCircle size={20} /></span>

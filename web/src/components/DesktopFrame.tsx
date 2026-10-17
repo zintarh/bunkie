@@ -10,6 +10,7 @@ import { avatarUrl } from "@/lib/photos";
 import { usePrefs } from "@/lib/prefs";
 import { BunkIcon, ChatIcon, HomeIcon } from "./icons";
 import { BunkMark } from "./ui";
+import { PostWantLink } from "./Wants";
 
 /**
  * Laptop layout, Instagram-for-web style (phones keep the phone layout; this is all hidden below 1024px):
@@ -110,6 +111,7 @@ export function HomeRail() {
         <b>{prefs.stage === "in_camp" ? "Rooms free on your camp exit day" : prefs.ppa?.label ?? "Add your PPA"}</b>
         <span className="link" style={{ height: "auto", alignSelf: "flex-start", padding: 0 }}>Change</span>
       </Link>
+      <PostWantLink />
       <Link href="/host" className="homerail-host">
         <span className="sidenav-create big"><Plus size={20} strokeWidth={2.6} /></span>
         <span className="stack" style={{ gap: 0 }}><b>Host a corper</b><span className="small">List your room</span></span>
