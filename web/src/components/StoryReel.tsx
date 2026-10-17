@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import s from "./story.module.css";
 
@@ -63,27 +64,82 @@ function Bunk({ x, y, w = 150, a = "#17A862", b = "#F5B83D" }: { x: number; y: n
   );
 }
 
-const CAPTIONS = [
-  "Day 21. Camp ends tomorrow.",
-  "Posted to Abuja. Knows no one.",
-  "Meets her bunkie on a video call, from camp.",
-  "Exit day: moves in with someone who knows the way.",
-  "Leave camp with your bunkie.",
+const STEPS = [
+  { title: "Camp ends", text: "Day 21. Camp ends tomorrow." },
+  { title: "Posted", text: "Posted to Wuse, Abuja. She knows no one there." },
+  { title: "Matched", text: "Bunkie matches her with Ladi, a verified corper already serving there." },
+  { title: "Exit day", text: "She moves in with someone who’s been where she is." },
+  { title: "Bunkies", text: "A room gives you a bed. A bunkie gives you a start." },
 ];
+const CAPTIONS = STEPS.map((x) => x.text);
 
-export function StoryReel() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [play, setPlay] = useState(false);
+/** True while the element is on screen (the animation pauses otherwise). */
+function useOnScreen<T extends Element>() {
+  const ref = useRef<T>(null);
+  const [on, setOn] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setPlay(e.isIntersecting), { threshold: 0.35 });
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { threshold: 0.35 });
     io.observe(el);
     return () => io.disconnect();
   }, []);
+  return [ref, on] as const;
+}
 
+function Bars() {
+  return (
+    <div className={s.bars} aria-hidden="true">
+      {CAPTIONS.map((c, i) => <span key={c}><i className={s[`b${i + 1}`]} /></span>)}
+    </div>
+  );
+}
+
+/** The reel with its captions underneath (also what the video export records). */
+export function StoryReel() {
+  const [ref, play] = useOnScreen<HTMLDivElement>();
   return (
     <div ref={ref} className={s.reel} data-play={play || undefined} role="img" aria-label={`Bunkie's story: ${CAPTIONS.join(" ")}`}>
+      <Stage />
+      <div className={s.captions}>
+        {CAPTIONS.map((c, i) => <p key={c} className={`${s.caption} ${s[`c${i + 1}`]}`}>{c}</p>)}
+      </div>
+      <Bars />
+    </div>
+  );
+}
+
+/**
+ * Landing section: the story told on the left, step by step, lit up in time with the reel on the
+ * right. Phones: heading, reel, then the step that's playing.
+ */
+export function StorySection() {
+  const [ref, play] = useOnScreen<HTMLDivElement>();
+  return (
+    <div ref={ref} className={`${s.reel} ${s.section}`} data-play={play || undefined}>
+      <div className={s.copy}>
+        <span className={s.eyebrow}>How Bunkie works</span>
+        <h2 className={s.heading}>From camp to a friend’s front door.</h2>
+        <ol className={s.steps}>
+          {STEPS.map((x, i) => (
+            <li key={x.title} className={s[`st${i + 1}`]}>
+              <span className={s.stepNum}>{i + 1}</span>
+              <span className={s.stepBody}><b>{x.title}</b><span>{x.text}</span></span>
+            </li>
+          ))}
+        </ol>
+        <Link href="/welcome" className={s.cta}>Find your bunkie</Link>
+      </div>
+      <div className={s.media} role="img" aria-label={`Bunkie's story: ${CAPTIONS.join(" ")}`}>
+        <Stage />
+        <Bars />
+      </div>
+    </div>
+  );
+}
+
+function Stage() {
+  return (
       <div className={s.stage}>
         <svg viewBox="0 0 800 500" aria-hidden="true">
           {/* 1. Camp */}
@@ -122,7 +178,7 @@ export function StoryReel() {
                 <text x="280" y="196" className={s.letterHead}>POSTING LETTER</text>
                 <rect x="280" y="214" width="170" height="9" rx="4.5" fill="#E2E8E4" />
                 <rect x="280" y="232" width="120" height="9" rx="4.5" fill="#E2E8E4" />
-                <text x="280" y="290" className={s.letterBig}>PPA: Utako,</text>
+                <text x="280" y="290" className={s.letterBig}>PPA: Wuse,</text>
                 <text x="280" y="326" className={s.letterBig}>Abuja</text>
                 <g className={s.stamp}>
                   <circle cx="494" cy="306" r="28" fill="none" stroke="#17A862" strokeWidth="4" />
@@ -155,8 +211,8 @@ export function StoryReel() {
               <Person x={450} y={386} skin={SKIN.a} top={KHAKI} hair="puff" cap scale={0.58} />
             </g>
             <g className={s.bubbleL}>
-              <rect x="40" y="150" width="226" height="64" rx="22" fill="#fff" stroke="#10231B" strokeWidth="3" />
-              <text x="62" y="190" className={s.bubbleText}>Just got Utako!</text>
+              <rect x="40" y="134" width="226" height="96" rx="22" fill="#fff" stroke="#10231B" strokeWidth="3" />
+              <text className={s.bubbleText}><tspan x="62" y="174">Just got posted</tspan><tspan x="62" y="204">to Wuse!</tspan></text>
             </g>
             <g className={s.bubbleR}>
               <rect x="534" y="270" width="236" height="64" rx="22" fill="#17A862" />
@@ -218,12 +274,5 @@ export function StoryReel() {
           </g>
         </svg>
       </div>
-      <div className={s.captions}>
-        {CAPTIONS.map((c, i) => <p key={c} className={`${s.caption} ${s[`c${i + 1}`]}`}>{c}</p>)}
-      </div>
-      <div className={s.bars} aria-hidden="true">
-        {CAPTIONS.map((c, i) => <span key={c}><i className={s[`b${i + 1}`]} /></span>)}
-      </div>
-    </div>
   );
 }
