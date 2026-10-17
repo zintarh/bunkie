@@ -1,0 +1,123 @@
+/* Bunkie story reel: one 20s loop, five 4s scenes (each scene = 20% of the loop).
+   Base styles are each element's resting (visible) state; keyframes only add the motion. */
+.reel { --t: 20s; position: relative; width: 100%; max-width: 820px; margin: 0 auto; text-align: center; }
+.reel * { transform-box: fill-box; }
+.reel:not([data-play]) * { animation-play-state: paused !important; }
+.stage { border-radius: 28px; overflow: hidden; box-shadow: 0 2px 4px rgba(16, 35, 27, 0.05), 0 24px 60px rgba(16, 35, 27, 0.14); background: #FFF6E3; }
+.stage svg { display: block; width: 100%; height: auto; }
+.stage text { font-family: var(--display); }
+
+.scene { opacity: 0; animation: var(--t) linear infinite; }
+.s1 { animation-name: s1; }
+.s2 { animation-name: s2; }
+.s3 { animation-name: s3; }
+.s4 { animation-name: s4; }
+.s5 { animation-name: s5; }
+@keyframes s1 { 0%, 18.5% { opacity: 1; } 20%, 98.5% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes s2 { 0%, 18.5% { opacity: 0; } 20%, 38.5% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes s3 { 0%, 38.5% { opacity: 0; } 40%, 58.5% { opacity: 1; } 60%, 100% { opacity: 0; } }
+@keyframes s4 { 0%, 58.5% { opacity: 0; } 60%, 78.5% { opacity: 1; } 80%, 100% { opacity: 0; } }
+@keyframes s5 { 0%, 78.5% { opacity: 0; } 80%, 98.5% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Shared motion */
+.bob { animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.wave { transform-origin: 0% 100%; animation: wave 1s ease-in-out infinite; }
+@keyframes wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(16deg); } }
+
+/* 1. Camp: the day counter ticks to 21 */
+.cal { transform-origin: 50% 0%; animation: cal var(--t) infinite; }
+@keyframes cal { 0% { transform: rotate(-4deg); } 3% { transform: rotate(3deg); } 6% { transform: rotate(-1deg); } 8%, 100% { transform: none; } }
+.calHead { font-size: 18px; font-weight: 800; letter-spacing: 3px; fill: #fff; }
+.calNum { font-size: 72px; font-weight: 800; fill: #10231B; transform-origin: center; }
+.n19, .n20 { opacity: 0; }
+.n19 { animation: n19 var(--t) infinite; }
+.n20 { animation: n20 var(--t) infinite; }
+.n21 { animation: n21 var(--t) infinite cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes n19 { 0%, 5.5% { opacity: 1; } 6%, 100% { opacity: 0; } }
+@keyframes n20 { 0%, 5.5% { opacity: 0; } 6%, 10.5% { opacity: 1; } 11%, 100% { opacity: 0; } }
+@keyframes n21 { 0%, 10.5% { opacity: 0; transform: scale(0.6); } 11% { opacity: 1; transform: scale(0.6); } 13%, 100% { opacity: 1; transform: none; } }
+
+/* 2. The posting: Abuja rises, the letter lands, a question */
+.rock { transform-origin: 50% 100%; animation: rise var(--t) infinite cubic-bezier(0.2, 0.8, 0.2, 1); }
+.city { transform-origin: 50% 100%; animation: rise2 var(--t) infinite cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes rise { 0%, 20% { transform: scaleY(0.2); } 24%, 100% { transform: none; } }
+@keyframes rise2 { 0%, 21% { transform: scaleY(0); } 26%, 100% { transform: none; } }
+.letter { animation: letter var(--t) infinite cubic-bezier(0.2, 0.9, 0.3, 1.15); }
+@keyframes letter { 0%, 21% { transform: translateY(380px); } 25.5%, 100% { transform: none; } }
+.letterHead { font-size: 15px; font-weight: 800; letter-spacing: 2px; fill: #0E8247; }
+.letterBig { font-size: 34px; font-weight: 800; fill: #10231B; letter-spacing: -1px; }
+.stamp { transform-origin: center; animation: stamp var(--t) infinite; }
+@keyframes stamp { 0%, 27% { opacity: 0; transform: scale(1.8); } 28.5%, 100% { opacity: 1; transform: none; } }
+.ask { transform-origin: center; animation: ask var(--t) infinite cubic-bezier(0.3, 1.7, 0.5, 1); }
+@keyframes ask { 0%, 29% { transform: scale(0); } 31%, 100% { transform: none; } }
+.askMark { font-size: 52px; font-weight: 800; fill: #10231B; }
+
+/* 3. Meet from camp: a video call */
+.phone { animation: phone var(--t) infinite cubic-bezier(0.2, 0.9, 0.3, 1.1); }
+@keyframes phone { 0%, 40% { transform: translateY(460px); } 44%, 100% { transform: none; } }
+.callName { font-size: 18px; font-weight: 800; fill: #10231B; }
+.callSub { font-family: var(--body); font-size: 12px; font-weight: 600; fill: #56645C; }
+.callInitial { font-size: 15px; font-weight: 800; fill: #10231B; }
+.fit { font-size: 14px; font-weight: 800; fill: #0E8247; }
+.bubbleL, .bubbleR { transform-origin: center; }
+.bubbleL { animation: bubbleL var(--t) infinite cubic-bezier(0.3, 1.5, 0.5, 1); }
+.bubbleR { animation: bubbleR var(--t) infinite cubic-bezier(0.3, 1.5, 0.5, 1); }
+@keyframes bubbleL { 0%, 46% { transform: scale(0); opacity: 0; } 48%, 100% { transform: none; opacity: 1; } }
+@keyframes bubbleR { 0%, 51% { transform: scale(0); opacity: 0; } 53%, 100% { transform: none; opacity: 1; } }
+.bubbleText { font-family: var(--body); font-size: 21px; font-weight: 700; fill: #10231B; }
+.bubbleOn { fill: #fff; }
+
+/* 4. Exit day: she walks up, the door opens, the key */
+.walk { animation: walk var(--t) infinite ease-out; }
+@keyframes walk { 0%, 60% { transform: translateX(-300px); } 61% { transform: translateX(-300px) translateY(0); }
+  62% { transform: translateX(-240px) translateY(-6px); } 63% { transform: translateX(-180px) translateY(0); }
+  64% { transform: translateX(-120px) translateY(-6px); } 65% { transform: translateX(-60px) translateY(0); }
+  66%, 100% { transform: none; } }
+.door { transform-origin: 0% 50%; animation: door var(--t) infinite cubic-bezier(0.5, 0, 0.2, 1); }
+@keyframes door { 0%, 66% { transform: none; } 69.5%, 100% { transform: scaleX(0.14); } }
+.host { animation: host var(--t) infinite; }
+@keyframes host { 0%, 67% { opacity: 0; } 69%, 100% { opacity: 1; } }
+.key { transform-origin: 0% 50%; animation: key var(--t) infinite; }
+@keyframes key { 0%, 70% { opacity: 0; transform: translateY(-30px); } 71.5% { opacity: 1; transform: none; } 72.5% { transform: rotate(14deg); } 73.5% { transform: rotate(-8deg); } 74.5%, 100% { opacity: 1; transform: none; } }
+.sun { transform-origin: center; animation: sun var(--t) infinite; }
+@keyframes sun { 0%, 60% { transform: translateY(60px); } 66%, 100% { transform: none; } }
+
+/* 5. Bunkies */
+.duo { animation: duo var(--t) infinite cubic-bezier(0.2, 0.9, 0.3, 1.1); }
+@keyframes duo { 0%, 80% { transform: translateY(240px); } 84%, 100% { transform: none; } }
+.mark { transform-origin: center; animation: mark var(--t) infinite cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes mark { 0%, 83% { transform: translateY(-200px) rotate(-20deg); } 86.5%, 100% { transform: none; } }
+.spark { transform-origin: center; animation: spark 1.6s ease-in-out infinite; }
+@keyframes spark { 0%, 100% { transform: scale(0.5); opacity: 0.4; } 50% { transform: scale(1.1); opacity: 1; } }
+
+/* Captions and progress */
+.captions { position: relative; height: 64px; margin-top: 20px; }
+.reel .caption { position: absolute; inset: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-family: var(--display);
+  font-weight: 800; font-size: clamp(19px, 2.6vw, 26px); letter-spacing: -0.02em; color: var(--ink); opacity: 0; animation: var(--t) linear infinite; text-wrap: balance; }
+.reel .c1 { animation-name: s1; }
+.reel .c2 { animation-name: s2; }
+.reel .c3 { animation-name: s3; }
+.reel .c4 { animation-name: s4; }
+.reel .c5 { animation-name: s5; }
+.bars { display: flex; gap: 6px; max-width: 260px; margin: 6px auto 0; }
+.bars span { flex: 1; height: 4px; border-radius: 99px; background: rgba(16, 35, 27, 0.12); overflow: hidden; }
+.bars i { display: block; height: 100%; background: var(--green); transform-origin: 0 50%; transform: scaleX(1); animation: var(--t) linear infinite; }
+.bars .b1 { animation-name: b1; } .bars .b2 { animation-name: b2; } .bars .b3 { animation-name: b3; } .bars .b4 { animation-name: b4; } .bars .b5 { animation-name: b5; }
+@keyframes b1 { 0% { transform: scaleX(0); } 20%, 100% { transform: scaleX(1); } }
+@keyframes b2 { 0%, 20% { transform: scaleX(0); } 40%, 100% { transform: scaleX(1); } }
+@keyframes b3 { 0%, 40% { transform: scaleX(0); } 60%, 100% { transform: scaleX(1); } }
+@keyframes b4 { 0%, 60% { transform: scaleX(0); } 80%, 100% { transform: scaleX(1); } }
+@keyframes b5 { 0%, 80% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+
+@media (max-width: 640px) {
+  .stage { border-radius: 22px; }
+  .captions { height: 72px; margin-top: 14px; padding: 0 8px; }
+}
+
+/* Reduced motion: rest on the last scene. */
+@media (prefers-reduced-motion: reduce) {
+  .reel *, .reel *::before { animation: none !important; }
+  .s5, .reel .c5 { opacity: 1; }
+  .bars { display: none; }
+}
