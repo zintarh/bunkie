@@ -128,23 +128,25 @@
 }
 
 /* Landing section: story steps on the left, lit in time with the reel on the right. */
-.section { max-width: 1180px; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; align-items: center; text-align: left; }
-.copy { display: flex; flex-direction: column; gap: 18px; }
+.section { max-width: none; display: grid; grid-template-columns: minmax(300px, 0.62fr) minmax(0, 1.38fr); gap: 56px; align-items: center; text-align: left; }
+.copy { display: flex; flex-direction: column; gap: 14px; }
 .eyebrow { font-weight: 800; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-text); }
-.reel .heading { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4.2vw, 50px); letter-spacing: -0.035em; line-height: 1.04; text-wrap: balance; color: var(--ink); }
-.steps { list-style: none; margin: 6px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.steps li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 14px; border-radius: 18px; opacity: 0.38; animation: var(--t) linear infinite; }
-.stepNum { width: 30px; height: 30px; border-radius: 99px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; background: var(--ink); color: #fff; }
+.reel .heading { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(30px, 3.3vw, 44px); letter-spacing: -0.035em; line-height: 1.04; text-wrap: balance; color: var(--ink); }
+.steps { list-style: none; margin: 4px 0 6px; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.steps li { display: flex; gap: 12px; align-items: flex-start; padding: 9px 12px; border-radius: 18px; opacity: 0.38; animation: var(--t) linear infinite; }
+.stepNum { width: 26px; height: 26px; margin-top: 1px; border-radius: 99px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; background: var(--ink); color: #fff; }
 .stepBody { display: flex; flex-direction: column; gap: 2px; }
-.stepBody b { font-family: var(--display); font-size: 19px; letter-spacing: -0.01em; color: var(--ink); }
-.stepBody span { font-size: 16px; line-height: 1.45; color: var(--ink); }
+.stepBody b { font-family: var(--display); font-size: 17px; letter-spacing: -0.01em; color: var(--ink); }
+.stepBody span { font-size: 15px; line-height: 1.4; color: var(--ink); }
 .reel .st1 { animation-name: on1; } .reel .st2 { animation-name: on2; } .reel .st3 { animation-name: on3; } .reel .st4 { animation-name: on4; } .reel .st5 { animation-name: on5; }
 @keyframes on1 { 0%, 18.5% { opacity: 1; background: var(--green-soft); } 20%, 98.5% { opacity: 0.38; background: transparent; } 100% { opacity: 1; background: var(--green-soft); } }
 @keyframes on2 { 0%, 18.5% { opacity: 0.38; background: transparent; } 20%, 38.5% { opacity: 1; background: var(--green-soft); } 40%, 100% { opacity: 0.38; background: transparent; } }
 @keyframes on3 { 0%, 38.5% { opacity: 0.38; background: transparent; } 40%, 58.5% { opacity: 1; background: var(--green-soft); } 60%, 100% { opacity: 0.38; background: transparent; } }
 @keyframes on4 { 0%, 58.5% { opacity: 0.38; background: transparent; } 60%, 78.5% { opacity: 1; background: var(--green-soft); } 80%, 100% { opacity: 0.38; background: transparent; } }
 @keyframes on5 { 0%, 78.5% { opacity: 0.38; background: transparent; } 80%, 98.5% { opacity: 1; background: var(--green-soft); } 100% { opacity: 0.38; background: transparent; } }
-.media .bars { margin-top: 16px; }
+.media { min-width: 0; }
+.media .stage { border-radius: 32px; }
+.media .bars { margin-top: 18px; }
 .cta { align-self: flex-start; display: inline-flex; align-items: center; height: 54px; padding: 0 28px; border-radius: 99px; background: var(--green); color: #fff; font-weight: 800; font-size: 16px; box-shadow: var(--shadow-green); }
 .cta:hover { background: var(--green-text); }
 
