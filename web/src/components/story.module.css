@@ -1,7 +1,7 @@
 /* Bunkie story reel: one 20s loop, five 4s scenes (each scene = 20% of the loop).
    Base styles are each element's resting (visible) state; keyframes only add the motion. */
 .reel { --t: 20s; position: relative; width: 100%; max-width: 820px; margin: 0 auto; text-align: center; }
-.reel * { transform-box: fill-box; }
+.reel :not([transform]) { transform-box: fill-box; }
 .reel:not([data-play]) * { animation-play-state: paused !important; }
 .stage { border-radius: 28px; overflow: hidden; box-shadow: 0 2px 4px rgba(16, 35, 27, 0.05), 0 24px 60px rgba(16, 35, 27, 0.14); background: #FFF6E3; }
 .stage svg { display: block; width: 100%; height: auto; }
@@ -87,9 +87,14 @@
 .duo { animation: duo var(--t) infinite cubic-bezier(0.2, 0.9, 0.3, 1.1); }
 @keyframes duo { 0%, 80% { transform: translateY(240px); } 84%, 100% { transform: none; } }
 .mark { transform-origin: center; animation: mark var(--t) infinite cubic-bezier(0.3, 1.6, 0.5, 1); }
-@keyframes mark { 0%, 83% { transform: translateY(-200px) rotate(-20deg); } 86.5%, 100% { transform: none; } }
-.spark { transform-origin: center; animation: spark 1.6s ease-in-out infinite; }
-@keyframes spark { 0%, 100% { transform: scale(0.5); opacity: 0.4; } 50% { transform: scale(1.1); opacity: 1; } }
+@keyframes mark { 0%, 90% { transform: translateY(-200px) rotate(-20deg); } 93.5%, 100% { transform: none; } }
+.hugL, .hugR { transform-origin: 50% 100%; animation: var(--t) infinite cubic-bezier(0.4, 0, 0.2, 1); }
+.reel .hugL { animation-name: hugL; }
+.reel .hugR { animation-name: hugR; }
+@keyframes hugL { 0%, 85% { transform: translateX(-70px); } 88% { transform: translateX(3px) rotate(1.5deg); } 89.5%, 100% { transform: rotate(2deg); } }
+@keyframes hugR { 0%, 85% { transform: translateX(70px); } 88% { transform: translateX(-3px) rotate(-1.5deg); } 89.5%, 100% { transform: rotate(-2deg); } }
+.arms { animation: arms var(--t) infinite; }
+@keyframes arms { 0%, 87.5% { opacity: 0; } 89%, 100% { opacity: 1; } }
 
 /* Captions and progress */
 .captions { position: relative; height: 64px; margin-top: 20px; }

@@ -10,8 +10,8 @@ const SKIN = { a: "#7A4A2E", b: "#5B3520" };
 const KHAKI = "#C9AE7C";
 
 /** A person, flat and friendly. (x, y) is the centre of the head. */
-function Person({ x, y, skin, top, hair, cap, wave, scale = 1, className }: {
-  x: number; y: number; skin: string; top: string; hair: "puff" | "short" | "bun"; cap?: boolean; wave?: boolean; scale?: number; className?: string;
+function Person({ x, y, skin, top, hair, cap, wave, happy, scale = 1, className, children }: {
+  x: number; y: number; skin: string; top: string; hair: "puff" | "short" | "bun"; cap?: boolean; wave?: boolean; happy?: boolean; scale?: number; className?: string; children?: React.ReactNode;
 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`}>
@@ -30,9 +30,20 @@ function Person({ x, y, skin, top, hair, cap, wave, scale = 1, className }: {
         {hair === "bun" && <path d="M-26 6 C-30 -26 -14 -32 0 -32 C14 -32 30 -26 26 6 C22 -10 14 -16 0 -16 C-14 -16 -22 -10 -26 6 Z" fill="#1E120B" />}
         {hair === "short" && <path d="M-24 -4 C-24 -26 -12 -30 0 -30 C12 -30 24 -26 24 -4 C18 -16 -18 -16 -24 -4 Z" fill="#1E120B" />}
         {cap && <><path d="M-25 -8 C-25 -30 25 -30 25 -8 Z" fill={KHAKI} /><rect x="-30" y="-11" width="44" height="6" rx="3" fill="#B0925E" /></>}
-        <circle cx="-8" cy="2" r="2.6" fill="#1E120B" />
-        <circle cx="8" cy="2" r="2.6" fill="#1E120B" />
+        {happy ? (
+          <>
+            <path d="M-12 3 Q-8 -2 -4 3 M4 3 Q8 -2 12 3" stroke="#1E120B" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+            <circle cx="-13" cy="10" r="3.5" fill="#E8836B" opacity="0.55" />
+            <circle cx="13" cy="10" r="3.5" fill="#E8836B" opacity="0.55" />
+          </>
+        ) : (
+          <>
+            <circle cx="-8" cy="2" r="2.6" fill="#1E120B" />
+            <circle cx="8" cy="2" r="2.6" fill="#1E120B" />
+          </>
+        )}
         <path d="M-7 11 Q0 17 7 11" stroke="#1E120B" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+        {children}
       </g>
     </g>
   );
@@ -181,19 +192,29 @@ export function StoryReel() {
           <g className={`${s.scene} ${s.s5}`}>
             <rect width="800" height="500" fill="#17A862" />
             <circle cx="400" cy="560" r="330" fill="#34D186" opacity="0.35" />
+            {/* They step in and hug: arms cross each other's backs. */}
             <g className={s.duo}>
-              <Person x={330} y={300} skin={SKIN.a} top={KHAKI} hair="puff" scale={1.1} />
-              <Person x={470} y={300} skin={SKIN.b} top="#FDEBC4" hair="bun" scale={1.1} />
+              <g className={s.hugL}>
+                <Person x={358} y={344} skin={SKIN.a} top={KHAKI} hair="puff" happy scale={1.65}>
+                  <g className={s.arms}>
+                    <path d="M26 58 C50 44 82 46 90 66" stroke={KHAKI} strokeWidth="13" strokeLinecap="round" fill="none" />
+                    <circle cx="90" cy="70" r="7.5" fill={SKIN.a} />
+                  </g>
+                </Person>
+              </g>
+              <g className={s.hugR}>
+                <Person x={442} y={344} skin={SKIN.b} top="#FDEBC4" hair="bun" happy scale={1.65}>
+                  <g className={s.arms}>
+                    <path d="M-20 50 C-44 38 -78 40 -88 62" stroke="#FDEBC4" strokeWidth="13" strokeLinecap="round" fill="none" />
+                    <circle cx="-88" cy="66" r="7.5" fill={SKIN.b} />
+                  </g>
+                </Person>
+              </g>
             </g>
             <g className={s.mark}>
               <rect x="352" y="70" width="96" height="96" rx="26" fill="#F5B83D" />
               <path d="M380 92v52M420 92v52M380 110h40M380 128h40" stroke="#10231B" strokeWidth="8" strokeLinecap="round" />
             </g>
-            {[[230, 140], [580, 120], [620, 230], [180, 250]].map(([x, y], i) => (
-              <path key={i} className={s.spark} style={{ animationDelay: `${i * 0.15}s` }}
-                d={`M${x} ${y - 12} C${x + 2} ${y - 2} ${x + 2} ${y - 2} ${x + 12} ${y} C${x + 2} ${y + 2} ${x + 2} ${y + 2} ${x} ${y + 12} C${x - 2} ${y + 2} ${x - 2} ${y + 2} ${x - 12} ${y} C${x - 2} ${y - 2} ${x - 2} ${y - 2} ${x} ${y - 12} Z`}
-                fill="#FDEBC4" />
-            ))}
           </g>
         </svg>
       </div>
