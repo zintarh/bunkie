@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
-import { MyWantCard, PostWantLink } from "@/components/Wants";
+import { LookingStrip, MyWantCard } from "@/components/Wants";
 import { InstallCard } from "@/components/InstallPrompt";
 import { HomeRail } from "@/components/DesktopFrame";
 import { Filters, activeFilterCount } from "@/components/Filters";
@@ -131,6 +131,8 @@ export default function Explore() {
   }, [rooms, myAnswers, search, length?.unit, length?.n]);
   const exact = ranked?.filter(({ r }) => r.exact !== false) ?? null;
   const close = ranked?.filter(({ r }) => r.exact === false) ?? [];
+  // Few rooms fit: posting what you need leads, and corpers already looking show under the rooms.
+  const few = exact != null && exact.length < 3;
 
   const nFilters = activeFilterCount(f, inCamp);
 
@@ -178,7 +180,7 @@ export default function Explore() {
       <div className="body feed-body" style={{ padding: "4px 16px 24px", gap: 0 }}>
         <div className="feed-col">
         <ContinueHosting style={{ marginTop: 14 }} />
-        <MyWantCard style={{ marginTop: 14 }} />
+        <MyWantCard style={{ marginTop: 14 }} invite={few} />
         <InstallCard style={{ marginTop: 14 }} />
         {inCamp && (
           <div className="row card" style={{ marginTop: 14, padding: "12px 14px", borderRadius: 18 }}>
@@ -216,7 +218,6 @@ export default function Explore() {
             <span className="stack" style={{ gap: 2, padding: "12px 2px 0" }}>
               <span className="h2">{exact?.length ? "Close matches" : "Nothing exact yet. These are close"}</span>
               <span className="small">Each one says what&apos;s different.</span>
-              {!exact?.length && <PostWantLink style={{ marginTop: 10 }} />}
             </span>
             {close.map(({ r, fit }) => (
               <RoomCard key={r.id} room={r} saved={saved.has(r.id)} onToggleSave={() => toggleSave(r.id)} fitScore={fit}
@@ -227,7 +228,6 @@ export default function Explore() {
         {ranked && ranked.length === 0 && (
           <div className="stack" style={{ padding: "32px 8px", alignItems: "center", textAlign: "center", gap: 12 }}>
             <span className="h2">No bunkies match yet</span>
-            <PostWantLink style={{ width: "100%", textAlign: "left" }} />
             {/* Say what's narrowing the search, so a hidden listing never looks like a missing one. */}
             <div className="lrows" style={{ width: "100%", textAlign: "left" }}>
               {inCamp && (
@@ -246,6 +246,7 @@ export default function Explore() {
             </div>
           </div>
         )}
+        {few && <LookingStrip style={{ marginTop: 28 }} />}
         </div>
       </div>
       {/* Laptop: the right-hand panel beside the band and feed (hidden on phones). */}
