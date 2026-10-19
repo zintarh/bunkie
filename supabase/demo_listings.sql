@@ -2,6 +2,7 @@
 -- Re-runnable: removes the earlier demo hosts (and their listings) first.
 -- Run: supabase db query --linked -f supabase/demo_listings.sql   (or paste into the SQL editor)
 -- Demo hosts can't sign in (no password). Photos are the bundled /demo images.
+-- Rooms are flagged is_demo: search shows them only where SHOW_DEMO_ROOMS=true (local), never in production.
 
 begin;
 
@@ -69,10 +70,10 @@ insert into demo values
   (5, 'd1000000-0000-4000-8000-000000000005', 'd0000000-0000-4000-8000-000000000005', 'Jabi', 9.0688, 7.4215,
    'Flat 12, Jabi Lake Court', 'Near Jabi Lake Mall', 'own_room', 'own', true, 'mixed', true, 1, 12, 'monthly', 1, 140000, 70000, true, 40000);
 
-insert into public.listings (id, host_id, status, area_name, room_kind, bath_kind, furnished, household, open_to_camp,
+insert into public.listings (id, host_id, status, is_demo, area_name, room_kind, bath_kind, furnished, household, open_to_camp,
   min_months, max_months, pay_schedule, available_from, rent_monthly, deposit, allowed_to_share, open_to_short, weekly_price,
   published_at, area_lat, area_lng)
-select id, host, 'live', area, room, bath, furnished, household, camp, min_m, max_m, pay, current_date + free_in, rent, deposit,
+select id, host, 'live', true, area, room, bath, furnished, household, camp, min_m, max_m, pay, current_date + free_in, rent, deposit,
        true, short, weekly, now() - (n || ' hours')::interval,
        round((lat / 0.003)::numeric) * 0.003, round((lng / 0.003)::numeric) * 0.003
 from demo;

@@ -9,6 +9,9 @@ const CENTRE = { lat: 9.0579, lng: 7.4951 };
 
 const estimate = estimateMinutes;
 
+/** Demo rooms (supabase/demo_listings.sql) show only where SHOW_DEMO_ROOMS=true, i.e. local testing. */
+const SHOW_DEMO = process.env.SHOW_DEMO_ROOMS === "true";
+
 export async function searchRooms(p: SearchParams): Promise<RoomCard[]> {
   const db = supabasePublic();
   if (!db) return searchDemo(p);
@@ -24,6 +27,7 @@ export async function searchRooms(p: SearchParams): Promise<RoomCard[]> {
     p_stay: p.stay ?? "any",
     p_max_minutes: p.maxMinutes ?? null,
     p_limit: 40,
+    p_demo: SHOW_DEMO,
   });
   if (error) throw new Error(error.message);
   return data as RoomCard[];
@@ -72,6 +76,7 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     )
     .eq("id", id)
     .eq("status", "live")
+    .in("is_demo", SHOW_DEMO ? [true, false] : [false])
     .maybeSingle();
   if (!l) return null;
 
@@ -110,6 +115,6 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
 export async function liveRoomIds(): Promise<{ id: string; updated: string | null }[]> {
   const db = supabasePublic();
   if (!db) return DEMO_ROOMS.map((r) => ({ id: r.id, updated: r.published_at }));
-  const { data } = await db.from("listings").select("id, published_at").eq("status", "live").limit(5000);
+  const { data } = await db.from("listings").select("id, published_at").eq("status", "live").eq("is_demo", false).limit(5000);
   return (data ?? []).map((r) => ({ id: r.id as string, updated: r.published_at as string | null }));
 }
