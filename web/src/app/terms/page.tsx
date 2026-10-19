@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LegalDoc, type LegalSection } from "@/components/LegalDoc";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 export const metadata = { title: "Terms" };
 
@@ -198,7 +199,7 @@ const SECTIONS: LegalSection[] = [
   },
   {
     id: "contact", title: "Contact us",
-    body: <p>Support: [support email], [support phone], or <Link href="/help">Get help</Link> in the app.</p>,
+    body: <p>Email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>, or use <Link href="/help">Get help</Link> in the app.</p>,
   },
 ];
 

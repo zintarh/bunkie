@@ -159,6 +159,11 @@ export function ChevronDownIcon({ size = 24 }: IconProps) {
   return svg(size, <path d="m6 9.5 6 6 6-6" />);
 }
 
+/** Email: a rounded envelope with a soft fold. */
+export function MailIcon({ size = 24 }: IconProps) {
+  return svg(size, <><path d="M3.5 7.8A3.3 3.3 0 0 1 6.8 4.5h10.4a3.3 3.3 0 0 1 3.3 3.3v8.4a3.3 3.3 0 0 1-3.3 3.3H6.8a3.3 3.3 0 0 1-3.3-3.3Z" /><path d="m4.5 7.5 6.3 4.6c.7.5 1.7.5 2.4 0l6.3-4.6" /></>);
+}
+
 /** Agreement: a page with a folded corner and lines. */
 export function DocIcon({ size = 24 }: IconProps) {
   return svg(size, <><path d="M6.5 3h7.2L19 8.3v9.9A2.8 2.8 0 0 1 16.2 21H7.8A2.8 2.8 0 0 1 5 18.2V4.5C5 3.7 5.7 3 6.5 3Z" /><path d="M13.5 3v3.8c0 .8.7 1.5 1.5 1.5h4M8.5 13h7M8.5 16.5h4.5" /></>);

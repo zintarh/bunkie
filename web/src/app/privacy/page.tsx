@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LegalDoc, type LegalSection } from "@/components/LegalDoc";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 export const metadata = { title: "Privacy" };
 
@@ -23,7 +24,7 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>Bunkie is the data controller for the personal data described here. In this policy, “Bunkie”, “we” and “us” mean Bunkie and the company that runs it.</p>
         <p>Bunkie helps corp members find a bunkie: a fellow corper, or another verified host, to share a home with during the service year. Bunkie is not affiliated with or endorsed by the National Youth Service Corps (NYSC).</p>
-        <p>Our Data Protection Officer can be reached at [dpo email]. This policy follows the Nigeria Data Protection Act 2023 (NDPA) and the rules of the Nigeria Data Protection Commission (NDPC).</p>
+        <p>Our Data Protection Officer can be reached at <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>. This policy follows the Nigeria Data Protection Act 2023 (NDPA) and the rules of the Nigeria Data Protection Commission (NDPC).</p>
       </>
     ),
   },
@@ -144,7 +145,7 @@ const SECTIONS: LegalSection[] = [
           <li>withdraw consent you’ve given, such as for notifications or location;</li>
           <li>not be subject to decisions made only by automated means that seriously affect you.</li>
         </ul>
-        <p>Ask from <Link href="/help">Get help</Link> or email [dpo email]. We reply within [30] days. We may need to confirm it’s you first. Some records, like payments, must be kept by law even if you ask us to delete your account.</p>
+        <p>Ask from <Link href="/help">Get help</Link> or email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>. We reply within [30] days. We may need to confirm it’s you first. Some records, like payments, must be kept by law even if you ask us to delete your account.</p>
         <p>If you’re unhappy with how we handle your data, you can complain to the Nigeria Data Protection Commission (ndpc.gov.ng).</p>
       </>
     ),
@@ -171,7 +172,7 @@ const SECTIONS: LegalSection[] = [
   },
   {
     id: "contact", title: "Contact us",
-    body: <p>Data Protection Officer: [dpo email]. Support: [support email], [support phone].</p>,
+    body: <p>For privacy questions, data requests and support, email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</p>,
   },
 ];
 

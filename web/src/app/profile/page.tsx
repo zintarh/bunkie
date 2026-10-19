@@ -8,6 +8,7 @@ import { NotificationsRow } from "@/components/InstallPrompt";
 import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
 import { forgetPush } from "@/lib/install";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function Profile() {
@@ -110,7 +111,7 @@ export default function Profile() {
         <div className="lrows">{helpRows.map(row)}</div>
 
         <p className="small" style={{ marginTop: "auto", paddingTop: 24, fontSize: 12, lineHeight: 1.6, textAlign: "center" }}>
-          [support email] · [support phone]<br />Not affiliated with or endorsed by NYSC.
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a><br />Not affiliated with or endorsed by NYSC.
         </p>
       </div>
       <TabBar />

@@ -1,10 +1,12 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Phone, Siren } from "lucide-react";
+import { Siren } from "lucide-react";
+import { MailIcon } from "@/components/icons";
 import { TopBar } from "@/components/ui";
 import { errorText, useMe } from "@/lib/auth";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import { qs } from "@/lib/url";
 
 const KINDS = [
@@ -60,7 +62,7 @@ function Help() {
             {error && <p className="err" role="alert">{error}</p>}
           </>
         )}
-        <p className="note"><Phone size={16} style={{ flexShrink: 0, marginTop: 1 }} />Support: [support phone] · [support email]</p>
+        <p className="note"><MailIcon size={16} />Or email us at <a href={`mailto:${SUPPORT_EMAIL}`} style={{ fontWeight: 700 }}>{SUPPORT_EMAIL}</a></p>
       </div>
       {!sent && <div className="foot"><button className="btn" disabled={!kind || busy} onClick={send}>{busy ? <span className="spin" /> : "Send"}</button></div>}
     </main>
