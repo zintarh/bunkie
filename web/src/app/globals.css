@@ -29,7 +29,7 @@
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: #eef2ef;
+  background: var(--white);
   color: var(--ink);
   font-family: var(--body);
   font-size: 16px;
@@ -51,6 +51,8 @@ input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- Frame ---------- */
+/* Tablets: a soft surround beside the phone-width column. Phones stay white edge to edge. */
+@media (min-width: 520px) and (max-width: 1023px) { body:not(:has([data-full])) { background: #eef2ef; } }
 .app {
   max-width: 480px;
   margin: 0 auto;
@@ -209,7 +211,7 @@ body:has([data-full]) { background: var(--white); }
 /* ---------- Hero header ---------- */
 .hero {
   position: relative; color: var(--white); border-radius: 0 0 28px 28px; overflow: hidden;
-  background: radial-gradient(120% 90% at 100% 0%, #4be095 0%, rgba(75, 224, 149, 0) 60%), linear-gradient(160deg, #22c274 0%, #129a57 100%);
+  background: radial-gradient(90% 70% at 100% 100%, rgba(75, 224, 149, 0.55) 0%, rgba(75, 224, 149, 0) 70%), linear-gradient(180deg, #22c274 0%, #15a35e 100%);
 }
 .hero::after {
   content: ""; position: absolute; right: -24px; bottom: -34px; width: 150px; height: 150px; opacity: 0.13; pointer-events: none; transform: rotate(-12deg);

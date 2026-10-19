@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import { DesktopFrame } from "@/components/DesktopFrame";
 import { InstallHost } from "@/components/InstallPrompt";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import { StatusBar } from "@/components/StatusBar";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-NG" className={`${bricolage.variable} ${figtree.variable}`}>
       <body>
         <DesktopFrame>{children}</DesktopFrame>
+        <StatusBar />
         <ServiceWorker />
         <InstallHost />
       </body>

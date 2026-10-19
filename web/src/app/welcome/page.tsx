@@ -30,15 +30,6 @@ export default function Intro() {
     return () => clearTimeout(t);
   }, []);
 
-  // The status bar turns green with the splash, then back to the app's white.
-  const showingSplash = splash && ready && !(prefs.introSeen && prefs.stage);
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
-    meta.setAttribute("content", showingSplash ? "#17A862" : "#FFFFFF");
-    return () => meta.setAttribute("content", "#FFFFFF");
-  }, [showingSplash]);
-
   if (!ready || (prefs.introSeen && prefs.stage)) return <main className="screen" style={{ background: "#fff" }} />;
 
   const last = i === SLIDES.length - 1;
@@ -131,7 +122,7 @@ export default function Intro() {
         )}
       </div>
 
-      <button className={styles.splash} onClick={() => setSplash(false)} aria-label="Bunkie. Tap to continue"
+      <button className={styles.splash} data-statusbar="#26c878" onClick={() => setSplash(false)} aria-label="Bunkie. Tap to continue"
         style={{ opacity: splash ? 1 : 0, visibility: splash ? "visible" : "hidden" }}>
         <span className={styles.logo}><BunkMark size={42} /></span>
         <span className={styles.logoText}>bunkie</span>
