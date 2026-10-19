@@ -12,14 +12,14 @@ type Mine = { area_label: string; matches: number; offers: number };
  * match) shows a prominent card to post one; otherwise it renders nothing.
  */
 export function MyWantCard({ style, invite }: { style?: React.CSSProperties; invite?: boolean }) {
-  const [me, meReady] = useMe();
+  const [me, meLoading] = useMe();
   const [mine, setMine] = useState<Mine | null | undefined>(undefined);
   useEffect(() => {
     if (!me) return;
     supabaseBrowser()?.rpc("my_want").then(({ data }) => setMine(((data as Mine[]) ?? [])[0] ?? null));
   }, [me]);
   // Wait until we know whether there's a post, so the invite never flashes before it.
-  const known = meReady && (!me || mine !== undefined);
+  const known = !meLoading && (!me || mine !== undefined);
   if (!mine) return invite && known ? <PostWantHero style={style} /> : null;
   return (
     <Link href="/want" className="card row" style={{ gap: 12, padding: 14, color: "var(--ink)", ...style }}>

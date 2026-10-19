@@ -419,13 +419,19 @@ body:has([data-full]) { background: var(--white); }
 .feed-col { display: contents; }
 @media (min-width: 1024px) {
   .desk-feed > .app { max-width: none; }
-  .desk-feed .screen { display: grid; grid-template-columns: minmax(0, 620px); grid-template-rows: auto minmax(0, 1fr); column-gap: 48px; justify-content: start; padding: 0 28px 0 clamp(28px, 4vw, 64px); }
+  .desk-feed .screen { display: grid; grid-template-columns: min(620px, 100%); grid-template-rows: auto minmax(0, 1fr); column-gap: 48px; justify-content: center; padding: 0 28px; }
   .desk-feed .screen > .hero { grid-column: 1; grid-row: 1; border-radius: 0 0 32px 32px; padding: 22px 8px 24px !important; }
   .desk-feed .feed-body { grid-column: 1; grid-row: 2; padding: 8px 0 56px !important; }
-  .desk-feed .feed-col { display: flex; flex-direction: column; min-width: 0; }
+  .desk-feed .feed-col { display: flex; flex-direction: column; min-width: 0; container-type: inline-size; }
+}
+/* A wide feed shows rooms two across. */
+@container (min-width: 720px) {
+  .roomgrid { display: grid !important; grid-template-columns: 1fr 1fr; align-items: start; }
+  .roomgrid > span { grid-column: 1 / -1; }
 }
 @media (min-width: 1160px) {
-  .desk-feed .screen { grid-template-columns: minmax(0, 620px) 320px; }
+  /* Feed and side panel as one centred block that grows with the screen, so space never piles up on one side. */
+  .desk-feed .screen { grid-template-columns: minmax(0, 1fr) 320px; justify-content: stretch; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 40px; }
   .desk-feed .screen > .homerail { grid-column: 2; grid-row: 1 / 3; position: static; align-self: start; padding-top: 26px; }
 }
 
