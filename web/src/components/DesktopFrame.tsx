@@ -57,7 +57,7 @@ function SideNav({ path, onSearch, searching }: { path: string; onSearch: () => 
       </div>
       <div className="sidenav-items sidenav-bottom">
         {me
-          ? item("/profile", "Profile", <span className={`sidenav-avatar${is("/profile") ? " on" : ""}`}>{photo ? <img src={photo} alt="" /> : initial(me.profile.first_name)}</span>)
+          ? item("/profile", me.profile.first_name || "Profile", <span className={`sidenav-avatar${is("/profile") ? " on" : ""}`}>{photo ? <img src={photo} alt="" /> : initial(me.profile.first_name)}</span>)
           : <Link href="/signup" className="sidenav-signup"><span className="sidenav-label">Sign up</span><span className="sidenav-signup-short">Join</span></Link>}
       </div>
     </nav>
