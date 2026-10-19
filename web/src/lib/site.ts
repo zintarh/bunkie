@@ -2,7 +2,10 @@ import { ZONES, type Zone } from "./places";
 
 export const SUPPORT_EMAIL = "hello@bunkie.xyz";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://bunkie.xyz").replace(/\/$/, "");
+/** The address Google is told about (canonical tags, sitemap). Production is always the real domain; bunkie.xyz redirects to www. */
+export const SITE_URL = process.env.VERCEL_ENV === "production"
+  ? "https://www.bunkie.xyz"
+  : (process.env.NEXT_PUBLIC_SITE_URL || "https://www.bunkie.xyz").replace(/\/$/, "");
 
 /** "Wuse 2" -> "wuse-2", for the /abuja/[area] pages. */
 export const areaSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
