@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Briefcase, CalendarDays, MapPin, Tent } from "lucide-react";
-import { Seg, TopBar } from "@/components/ui";
+import { TopBar } from "@/components/ui";
 import { dayLabel } from "@/lib/format";
 import { BATCHES } from "@/lib/places";
 import { setPrefs, usePrefs } from "@/lib/prefs";
@@ -13,6 +13,12 @@ const STAGES: { value: NyscStage; label: string; sub: string; Icon: typeof Tent 
   { value: "in_camp", label: "In camp", sub: "I have my call-up letter, no PPA yet", Icon: Tent },
   { value: "have_ppa", label: "I have my PPA", sub: "I know where I’m posted", Icon: MapPin },
   { value: "serving", label: "Already serving", sub: "Looking for a new place", Icon: Briefcase },
+];
+
+const PREFS: { value: SharePref; label: string }[] = [
+  { value: "women_only", label: "Women only" },
+  { value: "men_only", label: "Men only" },
+  { value: "mixed_ok", label: "Mixed is fine" },
 ];
 
 // The batch whose camp ends soonest from today is the likely default.
@@ -97,9 +103,15 @@ export default function Start() {
         )}
 
         <div className="stack" style={{ gap: 10 }}>
-          <span className="h2" style={{ fontSize: 16 }}>Share a home with</span>
-          <Seg label="Share a home with" value={pref} onChange={setPref}
-            options={[{ value: "women_only", label: "Women only" }, { value: "men_only", label: "Men only" }, { value: "mixed_ok", label: "Mixed is fine" }]} />
+          <span id="pref-q" className="h2" style={{ fontSize: 18 }}>Who do you want to live with?</span>
+          <div role="radiogroup" aria-labelledby="pref-q" className="opts3">
+            {PREFS.map(({ value, label }) => (
+              <button key={value} type="button" role="radio" aria-checked={pref === value}
+                className={pref === value ? "opt on" : "opt"} onClick={() => setPref(value)}>
+                <span className="radio" aria-hidden="true" />{label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <p className="small" style={{ marginTop: "auto" }}>
