@@ -21,7 +21,7 @@ import { PostWantLink } from "./Wants";
  *  full   pages with their own frame (landing, host partners, admin)
  */
 function modeFor(path: string): "feed" | "dm" | "page" | "full" {
-  if (path === "/" || path === "/partners" || path.startsWith("/admin")) return "full";
+  if (path === "/" || path === "/partners" || path === "/make-money-as-a-corper" || path === "/abuja" || path.startsWith("/abuja/") || path.startsWith("/admin")) return "full";
   if (path === "/explore") return "feed";
   if (path.startsWith("/inbox")) return "dm";
   return "page";

@@ -105,3 +105,11 @@ export async function getRoom(id: string): Promise<RoomDetail | null> {
     rules: byPos(l.house_rules ?? []),
   };
 }
+
+/** Every live room, for the sitemap. */
+export async function liveRoomIds(): Promise<{ id: string; updated: string | null }[]> {
+  const db = supabasePublic();
+  if (!db) return DEMO_ROOMS.map((r) => ({ id: r.id, updated: r.published_at }));
+  const { data } = await db.from("listings").select("id, published_at").eq("status", "live").limit(5000);
+  return (data ?? []).map((r) => ({ id: r.id as string, updated: r.published_at as string | null }));
+}

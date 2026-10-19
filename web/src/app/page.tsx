@@ -6,12 +6,15 @@ import {
 } from "@/components/icons";
 import { LandingFooter, LandingNav } from "@/components/LandingChrome";
 import { RotatingWord } from "@/components/RotatingWord";
-import { StoryReel } from "@/components/StoryReel";
+import { StorySection } from "@/components/StoryReel";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 import styles from "./landing.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Bunkie · Leave NYSC camp with your bunkie" },
-  description: "Start your service year with a friend. Bunkie pairs new corp members with corpers already serving in Abuja.",
+  title: { absolute: "Bunkie · NYSC accommodation in Abuja with a corper bunkie" },
+  description: "Rooms for corp members in Abuja. Book from NYSC camp, move in on exit day and live with a verified corper who’s already serving.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Bunkie · Leave NYSC camp with your bunkie",
     description: "Start your service year with a friend, not alone.",
@@ -54,6 +57,13 @@ const FAQ = [
 export default function Landing() {
   return (
     <div className={styles.page} data-full>
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "Organization", "@id": `${SITE_URL}/#org`, name: "Bunkie", url: SITE_URL, logo: `${SITE_URL}/icons/icon-512.png`, email: SUPPORT_EMAIL, areaServed: { "@type": "City", name: "Abuja" } },
+          { "@type": "WebSite", name: "Bunkie", url: SITE_URL, publisher: { "@id": `${SITE_URL}/#org` } },
+        ],
+      }} />
       <LandingNav
         links={[{ href: "#year", label: "How it works" }, { href: "#safety", label: "Safety" }, { href: "/partners", label: "Host partners" }]}
         cta={{ href: "/welcome", label: "Find your bunkie" }}
@@ -76,7 +86,12 @@ export default function Landing() {
           </Link>
           <Link href="/partners" className={styles.heroHost}>Already serving? Be someone’s bunkie <ArrowIcon size={16} /></Link>
         </div>
-        <div className={styles.showcase}><StoryReel /></div>
+      </section>
+
+      <section className={styles.section} style={{ paddingTop: 96 }}>
+        <div className={styles.wrap}>
+          <StorySection />
+        </div>
       </section>
 
       <section className={styles.statement}>

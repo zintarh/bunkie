@@ -3,12 +3,16 @@ import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import { DesktopFrame } from "@/components/DesktopFrame";
 import { InstallHost } from "@/components/InstallPrompt";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-bricolage", display: "swap" });
 const figtree = Figtree({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-figtree", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  applicationName: "Bunkie",
+  openGraph: { siteName: "Bunkie", locale: "en_NG", type: "website" },
   title: { default: "Bunkie", template: "%s · Bunkie" },
   description: "Leave camp with a place to stay. Verified shared rooms for corp members in Abuja.",
   appleWebApp: { capable: true, title: "Bunkie", statusBarStyle: "default" },
@@ -19,7 +23,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#17A862",
+  themeColor: "#FFFFFF",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
