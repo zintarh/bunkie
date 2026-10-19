@@ -30,6 +30,15 @@ export default function Intro() {
     return () => clearTimeout(t);
   }, []);
 
+  // The status bar turns green with the splash, then back to the app's white.
+  const showingSplash = splash && ready && !(prefs.introSeen && prefs.stage);
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    meta.setAttribute("content", showingSplash ? "#17A862" : "#FFFFFF");
+    return () => meta.setAttribute("content", "#FFFFFF");
+  }, [showingSplash]);
+
   if (!ready || (prefs.introSeen && prefs.stage)) return <main className="screen" style={{ background: "#fff" }} />;
 
   const last = i === SLIDES.length - 1;

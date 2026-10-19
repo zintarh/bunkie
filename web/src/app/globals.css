@@ -233,13 +233,12 @@ body:has([data-full]) { background: var(--white); }
 
 /* ---------- Tab bar ---------- */
 /* Floating nav: one rounded pill lifted off the bottom edge, tabs grouped in the middle. */
-.tabs { flex-shrink: 0; align-self: center; display: flex; justify-content: center; gap: 2px; margin: 0 auto calc(12px + var(--safe-bottom)); padding: 6px; width: fit-content; background: var(--white); border-radius: 28px; box-shadow: 0 10px 30px rgba(16, 35, 27, 0.14), 0 2px 6px rgba(16, 35, 27, 0.06); border: 1px solid rgba(16, 35, 27, 0.04); }
-.tab { flex: 0 0 88px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: #7a867f; padding: 6px 0 4px; border-radius: 22px; position: relative; transition: color 0.2s ease; }
-.tab svg { position: relative; z-index: 1; transition: transform 0.2s ease; }
+.tabs { flex-shrink: 0; display: flex; background: var(--white); border-top: 1px solid var(--line); padding: 0 8px var(--safe-bottom); }
+.tab { flex: 1; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; color: #7a867f; position: relative; transition: color 0.2s ease; }
+.tab svg { transition: transform 0.2s ease; }
 .tab:active svg { transform: scale(0.9); }
 .tab.on { color: var(--green-text); }
-.tab.on::before { content: ""; position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(180deg, #e3f8ec, #d2f3df); }
-.tab > * { position: relative; z-index: 1; }
+.tab.on::before { content: ""; position: absolute; top: -1px; left: 50%; width: 28px; height: 3px; margin-left: -14px; border-radius: 0 0 3px 3px; background: var(--green); }
 
 /* ---------- Sheets and progress ---------- */
 .scrim { position: fixed; inset: 0; background: rgba(16, 35, 27, 0.4); z-index: 40; display: flex; align-items: flex-end; justify-content: center; animation: fade 0.2s ease both; }
@@ -420,7 +419,7 @@ body:has([data-full]) { background: var(--white); }
 .feed-col { display: contents; }
 @media (min-width: 1024px) {
   .desk-feed > .app { max-width: none; }
-  .desk-feed .screen { display: grid; grid-template-columns: minmax(0, 620px); grid-template-rows: auto minmax(0, 1fr); column-gap: 48px; justify-content: center; padding: 0 28px; }
+  .desk-feed .screen { display: grid; grid-template-columns: minmax(0, 620px); grid-template-rows: auto minmax(0, 1fr); column-gap: 48px; justify-content: start; padding: 0 28px 0 clamp(28px, 4vw, 64px); }
   .desk-feed .screen > .hero { grid-column: 1; grid-row: 1; border-radius: 0 0 32px 32px; padding: 22px 8px 24px !important; }
   .desk-feed .feed-body { grid-column: 1; grid-row: 2; padding: 8px 0 56px !important; }
   .desk-feed .feed-col { display: flex; flex-direction: column; min-width: 0; }
