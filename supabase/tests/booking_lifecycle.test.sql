@@ -430,3 +430,16 @@ do $$ begin
   assert (select viewing_at from public.bookings where id = (select id from v1)) = date_trunc('hour', now()) + interval '2 days', 'their time';
 end $$;
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- No double booking: paid dates are closed to everyone, even past the app
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000b4');   -- Ngozi asks for dates inside Bisi's paid short stay
+select t.expect_error($$ select public.request_room((select listing_id from ids), current_date + 205, 1) $$, '%booked for those dates%');
+reset role;
+-- Even a direct write can't put two paid stays on the same room and dates.
+select t.expect_error($$
+  insert into public.bookings (listing_id, tenant_id, host_id, move_in, months, move_out, monthly_total, status)
+  select listing_id, '00000000-0000-0000-0000-0000000000b4', '00000000-0000-0000-0000-0000000000a1',
+         current_date + 205, 1, current_date + 235, 40000, 'paid' from ids $$, '%no_double_booking%');
