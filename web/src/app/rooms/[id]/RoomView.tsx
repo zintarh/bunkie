@@ -108,7 +108,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
             value={commute != null ? `${commute} min` : room.ease_min != null ? `${room.ease_min} min` : "—"}
             label={commute != null ? "to your PPA" : "to the city centre"} />
           <Fact icon={<CalendarDays size={20} color="var(--green)" strokeWidth={2.2} />} value={stayRange(room.min_months, room.max_months)} label="stay length" />
-          <Fact icon={<CalendarDays size={20} color="var(--green)" strokeWidth={2.2} />} value={room.available_from ? dayLabel(room.available_from).slice(4) : "Now"} label="move in from" />
+          <Fact icon={<CalendarDays size={20} color="var(--green)" strokeWidth={2.2} />} value={room.available_from && room.available_from > new Date().toISOString().slice(0, 10) ? dayLabel(room.available_from).slice(4) : "Now"} label="move in from" />
           <Fact icon={<Bath size={20} color="var(--green)" strokeWidth={2.2} />} value={room.bath_kind === "own" ? "Own" : "Shared"} label="bathroom" />
         </section>
 

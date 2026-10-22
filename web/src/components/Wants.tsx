@@ -98,11 +98,14 @@ export function LookingStrip({ style }: { style?: React.CSSProperties }) {
 
 /** Hosting: how many corpers are looking right now. */
 export function LookingCard({ style }: { style?: React.CSSProperties }) {
+  const [me] = useMe();
   const [n, setN] = useState<number | null>(null);
+  // Only signed-in people can see who's looking.
   useEffect(() => {
+    if (!me) return;
     supabaseBrowser()?.rpc("want_feed", { p_listing: null, p_limit: 100 })
       .then(({ data }) => setN(((data ?? []) as { mine: boolean }[]).filter((w) => !w.mine).length));
-  }, []);
+  }, [me]);
   if (!n) return null;
   return (
     <Link href="/host/looking" className="card row" style={{ gap: 12, padding: "12px 14px", color: "var(--ink)", ...style }}>
