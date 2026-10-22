@@ -34,8 +34,16 @@ export function ReviewStep({ listing, reload }: StepProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Host checks all sent and still being looked at: nothing to do, so no link back into /verify.
+  const [verifyWaiting, setVerifyWaiting] = useState(false);
   useEffect(() => {
-    supabaseBrowser()?.rpc("listing_missing", { p_listing: listing.id }).then(({ data }) => setMissing((data as string[]) ?? []));
+    const db = supabaseBrowser();
+    db?.rpc("listing_missing", { p_listing: listing.id }).then(({ data }) => setMissing((data as string[]) ?? []));
+    db?.rpc("my_verification").then(({ data }) => {
+      const sent = new Set(((data ?? []) as { kind: string; status: string }[])
+        .filter((v) => v.status === "passed" || v.status === "pending").map((v) => v.kind));
+      setVerifyWaiting(["phone", "nin", "liveness", "proof_of_address"].every((k) => sent.has(k)));
+    });
   }, [listing.id, listing.status]);
 
   const publish = async () => {
@@ -78,7 +86,12 @@ export function ReviewStep({ listing, reload }: StepProps) {
           <div className="stack" style={{ gap: 6 }}>
             <span className="h2">Finish these first</span>
             <div className="lrows">
-              {missing.map((m) => (
+              {missing.map((m) => m === "verification" && verifyWaiting ? (
+                <div key={m} className="lrow">
+                  <span className="tile t-mint"><Check size={20} /></span>
+                  <span className="stack" style={{ gap: 0, flex: 1 }}><span>Verify you</span><span className="small">Checking your details</span></span>
+                </div>
+              ) : (
                 <Link key={m} className="lrow" href={FIX[m]?.href(listing.id) ?? "#"}>
                   <span className="tile t-amber"><CircleAlert size={20} /></span><span style={{ flex: 1 }}>{FIX[m]?.label ?? m}</span><ChevronRight size={18} color="var(--muted)" />
                 </Link>

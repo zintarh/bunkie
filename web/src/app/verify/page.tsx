@@ -26,8 +26,9 @@ function Verify() {
     const db = supabaseBrowser();
     if (!db) return setDone(new Set());
     const { data } = await db.rpc("my_verification");
+    // Sent and waiting counts as done here: nobody is asked for the same thing twice.
     const passed = new Set<StepKey>(((data ?? []) as { kind: string; status: string }[])
-      .filter((v) => v.status === "passed").map((v) => (v.kind === "proof_of_address" ? "address" : v.kind) as StepKey));
+      .filter((v) => v.status === "passed" || v.status === "pending").map((v) => (v.kind === "proof_of_address" ? "address" : v.kind) as StepKey));
     setDone(passed);
   }, []);
   useEffect(() => void load(), [load]);
@@ -143,8 +144,9 @@ function NinStep({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      const r = await callFunction<{ masked_name: string }>("verify", { action: "nin", nin, dob });
-      setMasked(r.masked_name);
+      const r = await callFunction<{ masked_name: string | null }>("verify", { action: "nin", nin, dob });
+      if (r.masked_name) setMasked(r.masked_name);
+      else onDone();
     } catch (e) {
       setError(errorText(e));
     } finally {

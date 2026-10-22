@@ -20,7 +20,7 @@ export default function AdminHome() {
     { href: "/admin/reports", n: o?.reports, label: "Open reports", Icon: Flag, tone: styles.iRed },
     { href: "/admin/chats", n: o?.chats, label: "Flagged chats", Icon: MessageSquareWarning, tone: styles.iAmber },
     { href: "/admin/listings", n: o?.listings, label: "Listings waiting", Icon: ListChecks, tone: styles.iMint },
-    { href: "/admin/verifications", n: o?.verifications, label: "Failed ID checks, 30 days", Icon: BadgeCheck, tone: styles.iSky },
+    { href: "/admin/verifications", n: o?.verifications, label: "ID checks waiting", Icon: BadgeCheck, tone: styles.iSky },
   ];
   const today = [
     { n: o?.live_listings, label: "Live rooms", Icon: BedDouble, tone: styles.iMint, href: "/admin/listings" },

@@ -8,13 +8,18 @@
 //   discharge        { path, certificate_number }  NYSC certificate, for hosts who served before
 //   serving_corper   { state_code, batch_id, call_up_path, ppa_path }  hosts serving now
 import { HttpError, admin, json, requireUser, serve } from "../_shared/clients.ts";
-import { identity } from "../_shared/identity.ts";
+import { identity, manualReview } from "../_shared/identity.ts";
 
 const record = (user: string, kind: string, passed: boolean, provider: string, ref: string, extra: Record<string, unknown> = {}) =>
   admin.rpc("sys_record_verification", {
     p_user: user, p_kind: kind, p_passed: passed, p_provider: provider, p_ref: ref,
     p_masked_name: extra.masked_name ?? null, p_gender: extra.gender ?? null, p_result: extra.result ?? {},
   });
+
+// Manual review: keep what was sent for the team to check; the person carries on.
+const submit = (user: string, kind: string, result: Record<string, unknown>) =>
+  admin.rpc("sys_submit_verification", { p_user: user, p_kind: kind, p_provider: "manual", p_result: result })
+    .then(({ error }) => { if (error) throw new HttpError(500, "Couldn't save that. Try again."); });
 
 serve(async (req) => {
   const { db, user } = await requireUser(req);
@@ -35,6 +40,10 @@ serve(async (req) => {
       const dob = String(body.dob ?? "");
       if (nin.length !== 11) throw new HttpError(400, "A NIN has 11 digits.");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) throw new HttpError(400, "Enter your date of birth.");
+      if (manualReview()) {
+        await submit(user.id, "nin", { nin, dob });
+        return json({ masked_name: null });
+      }
       const p = identity();
       const r = await p.lookupNin(nin, dob);
       if (!r.found) throw new HttpError(404, "We couldn't find that NIN. Check the digits.");
@@ -51,6 +60,10 @@ serve(async (req) => {
 
     case "liveness": {
       if (!ownPath(body.path)) throw new HttpError(400, "Take the selfie again.");
+      if (manualReview()) {
+        await submit(user.id, "liveness", { path: body.path });
+        return json({ ok: true });
+      }
       const p = identity();
       const r = await p.liveness(body.path, user.id);
       await record(user.id, "liveness", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
@@ -66,6 +79,10 @@ serve(async (req) => {
         .eq("state_code", code).neq("user_id", user.id);
       if (count) throw new HttpError(409, "That state code is already on another account. Get help if it's yours.");
       await db.from("profile_private").update({ state_code: code }).eq("user_id", user.id);
+      if (manualReview()) {
+        await submit(user.id, "call_up", { path: body.path, state_code: code });
+        return json({ ok: true });
+      }
       const p = identity();
       const r = await p.callUpLetter(body.path, code, user.id);
       await record(user.id, "call_up", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
@@ -78,6 +95,10 @@ serve(async (req) => {
       if (!["meter", "bill", "receipt"].includes(kind)) throw new HttpError(400, "Pick a proof of address.");
       const value = String(body.value ?? "");
       if (kind === "meter" ? !/^\d{11,13}$/.test(value) : !ownPath(value)) throw new HttpError(400, "Check the proof of address.");
+      if (manualReview()) {
+        await submit(user.id, "proof_of_address", { kind, path: kind === "meter" ? null : value, meter: kind === "meter" ? value : null });
+        return json({ ok: true });
+      }
       const p = identity();
       const r = await p.proofOfAddress(kind, value, user.id);
       await record(user.id, "proof_of_address", r.passed, p.name, r.ref, { result: { kind, path: kind === "meter" ? null : value, meter: kind === "meter" ? value : null } });
@@ -100,6 +121,11 @@ serve(async (req) => {
         .eq("state_code", code).neq("user_id", user.id);
       if (count) throw new HttpError(409, "That state code is already on another account. Get help if it's yours.");
       await admin.from("profile_private").update({ state_code: code, batch_id: batch.id }).eq("user_id", user.id);
+      if (manualReview()) {
+        await submit(user.id, "call_up", { path: body.call_up_path, state_code: code });
+        await submit(user.id, "ppa_letter", { path: body.ppa_path, state_code: code });
+        return json({ ok: true });
+      }
 
       const p = identity();
       const callUp = await p.callUpLetter(body.call_up_path, code, user.id);
@@ -115,6 +141,10 @@ serve(async (req) => {
       const number = String(body.certificate_number ?? "").toUpperCase().replace(/\s/g, "");
       if (!/^[A-Z0-9/-]{6,20}$/.test(number)) throw new HttpError(400, "Check the certificate number.");
       if (!ownPath(body.path)) throw new HttpError(400, "Add a photo of your certificate.");
+      if (manualReview()) {
+        await submit(user.id, "discharge", { path: body.path, certificate_number: number });
+        return json({ ok: true });
+      }
       const p = identity();
       const r = await p.dischargeCertificate(body.path, number, user.id);
       await record(user.id, "discharge", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path, certificate_number: number } });

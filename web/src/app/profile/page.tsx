@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Award, BadgeCheck, ChevronRight, CircleHelp, FileText, Heart, Home, KeyRound, Lock, LogOut, ShieldCheck, Sparkles } from "lucide-react";
 import { AvatarPicker } from "@/components/AvatarPicker";
 import { HostIcon } from "@/components/icons";
@@ -14,6 +15,17 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 export default function Profile() {
   const router = useRouter();
   const [me, loading] = useMe();
+  // Every check sent and at least one still being looked at: say so instead of asking again.
+  const [checking, setChecking] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!me || me.profile.is_verified) return;
+    supabaseBrowser()?.rpc("my_verification").then(({ data }) => {
+      const rows = (data ?? []) as { kind: string; status: string }[];
+      const needed = me.profile.is_host ? ["phone", "nin", "liveness", "proof_of_address"] : ["phone", "nin", "liveness", "call_up"];
+      const state = (k: string) => rows.find((r) => r.kind === k)?.status;
+      setChecking(needed.every((k) => state(k) === "passed" || state(k) === "pending") && needed.some((k) => state(k) === "pending"));
+    });
+  }, [me]);
 
   type Row = { href: string; label: string; Icon: typeof Home; tile: string; show: boolean };
   // Grouped by what people come here for: who they are first, then account, then help.
@@ -64,7 +76,16 @@ export default function Profile() {
         )}
 
         {/* Verifying comes first: requesting a room needs it. */}
-        {me && !me.profile.is_verified && (
+        {me && !me.profile.is_verified && checking && (
+          <div className="lrows" style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "var(--green-soft)", boxShadow: "none", color: "var(--ink)" }}>
+            <span className="tile t-mint"><ShieldCheck size={20} strokeWidth={2.2} /></span>
+            <span className="stack" style={{ gap: 2, flex: 1 }}>
+              <span style={{ fontWeight: 700, fontSize: 16 }}>Checking your details</span>
+              <span className="small">Your verified badge shows here once it&apos;s done.</span>
+            </span>
+          </div>
+        )}
+        {me && !me.profile.is_verified && checking === false && (
           <Link href="/verify" className="lrows" style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "var(--amber-soft)", boxShadow: "none", color: "var(--ink)" }}>
             <span className="tile" style={{ background: "var(--amber)", color: "var(--ink)" }}><ShieldCheck size={20} strokeWidth={2.2} /></span>
             <span className="stack" style={{ gap: 2, flex: 1 }}>

@@ -40,6 +40,9 @@ const testProvider: IdentityProvider = {
   },
 };
 
+/** IDENTITY_PROVIDER=manual: checks wait for the team in /admin/verifications instead of a provider. */
+export const manualReview = () => Deno.env.get("IDENTITY_PROVIDER") === "manual";
+
 export function identity(): IdentityProvider {
   const chosen = Deno.env.get("IDENTITY_PROVIDER") ?? "test";
   if (chosen === "test") {

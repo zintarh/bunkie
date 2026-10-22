@@ -22,6 +22,9 @@ function Send() {
   const [me] = useMe();
   const [draft, setDraft] = useState<RequestDraft | null>(null);
   const [checking, setChecking] = useState(true);
+  // Every check sent, still being looked at: wait here instead of going round to /verify again.
+  const [waiting, setWaiting] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const here = `/request/${id}/send`;
@@ -42,7 +45,15 @@ function Send() {
       // Testing mode (settings.require_verification_to_request = false) skips ID checks.
       const { data: rule } = await db.from("settings").select("value").eq("key", "require_verification_to_request").maybeSingle();
       const mustVerify = rule?.value !== false;
-      if (mustVerify && !fresh?.profile.is_verified) return router.replace(`/verify?next=${qs(here)}`);
+      if (mustVerify && !fresh?.profile.is_verified) {
+        const { data: rows } = await db.rpc("my_verification");
+        const sent = new Set(((rows ?? []) as { kind: string; status: string }[])
+          .filter((v) => v.status === "passed" || v.status === "pending").map((v) => v.kind));
+        const needed = fresh?.profile.is_host ? ["phone", "nin", "liveness", "proof_of_address"] : ["phone", "nin", "liveness", "call_up"];
+        if (!needed.every((k) => sent.has(k))) return router.replace(`/verify?next=${qs(here)}`);
+        setWaiting(true);
+      }
+      setVerified(!!fresh?.profile.is_verified);
       setChecking(false);
     })();
   }, [me, draft, here, router]);
@@ -65,6 +76,18 @@ function Send() {
   if (!draft || checking) {
     return <main className="screen" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></main>;
   }
+  if (waiting) {
+    return (
+      <main className="screen">
+        <TopBar back={`/request/${id}`} />
+        <div className="body">
+          <h1 className="h1">Checking your details</h1>
+          <p className="sub">Your request to {draft.hostName} is saved. Send it once your verified badge shows on your profile.</p>
+        </div>
+        <div className="foot"><Link className="btn" href="/explore">Keep browsing</Link></div>
+      </main>
+    );
+  }
   const end = draft.weeks ? parseDay(draft.moveIn) : addMonths(parseDay(draft.moveIn), draft.months);
   end.setDate(end.getDate() + (draft.weeks ? 7 * draft.weeks : 0) - 1);
 
@@ -77,7 +100,7 @@ function Send() {
           <div className="lrow"><span className="tile t-mint"><CalendarDays size={20} /></span>
             <span className="stack" style={{ gap: 0 }}><span style={{ fontWeight: 700 }}>{dayLabel(draft.moveIn)} – {dayLabel(end, true)}</span><span className="small">{stayLength({ months: draft.months, weeks: draft.weeks })}</span></span>
           </div>
-          <div className="lrow"><span className="tile t-amber"><BadgeCheck size={20} /></span><span>Verified, with your bunkie profile</span></div>
+          <div className="lrow"><span className="tile t-amber"><BadgeCheck size={20} /></span><span>{verified ? "Verified, with your bunkie profile" : "With your bunkie profile"}</span></div>
           {draft.message && <div className="lrow"><span className="tile t-sky"><MessageSquare size={20} /></span><span style={{ fontSize: 15 }}>{draft.message}</span></div>}
         </div>
         <p className="note">Hosts see: your name, photo and a verified badge. Never: your NIN, documents or phone number. Delete your data any time.</p>
