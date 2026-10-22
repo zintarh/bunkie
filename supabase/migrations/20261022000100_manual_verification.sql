@@ -73,7 +73,8 @@ begin
 end $$;
 
 -- No selfie (liveness) check for now: verified means phone, NIN and the call-up letter
--- (hosts: proof of address).
+-- (hosts: proof of address). Corpers who sent a PPA acceptance letter (they have their PPA)
+-- need that passed too.
 create or replace function public.sys_record_verification(
   p_user uuid, p_kind text, p_passed boolean, p_provider text, p_ref text,
   p_masked_name text default null, p_gender public.gender default null, p_result jsonb default '{}'
@@ -95,6 +96,8 @@ begin
 
   select is_host into v_is_host from public.profiles where id = p_user;
   v_needed := case when v_is_host then array['phone', 'nin', 'proof_of_address']
+                   when exists (select 1 from private.verifications v where v.user_id = p_user and v.kind = 'ppa_letter')
+                     then array['phone', 'nin', 'call_up', 'ppa_letter']
                    else array['phone', 'nin', 'call_up'] end;
   update public.profiles set is_verified = (
     select bool_and(exists (select 1 from private.verifications v
@@ -109,7 +112,10 @@ end $$;
 -- Recount everyone under the new rule.
 update public.profiles p set is_verified = (
   select bool_and(exists (select 1 from private.verifications v where v.user_id = p.id and v.kind = k and v.status = 'passed'))
-  from unnest(case when p.is_host then array['phone', 'nin', 'proof_of_address'] else array['phone', 'nin', 'call_up'] end) k);
+  from unnest(case when p.is_host then array['phone', 'nin', 'proof_of_address']
+                   when exists (select 1 from private.verifications v where v.user_id = p.id and v.kind = 'ppa_letter')
+                     then array['phone', 'nin', 'call_up', 'ppa_letter']
+                   else array['phone', 'nin', 'call_up'] end) k);
 
 -- Launch: hosts are verified before a room goes live ("every host is verified").
 update public.settings set value = 'true' where key = 'require_host_verification';

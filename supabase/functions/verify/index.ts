@@ -4,6 +4,7 @@
 //   nin_not_me       marks the NIN step failed so it can be redone
 //   liveness         { path }                 selfie already uploaded to kyc/{user}/...
 //   call_up          { path, state_code }     call-up letter already uploaded
+//   ppa_letter       { path, state_code }     PPA acceptance letter, for corpers who have their PPA
 //   address          { kind, value }          host proof of address (meter number, bill or receipt path)
 //   discharge        { path, certificate_number }  NYSC certificate, for hosts who served before
 //   serving_corper   { state_code, batch_id, call_up_path, ppa_path }  hosts serving now
@@ -87,6 +88,21 @@ serve(async (req) => {
       const r = await p.callUpLetter(body.path, code, user.id);
       await record(user.id, "call_up", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
       if (!r.passed) throw new HttpError(400, r.reason ?? "The name on the letter must match your NIN.");
+      return json({ ok: true });
+    }
+
+    case "ppa_letter": {
+      // Corpers who have their PPA send the acceptance letter after the call-up letter.
+      if (!ownPath(body.path)) throw new HttpError(400, "Add your PPA acceptance letter.");
+      const code = String(body.state_code ?? "").toUpperCase().trim();
+      if (manualReview()) {
+        await submit(user.id, "ppa_letter", { path: body.path, state_code: code });
+        return json({ ok: true });
+      }
+      const p = identity();
+      const r = await p.ppaLetter(body.path, code, user.id);
+      await record(user.id, "ppa_letter", r.passed, p.name, r.ref, { result: { reason: r.reason ?? null, path: body.path } });
+      if (!r.passed) throw new HttpError(400, r.reason ?? "We couldn't confirm your PPA acceptance letter.");
       return json({ ok: true });
     }
 

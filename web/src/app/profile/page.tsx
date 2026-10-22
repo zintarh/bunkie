@@ -10,22 +10,26 @@ import { Loading, TabBar } from "@/components/ui";
 import { refreshMe, useMe } from "@/lib/auth";
 import { forgetPush } from "@/lib/install";
 import { SUPPORT_EMAIL } from "@/lib/site";
+import { usePrefs } from "@/lib/prefs";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { neededChecks, sentKinds } from "@/lib/verification";
 
 export default function Profile() {
   const router = useRouter();
   const [me, loading] = useMe();
   // Every check sent and at least one still being looked at: say so instead of asking again.
   const [checking, setChecking] = useState<boolean | null>(null);
+  const [prefs, prefsReady] = usePrefs();
+  const hasPpa = prefs.stage === "have_ppa" || prefs.stage === "serving";
   useEffect(() => {
-    if (!me || me.profile.is_verified) return;
+    if (!me || me.profile.is_verified || !prefsReady) return;
     supabaseBrowser()?.rpc("my_verification").then(({ data }) => {
       const rows = (data ?? []) as { kind: string; status: string }[];
-      const needed = me.profile.is_host ? ["phone", "nin", "proof_of_address"] : ["phone", "nin", "call_up"];
-      const state = (k: string) => rows.find((r) => r.kind === k)?.status;
-      setChecking(needed.every((k) => state(k) === "passed" || state(k) === "pending") && needed.some((k) => state(k) === "pending"));
+      const sent = sentKinds(rows);
+      const needed = neededChecks(me.profile.is_host, hasPpa);
+      setChecking(needed.every((k) => sent.has(k)) && rows.some((r) => r.status === "pending"));
     });
-  }, [me]);
+  }, [me, prefsReady, hasPpa]);
 
   type Row = { href: string; label: string; Icon: typeof Home; tile: string; show: boolean };
   // Grouped by what people come here for: who they are first, then account, then help.
@@ -57,9 +61,9 @@ export default function Profile() {
 
         {!loading && !me && (
           <div className="card stack" style={{ gap: 14 }}>
-            <span style={{ fontWeight: 700, fontSize: 17 }}>Sign up to request and book</span>
-            <Link className="btn" href="/signup?next=/profile">Sign up</Link>
-            <Link className="link" href="/login?next=/profile">I have an account</Link>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Sign in to request and book</span>
+            <Link className="btn" href="/login?next=/profile">Sign in</Link>
+            <Link className="link" href="/signup?next=/profile">New here? Create an account</Link>
           </div>
         )}
         {me && (

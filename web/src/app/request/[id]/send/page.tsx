@@ -11,6 +11,8 @@ import { addMonths, dayLabel, parseDay, stayLength } from "@/lib/format";
 import { nudge } from "@/lib/install";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
+import { getPrefs } from "@/lib/prefs";
+import { neededChecks, sentKinds } from "@/lib/verification";
 
 /**
  * Last stop before a request goes out. Sends the person through whatever is still missing
@@ -47,9 +49,9 @@ function Send() {
       const mustVerify = rule?.value !== false;
       if (mustVerify && !fresh?.profile.is_verified) {
         const { data: rows } = await db.rpc("my_verification");
-        const sent = new Set(((rows ?? []) as { kind: string; status: string }[])
-          .filter((v) => v.status === "passed" || v.status === "pending").map((v) => v.kind));
-        const needed = fresh?.profile.is_host ? ["phone", "nin", "proof_of_address"] : ["phone", "nin", "call_up"];
+        const sent = sentKinds(rows as { kind: string; status: string }[] | null);
+        const stage = getPrefs().stage;
+        const needed = neededChecks(!!fresh?.profile.is_host, stage === "have_ppa" || stage === "serving");
         if (!needed.every((k) => sent.has(k))) return router.replace(`/verify?next=${qs(here)}`);
         setWaiting(true);
       }

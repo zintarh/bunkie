@@ -52,6 +52,17 @@ select public.admin_set_verification('00000000-0000-0000-0000-0000000a0002', 'li
 select public.admin_set_verification('00000000-0000-0000-0000-0000000a0002', 'call_up', true);
 reset role;
 
+-- They have their PPA: the acceptance letter has to pass too before the badge.
+select public.sys_submit_verification('00000000-0000-0000-0000-0000000a0002', 'ppa_letter', 'manual', '{"path":"x/ppa.pdf"}');
+select public.sys_record_verification('00000000-0000-0000-0000-0000000a0002', 'phone', true, 'supabase_auth', 'y');
+do $$ begin
+  assert not (select is_verified from public.profiles where id = '00000000-0000-0000-0000-0000000a0002'), 'PPA letter still waiting';
+end $$;
+set role authenticated;
+select tmv.as_user('00000000-0000-0000-0000-0000000a0001');
+select public.admin_set_verification('00000000-0000-0000-0000-0000000a0002', 'ppa_letter', true);
+reset role;
+
 do $$ begin
   assert (select is_verified from public.profiles where id = '00000000-0000-0000-0000-0000000a0002'), 'verified once all passed';
   assert (select gender from public.profile_private where user_id = '00000000-0000-0000-0000-0000000a0002') = 'female', 'gender from the NIN record';

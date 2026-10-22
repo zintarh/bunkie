@@ -8,7 +8,9 @@ import { Progress } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
 import { callFunction } from "@/lib/functions";
 import { shrink } from "@/lib/image";
+import { usePrefs } from "@/lib/prefs";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { sentKinds } from "@/lib/verification";
 
 type StepKey = "phone" | "nin" | "liveness" | "call_up" | "address";
 const PRIVACY = "Hosts see your name, photo and a verified badge. Never your NIN, documents or phone number.";
@@ -18,6 +20,9 @@ function Verify() {
   const sp = useSearchParams();
   const next = safeNext(sp.get("next"), "/profile");
   const [me] = useMe();
+  const [prefs, prefsReady] = usePrefs();
+  // Corpers who have their PPA (or are serving) send the acceptance letter with the call-up letter.
+  const hasPpa = prefs.stage === "have_ppa" || prefs.stage === "serving";
   const isHost = sp.get("as") === "host" || !!me?.profile.is_host;
   // No selfie step for now; LivenessStep stays for when it comes back.
   const steps: StepKey[] = isHost ? ["phone", "nin", "address"] : ["phone", "nin", "call_up"];
@@ -28,11 +33,15 @@ function Verify() {
     if (!db) return setDone(new Set());
     const { data } = await db.rpc("my_verification");
     // Sent and waiting counts as done here: nobody is asked for the same thing twice.
-    const passed = new Set<StepKey>(((data ?? []) as { kind: string; status: string }[])
-      .filter((v) => v.status === "passed" || v.status === "pending").map((v) => (v.kind === "proof_of_address" ? "address" : v.kind) as StepKey));
+    const sent = sentKinds(data as { kind: string; status: string }[] | null);
+    const passed = new Set<StepKey>();
+    if (sent.has("phone")) passed.add("phone");
+    if (sent.has("nin")) passed.add("nin");
+    if (sent.has("proof_of_address")) passed.add("address");
+    if (sent.has("call_up") && (!hasPpa || sent.has("ppa_letter"))) passed.add("call_up");
     setDone(passed);
-  }, []);
-  useEffect(() => void load(), [load]);
+  }, [hasPpa]);
+  useEffect(() => { if (prefsReady) void load(); }, [load, prefsReady]);
 
   const current = done ? steps.find((s) => !done.has(s)) : undefined;
   useEffect(() => {
@@ -54,7 +63,7 @@ function Verify() {
       {current === "phone" && <PhoneStep onDone={finish} />}
       {current === "nin" && <NinStep onDone={finish} />}
       {current === "liveness" && <LivenessStep userId={me!.user.id} onDone={finish} />}
-      {current === "call_up" && <CallUpStep userId={me!.user.id} onDone={finish} />}
+      {current === "call_up" && <CallUpStep userId={me!.user.id} hasPpa={hasPpa} onDone={finish} />}
       {current === "address" && <AddressStep userId={me!.user.id} onDone={finish} />}
     </main>
   );
@@ -257,9 +266,10 @@ function LivenessStep({ userId, onDone }: { userId: string; onDone: () => void }
 }
 
 
-function CallUpStep({ userId, onDone }: { userId: string; onDone: () => void }) {
+function CallUpStep({ userId, hasPpa, onDone }: { userId: string; hasPpa: boolean; onDone: () => void }) {
   const [code, setCode] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [ppaFile, setPpaFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const valid = /^[A-Z]{2}\/\d{2}[ABC]\/\d{3,5}$/.test(code);
@@ -271,6 +281,10 @@ function CallUpStep({ userId, onDone }: { userId: string; onDone: () => void }) 
     try {
       const path = await uploadDoc(userId, "call-up", file);
       await callFunction("verify", { action: "call_up", path, state_code: code });
+      if (hasPpa && ppaFile) {
+        const ppaPath = await uploadDoc(userId, "ppa-letter", ppaFile);
+        await callFunction("verify", { action: "ppa_letter", path: ppaPath, state_code: code });
+      }
       onDone();
     } catch (e) {
       setError(errorText(e));
@@ -287,10 +301,11 @@ function CallUpStep({ userId, onDone }: { userId: string; onDone: () => void }) 
           <label className="field"><input id="sc" placeholder="FC/26B/1234" autoCapitalize="characters" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ""))} /></label>
         </div>
         <DocPicker label="NYSC call-up letter" file={file} setFile={setFile} />
+        {hasPpa && <DocPicker label="PPA acceptance letter" file={ppaFile} setFile={setPpaFile} />}
         {error && <p className="err" role="alert">{error}</p>}
         <p className="note"><Lock size={16} style={{ flexShrink: 0, marginTop: 1 }} />Delete your data any time.</p>
       </div>
-      <div className="foot"><button className="btn" disabled={!valid || !file || busy} onClick={submit}>{busy ? <span className="spin" /> : "Finish"}</button></div>
+      <div className="foot"><button className="btn" disabled={!valid || !file || (hasPpa && !ppaFile) || busy} onClick={submit}>{busy ? <span className="spin" /> : "Finish"}</button></div>
     </>
   );
 }
