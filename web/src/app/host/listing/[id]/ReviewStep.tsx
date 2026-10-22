@@ -42,7 +42,7 @@ export function ReviewStep({ listing, reload }: StepProps) {
     db?.rpc("my_verification").then(({ data }) => {
       const sent = new Set(((data ?? []) as { kind: string; status: string }[])
         .filter((v) => v.status === "passed" || v.status === "pending").map((v) => v.kind));
-      setVerifyWaiting(["phone", "nin", "liveness", "proof_of_address"].every((k) => sent.has(k)));
+      setVerifyWaiting(["phone", "nin", "proof_of_address"].every((k) => sent.has(k)));
     });
   }, [listing.id, listing.status]);
 

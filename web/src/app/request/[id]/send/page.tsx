@@ -49,7 +49,7 @@ function Send() {
         const { data: rows } = await db.rpc("my_verification");
         const sent = new Set(((rows ?? []) as { kind: string; status: string }[])
           .filter((v) => v.status === "passed" || v.status === "pending").map((v) => v.kind));
-        const needed = fresh?.profile.is_host ? ["phone", "nin", "liveness", "proof_of_address"] : ["phone", "nin", "liveness", "call_up"];
+        const needed = fresh?.profile.is_host ? ["phone", "nin", "proof_of_address"] : ["phone", "nin", "call_up"];
         if (!needed.every((k) => sent.has(k))) return router.replace(`/verify?next=${qs(here)}`);
         setWaiting(true);
       }

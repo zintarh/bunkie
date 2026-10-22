@@ -71,3 +71,49 @@ begin
     'people', (select count(*) from public.profiles)
   );
 end $$;
+
+-- No selfie (liveness) check for now: verified means phone, NIN and the call-up letter
+-- (hosts: proof of address).
+create or replace function public.sys_record_verification(
+  p_user uuid, p_kind text, p_passed boolean, p_provider text, p_ref text,
+  p_masked_name text default null, p_gender public.gender default null, p_result jsonb default '{}'
+) returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_needed text[];
+  v_is_host boolean;
+begin
+  insert into private.verifications (user_id, kind, status, provider, provider_ref, masked_name, result, decided_at)
+  values (p_user, p_kind, case when p_passed then 'passed' else 'failed' end, p_provider, p_ref, p_masked_name, p_result, now());
+
+  if p_kind = 'nin' and p_passed and p_gender is not null then
+    update public.profile_private set gender = p_gender where user_id = p_user;
+  end if;
+  if p_kind = 'phone' and p_passed then
+    update public.profile_private set phone_verified = true where user_id = p_user;
+  end if;
+
+  select is_host into v_is_host from public.profiles where id = p_user;
+  v_needed := case when v_is_host then array['phone', 'nin', 'proof_of_address']
+                   else array['phone', 'nin', 'call_up'] end;
+  update public.profiles set is_verified = (
+    select bool_and(exists (select 1 from private.verifications v
+                            where v.user_id = p_user and v.kind = k and v.status = 'passed'))
+    from unnest(v_needed) k)
+  where id = p_user;
+
+  -- A passed call-up or discharge check backs up the host's corp member answer.
+  update public.profiles set corper_verified = private.corper_check(id, corper_status) where id = p_user;
+end $$;
+
+-- Recount everyone under the new rule.
+update public.profiles p set is_verified = (
+  select bool_and(exists (select 1 from private.verifications v where v.user_id = p.id and v.kind = k and v.status = 'passed'))
+  from unnest(case when p.is_host then array['phone', 'nin', 'proof_of_address'] else array['phone', 'nin', 'call_up'] end) k);
+
+-- Launch: hosts are verified before a room goes live ("every host is verified").
+update public.settings set value = 'true' where key = 'require_host_verification';
+
+-- Launch: remove the test account's "looking for a room" post from the live app.
+delete from public.room_wants
+where author_id in (select id from auth.users where email = 'tola.bunkie-test@example.com');

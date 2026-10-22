@@ -19,7 +19,8 @@ function Verify() {
   const next = safeNext(sp.get("next"), "/profile");
   const [me] = useMe();
   const isHost = sp.get("as") === "host" || !!me?.profile.is_host;
-  const steps: StepKey[] = isHost ? ["phone", "nin", "liveness", "address"] : ["phone", "nin", "liveness", "call_up"];
+  // No selfie step for now; LivenessStep stays for when it comes back.
+  const steps: StepKey[] = isHost ? ["phone", "nin", "address"] : ["phone", "nin", "call_up"];
   const [done, setDone] = useState<Set<StepKey> | null>(null);
 
   const load = useCallback(async () => {

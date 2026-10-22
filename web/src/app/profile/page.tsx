@@ -21,7 +21,7 @@ export default function Profile() {
     if (!me || me.profile.is_verified) return;
     supabaseBrowser()?.rpc("my_verification").then(({ data }) => {
       const rows = (data ?? []) as { kind: string; status: string }[];
-      const needed = me.profile.is_host ? ["phone", "nin", "liveness", "proof_of_address"] : ["phone", "nin", "liveness", "call_up"];
+      const needed = me.profile.is_host ? ["phone", "nin", "proof_of_address"] : ["phone", "nin", "call_up"];
       const state = (k: string) => rows.find((r) => r.kind === k)?.status;
       setChecking(needed.every((k) => state(k) === "passed" || state(k) === "pending") && needed.some((k) => state(k) === "pending"));
     });
