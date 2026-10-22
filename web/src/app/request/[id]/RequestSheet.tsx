@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Video } from "lucide-react";
+import { SlotPicker } from "@/components/SlotPicker";
 import { Seg, Stepper, TopBar } from "@/components/ui";
 import { useMe } from "@/lib/auth";
 import { loadDraft, saveDraft } from "@/lib/draft";
@@ -35,6 +36,10 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
   const [unit, setUnit] = useState<"weeks" | "months">("months");
   const [w, setW] = useState(2);
   const short = canShort && unit === "weeks";
+  const [seeFirst, setSeeFirst] = useState(false);
+  const [mode, setMode] = useState<"in_person" | "video_call">("in_person");
+  const [slots, setSlots] = useState<string[]>([]);
+  const viewMode = inCamp ? "video_call" : mode;
 
   useEffect(() => {
     if (!ready) return;
@@ -47,6 +52,11 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
         setW(d.weeks);
       }
       setMessage(d.message);
+      if (d.viewing) {
+        setSeeFirst(true);
+        setMode(d.viewing.mode);
+        setSlots(d.viewing.slots.filter((s) => new Date(s) > new Date()));
+      }
     } else if (inCamp && campEnd) setMoveIn(campEnd);
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -57,7 +67,8 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
     : room.pay_schedule === "lump_sum" ? room.monthly_total * m + deposit : room.monthly_total + deposit;
 
   const go = () => {
-    saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, weeks: short ? w : null, message });
+    saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, weeks: short ? w : null, message,
+      viewing: seeFirst && slots.length ? { mode: viewMode, slots } : null });
     const next = `/request/${room.id}/send`;
     router.push(me ? next : `/signup?next=${qs(next)}`);
   };
@@ -118,12 +129,32 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
           )}
         </section>
 
-        {inCamp && (
-          <section className="stack" style={{ gap: 10 }}>
-            <span className="h2">Viewing</span>
-            <div className="row"><span className="tile t-mint"><Video size={20} /></span><span>Video call with {room.host_first_name}, from camp</span></div>
-          </section>
-        )}
+        <section className="stack" style={{ gap: 12 }}>
+          <label className="check">
+            <input type="checkbox" checked={seeFirst} onChange={() => setSeeFirst(!seeFirst)} />
+            See it first <span className="muted" style={{ fontWeight: 500 }}>· optional</span>
+          </label>
+          {seeFirst && (
+            <div className="open stack" style={{ gap: 12 }}>
+              {inCamp ? (
+                <div className="row"><span className="tile t-mint"><Video size={20} /></span><span>Video call with {room.host_first_name}, from camp</span></div>
+              ) : (
+                <div className="seg" role="radiogroup" aria-label="Viewing type">
+                  {(["in_person", "video_call"] as const).map((v) => (
+                    <button key={v} type="button" role="radio" aria-checked={mode === v} className={mode === v ? "on" : ""} onClick={() => setMode(v)}>
+                      {v === "in_person" ? "In person" : "Video call"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <span className="small">Pick up to 3 times. {room.host_first_name} confirms one.</span>
+              <SlotPicker slots={slots} onChange={setSlots} max={3} />
+              {viewMode === "in_person" && (
+                <span className="small">Inspection: {room.inspection_fee ? `${naira(room.inspection_fee)}, comes off your first payment` : "free"}</span>
+              )}
+            </div>
+          )}
+        </section>
 
         <section className="card stack" style={{ gap: 10 }}>
           <span className="h2">Cost</span>
@@ -133,12 +164,7 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
           {deposit > 0 && <div className="kv num"><span>Caution deposit</span><span>{naira(deposit)}</span></div>}
           <div className="divider" />
           <div className="kv num" style={{ fontWeight: 700 }}><span style={{ color: "var(--ink)" }}>{short ? "Whole stay" : "First payment"}</span><span>{naira(first)}</span></div>
-          <span className="small">{short ? "Paid only after you both agree." : "Paid only after you view the room and both agree."}</span>
-          {!inCamp && (
-            <span className="small">
-              Inspection: {room.inspection_fee ? `${naira(room.inspection_fee)}, paid once ${room.host_first_name} accepts. Comes off your first payment.` : "free"}
-            </span>
-          )}
+          <span className="small">Paid once {room.host_first_name} accepts. Held until you move in.</span>
         </section>
 
         <section className="stack">
@@ -150,7 +176,7 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
         </section>
       </div>
       <div className="foot">
-        <button className="btn" onClick={go}>Continue</button>
+        <button className="btn" disabled={seeFirst && slots.length === 0} onClick={go}>Continue</button>
         <span className="small" style={{ textAlign: "center" }}>You won&apos;t pay anything now</span>
       </div>
     </main>

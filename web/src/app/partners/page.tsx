@@ -54,7 +54,7 @@ const FAQ = [
   { q: "What about the deposit?", a: "Bunkie holds it until move-out. You can propose deductions. If you can’t agree, the Bunkie team decides." },
   { q: "Can I charge for inspections?", a: "Yes, up to ₦5,000, or keep them free. You keep the fee if the corper doesn’t show up." },
   { q: "What if a corper leaves early?", a: "You keep the rent already paid out to you. Later weeks or months are refunded to the corper." },
-  { q: "Who sees my address?", a: "Corpers see your area on the room page. The exact location is shared once a viewing is booked." },
+  { q: "Who sees my address?", a: "Corpers see your area on the room page. The exact address is shared after you accept them." },
 ];
 
 export default function Partners() {

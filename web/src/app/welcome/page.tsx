@@ -10,7 +10,7 @@ import styles from "./intro.module.css";
 const SLIDES = [
   { title: "Find your bunkie", sub: "Share a room near your PPA." },
   { title: "Every host is verified", sub: "Real people, real rooms. Corpers first." },
-  { title: "See it, then pay", sub: "Your money is held until you move in." },
+  { title: "Pay safely in the app", sub: "Your money is held until you move in." },
 ];
 
 export default function Intro() {

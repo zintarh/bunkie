@@ -2,7 +2,11 @@
 
 /** A request being put together. Survives the sign-up, questions and verification detours. */
 /** weeks is set for a short stay (1-4 weeks); otherwise the stay is `months` long. */
-export type RequestDraft = { listingId: string; hostName: string; moveIn: string; months: number; weeks?: number | null; message: string };
+export type RequestDraft = {
+  listingId: string; hostName: string; moveIn: string; months: number; weeks?: number | null; message: string;
+  /** Optional "see it first": times that suit them; the host's accept confirms one. */
+  viewing?: { mode: "in_person" | "video_call"; slots: string[] } | null;
+};
 
 const KEY = "bunkie.requestDraft.v1";
 

@@ -24,7 +24,6 @@ function Questions() {
   const next = safeNext(useSearchParams().get("next"), "/profile");
   const [me] = useMe();
   const [step, setStep] = useState<Step>("intro");
-  const [pledged, setPledged] = useState(false);
   const [ans, setAns] = useState<Partial<Answers>>({});
   const [editing, setEditing] = useState<keyof Answers | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,7 +39,6 @@ function Questions() {
       .then(({ data }) => {
         if (data) {
           setAns(data as Answers);
-          setPledged(true);
           setStep("review");
         }
         setLoaded(true);
@@ -125,12 +123,8 @@ function Questions() {
             <span className="avatar" style={{ width: 64, height: 64, fontSize: 26, background: "var(--ink)", color: "var(--amber)" }}>{me?.profile.first_name?.[0] ?? "B"}</span>
             <h1 className="h1">Meet your dream bunkie</h1>
             <p className="sub">5 quick questions. You only do this once.</p>
-            <label className="opt" style={{ cursor: "pointer", borderColor: pledged ? "var(--green)" : undefined }}>
-              <input type="checkbox" checked={pledged} onChange={() => setPledged(!pledged)} style={{ width: 22, height: 22, accentColor: "var(--green-text)" }} />
-              I&apos;ll answer honestly
-            </label>
           </div>
-          <div className="foot"><button className="btn" disabled={!pledged} onClick={() => setStep(0)}>Start</button></div>
+          <div className="foot"><button className="btn" onClick={() => setStep(0)}>Start</button></div>
         </>
       ) : (
         <div className="body open" key={step} style={{ gap: 16, paddingTop: 20 }}>
