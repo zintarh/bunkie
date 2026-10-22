@@ -59,8 +59,11 @@ function Waiting({ b, reload }: Props) {
         <Timeline steps={[
           { title: "Request sent", sub: new Date(b.created_at).toLocaleString("en-NG", { weekday: "short", hour: "numeric", minute: "2-digit" }), state: "done" },
           { title: `Waiting for ${b.host.first_name}`, sub: waiting ? `${b.host.first_name} is talking to someone else first. You're next in line.` : `${b.host.first_name} has ${untilLabel(b.deadline_at)} to reply`, state: "now" },
-          { title: "Agree and pay", sub: "Held until you move in", state: "todo" },
-          { title: "Move in", sub: dayLabel(b.move_in), state: "todo" },
+          ...(b.viewing_mode && b.offered_slots.length
+            ? [{ title: `View the room · ${b.viewing_mode === "video_call" ? "video call" : "in person"}`, sub: `${b.host.first_name} confirms one: ${b.offered_slots.map(slotLabel).join(", ")}`, state: "todo" as const }]
+            : []),
+          { title: "Agree and pay", sub: "Held until you move in", state: "todo" as const },
+          { title: "Move in", sub: dayLabel(b.move_in), state: "todo" as const },
         ]} />
         <Err error={error} />
       </Body>
@@ -259,7 +262,7 @@ function AfterViewing({ b, reload }: Props) {
       <Foot>
         {v === "no"
           ? <button className="btn red" disabled={why.length === 0 || !!busy} onClick={() => run("mismatch", { details: why.join(", ") })}>Decline and report</button>
-          : <button className="btn" disabled={v !== "yes" || !!busy} onClick={() => run("matched")}>Continue to agreement</button>}
+          : <button className="btn" disabled={v !== "yes" || !!busy} onClick={() => run("matched")}>Yes, continue to pay</button>}
       </Foot>
     </>
   );

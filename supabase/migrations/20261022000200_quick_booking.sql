@@ -1,6 +1,9 @@
 -- Quicker booking: request -> host accepts -> corper agrees and pays. One wait instead of six.
--- Viewing times become optional (the host can still offer them); the money is held until move-in
--- and "Is everything as listed?" on move-in day refunds in full.
+--  * Viewing is optional. A corper who wants one picks times with the request (propose_viewing);
+--    the host's accept confirms one of them, so there's no back and forth over times.
+--  * After a viewing, "it matched" goes straight to agree and pay: the host's accept already
+--    counts as the host confirming the terms.
+--  * The money is held until move-in, and "Is everything as listed?" on move-in day refunds in full.
 
 create or replace function public.booking_action(
   p_booking uuid, p_action text, p_version int default null, p_payload jsonb default '{}'
@@ -39,6 +42,54 @@ begin
   -- Host declines before terms are agreed.
   elsif p_action = 'decline' and v_host and b.status in ('requested', 'accepted', 'inspection_due', 'viewing_booked', 'viewed') then
     return private.close(b, 'host_declined', v_uid);
+
+  -- The corper asks to see it first, with up to three times that suit them (sent with the request).
+  elsif p_action = 'propose_viewing' and v_tenant and b.status = 'requested' then
+    select array_agg(x::timestamptz order by x::timestamptz) into v_slots
+    from jsonb_array_elements_text(coalesce(p_payload -> 'slots', '[]')) x;
+    v_mode := coalesce((p_payload ->> 'mode')::public.viewing_mode, 'in_person');
+    if coalesce(array_length(v_slots, 1), 0) not between 1 and 3 then perform private.fail('slots', 'Pick one to three times.'); end if;
+    if exists (select 1 from unnest(v_slots) x where x < now()) then perform private.fail('slots', 'Viewing times must be in the future.'); end if;
+    if b.is_camp_booking and v_mode <> 'video_call' then perform private.fail('camp', 'Camp bookings are viewed by video call.'); end if;
+    update public.bookings set offered_slots = v_slots, viewing_mode = v_mode, version = version + 1
+    where id = b.id returning * into b;
+    insert into public.booking_events (booking_id, actor_id, action, from_status, to_status, payload)
+    values (b.id, v_uid, 'propose_viewing', b.status, b.status, jsonb_build_object('slots', to_jsonb(v_slots), 'mode', v_mode));
+    return b;
+
+  -- Host accepts and confirms one of the corper's times: the viewing is booked in the same tap.
+  elsif p_action = 'accept' and v_host and b.status = 'requested' and p_payload ? 'at' then
+    v_slot := (p_payload ->> 'at')::timestamptz;
+    if b.viewing_mode is null or not (v_slot = any (b.offered_slots)) then perform private.fail('slots', 'Pick one of their times.'); end if;
+    if v_slot < now() then perform private.fail('slots', 'That time has passed. Suggest other times.'); end if;
+    begin
+      update public.bookings set viewing_at = v_slot where id = b.id;
+      -- Paid in-person inspection: the corper pays the fee to hold the time (video viewings are free).
+      if b.inspection_fee > 0 and b.viewing_mode = 'in_person' and b.inspection_payment_id is null then
+        b := private.move(b, 'inspection_due', 'accept', v_uid,
+                          greatest(now() + interval '15 minutes',
+                                   least(now() + make_interval(hours => private.setting_int('inspection_pay_hours', 2)),
+                                         v_slot - interval '30 minutes')),
+                          jsonb_build_object('at', v_slot, 'fee', b.inspection_fee));
+      else
+        b := private.move(b, 'viewing_booked', 'accept', v_uid,
+                          v_slot + make_interval(hours => private.setting_int('viewed_hours', 48)),
+                          jsonb_build_object('at', v_slot, 'mode', b.viewing_mode));
+      end if;
+    exception when unique_violation then
+      perform private.fail('room_busy', 'You''re already going ahead with another request for this room. Finish or close it first.');
+    end;
+    update public.bookings set deadline_at = null
+    where listing_id = b.listing_id and status = 'requested' and id <> b.id;
+    if b.status = 'inspection_due' then
+      perform private.notify(b.tenant_id, 'pay_inspection', b.id);
+    else
+      perform private.notify(b.tenant_id, 'viewing_booked', b.id);
+      perform private.enqueue('whatsapp', jsonb_build_object('user_id', u, 'template', 'viewing_reminder', 'booking_id', b.id),
+                              v_slot - interval '2 hours')
+      from unnest(array[b.tenant_id, b.host_id]) u;
+    end if;
+    return b;
 
   -- Accept: the agreement is ready straight away and the corper agrees and pays. A viewing is
   -- optional (the host offers times instead, below); move-in day's "Is everything as listed?"
@@ -142,12 +193,15 @@ begin
                         now() + make_interval(hours => private.setting_int('viewed_hours', 48)));
 
   -- Tenant: did the room match the listing?
+  -- It matched: the host already accepted, so the terms are ready to agree and pay.
   elsif p_action = 'matched' and v_tenant and b.status = 'viewed' then
-    update public.bookings set tenant_matched_at = now(), version = version + 1 where id = b.id returning * into b;
-    insert into public.booking_events (booking_id, actor_id, action, from_status, to_status)
-    values (b.id, v_uid, 'matched', b.status, b.status);
-    perform private.notify(b.host_id, 'tenant_matched', b.id);
-    return b;
+    update public.bookings set tenant_matched_at = now() where id = b.id;
+    v_terms := private.terms_for(b);
+    insert into public.agreement_versions (booking_id, version, terms, terms_hash, host_confirmed_at)
+    values (b.id, coalesce((select max(version) from public.agreement_versions where booking_id = b.id), 0) + 1,
+            v_terms, encode(extensions.digest(v_terms::text, 'sha256'), 'hex'), now());
+    return private.move(b, 'host_confirmed', 'matched', v_uid,
+                        now() + make_interval(hours => private.setting_int('confirm_hours', 24)));
 
   elsif p_action = 'mismatch' and v_tenant and b.status = 'viewed' then
     insert into public.reports (reporter_id, booking_id, listing_id, kind, details)

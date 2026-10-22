@@ -3,15 +3,17 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BadgeCheck, CalendarDays, MessageSquare } from "lucide-react";
+import { SlotPicker } from "@/components/SlotPicker";
 import { RequireAuth } from "@/components/auth";
 import { TopBar } from "@/components/ui";
 import { errorText, refreshMe, useMe } from "@/lib/auth";
+import { act } from "@/lib/bookings";
 import { clearDraft, loadDraft, type RequestDraft } from "@/lib/draft";
 import { addMonths, dayLabel, parseDay, stayLength } from "@/lib/format";
 import { nudge } from "@/lib/install";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
-import { getPrefs } from "@/lib/prefs";
+import { getPrefs, usePrefs } from "@/lib/prefs";
 import { neededChecks, sentKinds } from "@/lib/verification";
 
 /**
@@ -27,6 +29,12 @@ function Send() {
   // Every check sent, still being looked at: wait here instead of going round to /verify again.
   const [waiting, setWaiting] = useState(false);
   const [verified, setVerified] = useState(false);
+  // Optional: see it first. The times go with the request, so the host's accept books one.
+  const [prefs] = usePrefs();
+  const inCamp = prefs.stage === "in_camp";
+  const [seeFirst, setSeeFirst] = useState(false);
+  const [mode, setMode] = useState<"in_person" | "video_call">("in_person");
+  const [slots, setSlots] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const here = `/request/${id}/send`;
@@ -68,11 +76,19 @@ function Send() {
     const { data, error } = await db.rpc("request_room", {
       p_listing: draft.listingId, p_move_in: draft.moveIn, p_months: draft.weeks ? null : draft.months, p_weeks: draft.weeks ?? null, p_message: draft.message || null,
     });
+    if (error) {
+      setBusy(false);
+      return setError(errorText(error));
+    }
+    const booking = data as { id: string; version: number };
+    if (seeFirst && slots.length) {
+      // The request is in either way; a problem with the times shows on the booking.
+      await act(booking, "propose_viewing", { slots, mode: inCamp ? "video_call" : mode }).catch(() => null);
+    }
     setBusy(false);
-    if (error) return setError(errorText(error));
     clearDraft();
     nudge("request", draft.hostName);
-    router.replace(`/bookings/${(data as { id: string }).id}?sent=1`);
+    router.replace(`/bookings/${booking.id}?sent=1`);
   };
 
   if (!draft || checking) {
@@ -105,6 +121,27 @@ function Send() {
           <div className="lrow"><span className="tile t-amber"><BadgeCheck size={20} /></span><span>{verified ? "Verified, with your bunkie profile" : "With your bunkie profile"}</span></div>
           {draft.message && <div className="lrow"><span className="tile t-sky"><MessageSquare size={20} /></span><span style={{ fontSize: 15 }}>{draft.message}</span></div>}
         </div>
+        <div className="stack" style={{ gap: 12 }}>
+          <label className="check">
+            <input type="checkbox" checked={seeFirst} onChange={() => setSeeFirst(!seeFirst)} />
+            See it first (optional)
+          </label>
+          {seeFirst && (
+            <div className="open stack" style={{ gap: 12 }}>
+              {!inCamp && (
+                <div className="seg" role="radiogroup" aria-label="Viewing type">
+                  {(["in_person", "video_call"] as const).map((m) => (
+                    <button key={m} type="button" role="radio" aria-checked={mode === m} className={mode === m ? "on" : ""} onClick={() => setMode(m)}>
+                      {m === "in_person" ? "In person" : "Video call"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <span className="small">Pick up to 3 times. {draft.hostName} confirms one.</span>
+              <SlotPicker slots={slots} onChange={setSlots} max={3} />
+            </div>
+          )}
+        </div>
         <p className="note">Hosts see: your name, photo and a verified badge. Never: your NIN, documents or phone number. Delete your data any time.</p>
         {error && (
           <div className="stack">
@@ -114,7 +151,7 @@ function Send() {
         )}
       </div>
       <div className="foot">
-        <button className="btn" disabled={busy} onClick={send}>{busy ? <span className="spin" /> : `Send request to ${draft.hostName}`}</button>
+        <button className="btn" disabled={busy || (seeFirst && slots.length === 0)} onClick={send}>{busy ? <span className="spin" /> : `Send request to ${draft.hostName}`}</button>
         <span className="small" style={{ textAlign: "center" }}>You won&apos;t pay anything now</span>
       </div>
     </main>

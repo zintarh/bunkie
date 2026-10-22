@@ -88,9 +88,6 @@ end $$;
 set role authenticated;
 select ti.as_user('00000000-0000-0000-0000-0000000000b8');
 select public.booking_action((select id from k), 'matched');
-select ti.as_user('00000000-0000-0000-0000-0000000000a9');
-select public.booking_action((select id from k), 'confirm_terms');
-select ti.as_user('00000000-0000-0000-0000-0000000000b8');
 select public.booking_action((select id from k), 'confirm_terms', null,
   jsonb_build_object('terms_hash', (select terms_hash from public.agreement_versions where booking_id = (select id from k))));
 do $$ begin

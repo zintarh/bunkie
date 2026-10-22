@@ -169,12 +169,9 @@ do $$ begin assert (select count(*) from public.room_address((select id from b1)
 -- Stale version is refused.
 select t.expect_error($$ select public.booking_action((select id from b1), 'viewing_done', 1) $$, '%just changed%');
 select public.booking_action((select id from b1), 'viewing_done');
+-- It matched: the host accepted earlier, so the terms are ready straight away.
 select public.booking_action((select id from b1), 'matched');
-
-select t.as_user('00000000-0000-0000-0000-0000000000a1');
-select public.booking_action((select id from b1), 'confirm_terms');
-
-select t.as_user('00000000-0000-0000-0000-0000000000b1');
+do $$ begin assert (select status from public.bookings where id = (select id from b1)) = 'host_confirmed', 'matched: ready to agree'; end $$;
 select t.expect_error($$ select public.booking_action((select id from b1), 'confirm_terms', null, '{"terms_hash":"nope"}') $$, '%terms changed%');
 select public.booking_action((select id from b1), 'confirm_terms', null,
   jsonb_build_object('terms_hash', (select terms_hash from public.agreement_versions where booking_id = (select id from b1))));
@@ -265,9 +262,6 @@ select public.booking_action((select id from b5), 'book_viewing', null,
   jsonb_build_object('at', (select offered_slots[1] from public.bookings where id = (select id from b5)), 'mode', 'video_call'));
 select public.booking_action((select id from b5), 'viewing_done');
 select public.booking_action((select id from b5), 'matched');
-select t.as_user('00000000-0000-0000-0000-0000000000a1');
-select public.booking_action((select id from b5), 'confirm_terms');
-select t.as_user('00000000-0000-0000-0000-0000000000b4');
 select public.booking_action((select id from b5), 'confirm_terms', null,
   jsonb_build_object('terms_hash', (select terms_hash from public.agreement_versions where booking_id = (select id from b5))));
 create temp table pay5 as select * from public.start_payment((select id from b5));
@@ -413,3 +407,26 @@ do $$ begin
   assert exists (select 1 from private.jobs where payload ->> 'template' = 'accepted_pay'
                  and payload ->> 'booking_id' = (select id::text from q1)), 'corper told to agree and pay';
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- See it first: the corper sends times with the request; the host's accept books one
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000b4');
+select public.booking_action((select id from q1), 'withdraw');   -- free the room
+select t.as_user('00000000-0000-0000-0000-0000000000b3');   -- Bisi
+create temp table v1 as select (public.request_room((select listing_id from ids), current_date + 400, 1)).id;
+grant select on v1 to authenticated, service_role;
+select t.expect_error($$ select public.booking_action((select id from v1), 'propose_viewing', null,
+  jsonb_build_object('slots', jsonb_build_array(now() - interval '1 hour'))) $$, '%future%');
+select public.booking_action((select id from v1), 'propose_viewing', null,
+  jsonb_build_object('mode', 'video_call', 'slots', jsonb_build_array(date_trunc('hour', now()) + interval '1 day', date_trunc('hour', now()) + interval '2 days')));
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+select t.expect_error($$ select public.booking_action((select id from v1), 'accept', null,
+  jsonb_build_object('at', date_trunc('hour', now()) + interval '3 days')) $$, '%their times%');
+select public.booking_action((select id from v1), 'accept', null, jsonb_build_object('at', date_trunc('hour', now()) + interval '2 days'));
+do $$ begin
+  assert (select status from public.bookings where id = (select id from v1)) = 'viewing_booked', 'one tap: accepted and viewing booked';
+  assert (select viewing_at from public.bookings where id = (select id from v1)) = date_trunc('hour', now()) + interval '2 days', 'their time';
+end $$;
+reset role;
