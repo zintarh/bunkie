@@ -196,12 +196,9 @@ function Review({ b, reload, person }: Props & { person: React.ReactNode }) {
         <Err error={error} />
       </div>
       <Foot>
-        {b.weeks ? (
-          <>
-            <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => run("accept", { skip_viewing: true })}>Accept</button>
-            <button className="btn ghost" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Offer a viewing first</button>
-          </>
-        ) : <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Accept</button>}
+        {/* Accepting makes the agreement ready; a viewing first is optional. */}
+        <button className="btn" disabled={!!busy || !b.deadline_at} onClick={() => run("accept")}>Accept</button>
+        <button className="btn ghost" disabled={!!busy || !b.deadline_at} onClick={() => setPicking(true)}>Offer a viewing first</button>
         <button className="link" disabled={!!busy} onClick={() => run("decline")}>Decline</button>
       </Foot>
     </>

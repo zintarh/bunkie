@@ -78,6 +78,7 @@ const TEMPLATES: Record<string, { name: string; text: (o: string) => string }> =
   request_new: { name: "bunkie_request_new", text: (o) => `${o} wants to bunk with you. Reply in the app.` },
   requests_waiting: { name: "bunkie_requests_waiting", text: () => "You have requests waiting for your room." },
   request_accepted: { name: "bunkie_request_accepted", text: (o) => `${o} accepted. Pick a viewing time.` },
+  accepted_pay: { name: "bunkie_accepted_pay", text: (o) => `${o} accepted. Agree and pay to lock the room.` },
   booking_closed: { name: "bunkie_booking_closed", text: () => "A booking closed. See why and find similar rooms." },
   viewing_booked: { name: "bunkie_viewing_booked", text: (o) => `Viewing with ${o} is booked.` },
   viewing_reminder: { name: "bunkie_viewing_reminder", text: (o) => `Your viewing with ${o} is in 2 hours.` },

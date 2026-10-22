@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { CalendarPlus, Camera, Check, CircleAlert, Home, KeyRound, MapPin, Navigation, PartyPopper, Phone, Undo2, Video, Wallet } from "lucide-react";
 import { CLOSE_REASON } from "@/lib/bunkie";
 import { errorText } from "@/lib/auth";
-import { roomTitle, type BookingFull } from "@/lib/bookings";
+import { act, roomTitle, type BookingFull } from "@/lib/bookings";
 import { dayLabel, naira, slotLabel, stayLength, timeLabel, untilLabel } from "@/lib/format";
 import { callFunction } from "@/lib/functions";
 import { shrinkFile } from "@/lib/image";
@@ -59,8 +59,8 @@ function Waiting({ b, reload }: Props) {
         <Timeline steps={[
           { title: "Request sent", sub: new Date(b.created_at).toLocaleString("en-NG", { weekday: "short", hour: "numeric", minute: "2-digit" }), state: "done" },
           { title: `Waiting for ${b.host.first_name}`, sub: waiting ? `${b.host.first_name} is talking to someone else first. You're next in line.` : `${b.host.first_name} has ${untilLabel(b.deadline_at)} to reply`, state: "now" },
-          { title: "View the room", sub: b.is_camp_booking ? "Video call" : "In person or video call", state: "todo" },
-          { title: "Agree and pay", state: "todo" },
+          { title: "Agree and pay", sub: "Held until you move in", state: "todo" },
+          { title: "Move in", sub: dayLabel(b.move_in), state: "todo" },
         ]} />
         <Err error={error} />
       </Body>
@@ -266,24 +266,40 @@ function AfterViewing({ b, reload }: Props) {
 }
 
 function ConfirmAgreement({ b, reload }: Props) {
-  const { busy, error, run } = useStep(b, reload);
+  const { busy, error, setError } = useStep(b, reload);
   const [ok, setOk] = useState(false);
+  const [paying, setPaying] = useState(false);
+  // One tap: agree to the terms, then straight to checkout.
+  const agreeAndPay = async () => {
+    setPaying(true);
+    setError(null);
+    try {
+      await act(b, "confirm_terms", { terms_hash: b.agreement!.terms_hash });
+      const r = await callFunction<{ authorization_url: string }>("paystack", { booking_id: b.id });
+      window.location.href = r.authorization_url;
+    } catch (e) {
+      setError(errorText(e));
+      setPaying(false);
+      await reload();
+    }
+  };
   if (!b.agreement) return <Simple title="Agreement" text="Loading the terms…" />;
   return (
     <>
       <Body>
-        <h1 className="h1">Agreement</h1>
+        <h1 className="h1">{b.host.first_name} accepted</h1>
         <div className="grid2">
           <div className="card row" style={{ padding: 12 }}><span className="avatar" style={{ width: 36, height: 36 }}>{b.host.first_name[0]}</span><span className="stack" style={{ gap: 0 }}><b style={{ fontSize: 14 }}>{b.host.first_name}</b><span className="small" style={{ color: "var(--green-text)", fontWeight: 700 }}>Confirmed</span></span></div>
           <div className="card row" style={{ padding: 12 }}><span className="avatar" style={{ width: 36, height: 36, background: "var(--green-soft)" }}>{b.tenant.first_name[0]}</span><span className="stack" style={{ gap: 0 }}><b style={{ fontSize: 14 }}>You</b><span className="small" style={{ fontWeight: 700 }}>{ok ? "Ready" : "Not yet"}</span></span></div>
         </div>
         <AgreementParts terms={b.agreement.terms} hostName={b.host.first_name} />
-        <p className="small">Confirm within {untilLabel(b.deadline_at)}.</p>
+        <div className="banner green"><Wallet size={20} style={{ flexShrink: 0 }} />Held until you move in. Full refund if the room isn&apos;t as listed.</div>
+        <p className="small">Agree and pay within {untilLabel(b.deadline_at)} to lock the room.</p>
         <Err error={error} />
       </Body>
       <Foot>
         <label className="check"><input type="checkbox" checked={ok} onChange={() => setOk(!ok)} />I agree to these terms</label>
-        <button className="btn" disabled={!ok || !!busy} onClick={() => run("confirm_terms", { terms_hash: b.agreement!.terms_hash })}>Confirm</button>
+        <button className="btn" disabled={!ok || !!busy || paying} onClick={agreeAndPay}>{paying ? <span className="spin" /> : "Agree and pay"}</button>
       </Foot>
     </>
   );

@@ -9,6 +9,7 @@ const COPY: Record<string, (o: string) => { title: string; body: string }> = {
   request_new: (o) => ({ title: "New request", body: `${o} wants to bunk with you.` }),
   requests_waiting: () => ({ title: "Requests waiting", body: "Corpers are waiting to hear about your room." }),
   request_accepted: (o) => ({ title: `${o} accepted`, body: "Pick a viewing time." }),
+  accepted_pay: (o) => ({ title: `${o} accepted`, body: "Agree and pay to lock the room." }),
   booking_closed: () => ({ title: "A booking closed", body: "See why, and rooms like it." }),
   viewing_booked: (o) => ({ title: "Viewing booked", body: `You're seeing ${o}'s room.` }),
   viewing_reminder: (o) => ({ title: "Viewing in 2 hours", body: `With ${o}.` }),
@@ -27,7 +28,7 @@ const COPY: Record<string, (o: string) => { title: string; body: string }> = {
 };
 
 // Sent even in quiet hours.
-const URGENT = new Set(["pay_now", "pay_inspection", "booked"]);
+const URGENT = new Set(["pay_now", "pay_inspection", "booked", "accepted_pay"]);
 
 /** 7am Lagos (UTC+1) if it's between 10pm and 7am there now, else null. */
 export function quietUntil(now = new Date()): Date | null {

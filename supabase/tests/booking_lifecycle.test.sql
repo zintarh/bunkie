@@ -389,3 +389,27 @@ do $$ begin
   assert (select count(*) from public.find_rooms(p_move_in => current_date + 1)) = 0, 'picked date 59 days early: hidden';
 end $$;
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Quick booking: a monthly request accepted with no viewing goes straight to the agreement
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select t.as_user('00000000-0000-0000-0000-0000000000b4');   -- Ngozi
+create temp table q1 as select (public.request_room((select listing_id from ids), current_date + 300, 2)).id;
+grant select on q1 to authenticated, service_role;
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+select public.booking_action((select id from q1), 'accept');
+select t.as_user('00000000-0000-0000-0000-0000000000b4');
+do $$ begin
+  assert (select status from public.bookings where id = (select id from q1)) = 'host_confirmed', 'accept makes the agreement ready';
+end $$;
+select public.booking_action((select id from q1), 'confirm_terms', null,
+  jsonb_build_object('terms_hash', (select terms_hash from public.agreement_versions where booking_id = (select id from q1))));
+do $$ begin
+  assert (select status from public.bookings where id = (select id from q1)) = 'agreed', 'agreed: ready to pay';
+end $$;
+reset role;
+do $$ begin
+  assert exists (select 1 from private.jobs where payload ->> 'template' = 'accepted_pay'
+                 and payload ->> 'booking_id' = (select id::text from q1)), 'corper told to agree and pay';
+end $$;
