@@ -12,8 +12,7 @@ import { addMonths, dayLabel, parseDay, slotLabel, stayLength } from "@/lib/form
 import { nudge } from "@/lib/install";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { qs } from "@/lib/url";
-import { getPrefs } from "@/lib/prefs";
-import { neededChecks, sentKinds } from "@/lib/verification";
+import { VerifyGate } from "@/components/VerifyGate";
 
 /**
  * Last stop before a request goes out. Sends the person through whatever is still missing
@@ -25,8 +24,6 @@ function Send() {
   const [me] = useMe();
   const [draft, setDraft] = useState<RequestDraft | null>(null);
   const [checking, setChecking] = useState(true);
-  // Every check sent, still being looked at: wait here instead of going round to /verify again.
-  const [waiting, setWaiting] = useState(false);
   const [verified, setVerified] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,18 +41,8 @@ function Send() {
     (async () => {
       const { data: answers } = await db.from("bunkie_answers").select("approved_at").eq("user_id", me.user.id).maybeSingle();
       if (!answers?.approved_at) return router.replace(`/questions?next=${qs(here)}`);
+      // Verification comes after the bunkie questions (VerifyGate, below).
       const fresh = await refreshMe();
-      // Testing mode (settings.require_verification_to_request = false) skips ID checks.
-      const { data: rule } = await db.from("settings").select("value").eq("key", "require_verification_to_request").maybeSingle();
-      const mustVerify = rule?.value !== false;
-      if (mustVerify && !fresh?.profile.is_verified) {
-        const { data: rows } = await db.rpc("my_verification");
-        const sent = sentKinds(rows as { kind: string; status: string }[] | null);
-        const stage = getPrefs().stage;
-        const needed = neededChecks(!!fresh?.profile.is_host, stage === "have_ppa" || stage === "serving");
-        if (!needed.every((k) => sent.has(k))) return router.replace(`/verify?next=${qs(here)}`);
-        setWaiting(true);
-      }
       setVerified(!!fresh?.profile.is_verified);
       setChecking(false);
     })();
@@ -87,22 +74,11 @@ function Send() {
   if (!draft || checking) {
     return <main className="screen" style={{ alignItems: "center", justifyContent: "center" }}><span className="spin dark" aria-label="Loading" /></main>;
   }
-  if (waiting) {
-    return (
-      <main className="screen">
-        <TopBar back={`/request/${id}`} />
-        <div className="body">
-          <h1 className="h1">Checking your details</h1>
-          <p className="sub">Your request to {draft.hostName} is saved. Send it once your verified badge shows on your profile.</p>
-        </div>
-        <div className="foot"><Link className="btn" href="/explore">Keep browsing</Link></div>
-      </main>
-    );
-  }
   const end = draft.weeks ? parseDay(draft.moveIn) : addMonths(parseDay(draft.moveIn), draft.months);
   end.setDate(end.getDate() + (draft.weeks ? 7 * draft.weeks : 0) - 1);
 
   return (
+    <VerifyGate here={here} back={`/request/${id}`} saved={`Your request to ${draft.hostName} is saved.`}>
     <main className="screen">
       <TopBar back={`/request/${id}`} />
       <div className="body">
@@ -132,6 +108,7 @@ function Send() {
         <span className="small" style={{ textAlign: "center" }}>You won&apos;t pay anything now</span>
       </div>
     </main>
+    </VerifyGate>
   );
 }
 

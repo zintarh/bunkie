@@ -24,11 +24,12 @@ const COPY: Record<string, (o: string) => { title: string; body: string }> = {
   confirm_move_in: (o) => ({ title: `${o} checked in`, body: "Confirm they moved in." }),
   stay_ending: (o) => ({ title: "Notice given", body: `${o} gave notice. See the last night.` }),
   want_offer: (o) => ({ title: "Room offered", body: `${o} offered you a room.` }),
+  verified: () => ({ title: "You're verified", body: "Send your request now." }),
   new_message: (o) => ({ title: o, body: "Sent you a message" }),
 };
 
 // Sent even in quiet hours.
-const URGENT = new Set(["pay_now", "pay_inspection", "booked", "accepted_pay"]);
+const URGENT = new Set(["pay_now", "pay_inspection", "booked", "accepted_pay", "verified"]);
 
 /** 7am Lagos (UTC+1) if it's between 10pm and 7am there now, else null. */
 export function quietUntil(now = new Date()): Date | null {

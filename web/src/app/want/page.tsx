@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MapPin, Sparkles, X } from "lucide-react";
 import { PlaceSearch, type Place } from "@/components/PlaceSearch";
 import { RequireAuth } from "@/components/auth";
+import { VerifyGate } from "@/components/VerifyGate";
 import { Loading, Seg, Stepper, TopBar } from "@/components/ui";
 import { errorText } from "@/lib/auth";
 import { nudge } from "@/lib/install";
@@ -197,5 +198,11 @@ function Want() {
 }
 
 export default function Page() {
-  return <RequireAuth next="/want"><Want /></RequireAuth>;
+  return (
+    <RequireAuth next="/want">
+      <VerifyGate here="/want" back="/explore">
+        <Want />
+      </VerifyGate>
+    </RequireAuth>
+  );
 }

@@ -84,8 +84,8 @@ export default function Profile() {
           <div className="lrows" style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "var(--green-soft)", boxShadow: "none", color: "var(--ink)" }}>
             <span className="tile t-mint"><ShieldCheck size={20} strokeWidth={2.2} /></span>
             <span className="stack" style={{ gap: 2, flex: 1 }}>
-              <span style={{ fontWeight: 700, fontSize: 16 }}>Checking your details</span>
-              <span className="small">Your verified badge shows here once it&apos;s done.</span>
+              <span style={{ fontWeight: 700, fontSize: 16 }}>Your account is under review</span>
+              <span className="small">We&apos;ll let you know when you&apos;re verified.</span>
             </span>
           </div>
         )}

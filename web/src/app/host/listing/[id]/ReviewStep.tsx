@@ -89,7 +89,7 @@ export function ReviewStep({ listing, reload }: StepProps) {
               {missing.map((m) => m === "verification" && verifyWaiting ? (
                 <div key={m} className="lrow">
                   <span className="tile t-mint"><Check size={20} /></span>
-                  <span className="stack" style={{ gap: 0, flex: 1 }}><span>Verify you</span><span className="small">Checking your details</span></span>
+                  <span className="stack" style={{ gap: 0, flex: 1 }}><span>Verify you</span><span className="small">Your account is under review</span></span>
                 </div>
               ) : (
                 <Link key={m} className="lrow" href={FIX[m]?.href(listing.id) ?? "#"}>

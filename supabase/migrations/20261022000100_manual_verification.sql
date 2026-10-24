@@ -20,6 +20,8 @@ drop function public.admin_set_verification(uuid, text, boolean, text);
 create or replace function public.admin_set_verification(
   p_user uuid, p_kind text, p_passed boolean, p_note text default null, p_gender public.gender default null
 ) returns void language plpgsql security definer set search_path = '' as $$
+declare
+  v_was boolean := (select is_verified from public.profiles where id = p_user);
 begin
   perform private.require_admin();
   if p_kind = 'nin' and p_passed and p_gender is null then
@@ -34,6 +36,10 @@ begin
                                          jsonb_build_object('note', p_note));
   perform private.audit('verification_' || case when p_passed then 'pass' else 'fail' end, 'user', p_user::text,
                         jsonb_build_object('kind', p_kind, 'note', p_note));
+  -- Just verified: tell them, so they can send the request they saved.
+  if not v_was and (select is_verified from public.profiles where id = p_user) then
+    perform private.notify(p_user, 'verified', null);
+  end if;
 end $$;
 revoke execute on function public.admin_set_verification(uuid, text, boolean, text, public.gender) from public, anon;
 grant execute on function public.admin_set_verification(uuid, text, boolean, text, public.gender) to authenticated;
@@ -117,8 +123,9 @@ update public.profiles p set is_verified = (
                      then array['phone', 'nin', 'call_up', 'ppa_letter']
                    else array['phone', 'nin', 'call_up'] end) k);
 
--- Launch: hosts are verified before a room goes live ("every host is verified").
-update public.settings set value = 'true' where key = 'require_host_verification';
+-- Launch: hosts are verified before a room goes live ("every host is verified"), and corpers
+-- are verified as corp members before they request a room or post what they need.
+update public.settings set value = 'true' where key in ('require_host_verification', 'require_verification_to_request');
 
 -- Launch: remove the test account's "looking for a room" post from the live app.
 delete from public.room_wants

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChevronRight, Megaphone, Users } from "lucide-react";
 import { useMe } from "@/lib/auth";
+import { loadDraft, type RequestDraft } from "@/lib/draft";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 type Mine = { area_label: string; matches: number; offers: number };
@@ -111,6 +112,24 @@ export function LookingCard({ style }: { style?: React.CSSProperties }) {
     <Link href="/host/looking" className="card row" style={{ gap: 12, padding: "12px 14px", color: "var(--ink)", ...style }}>
       <span className="tile t-sky"><Users size={20} /></span>
       <span style={{ flex: 1, fontWeight: 700 }}>{n} {n === 1 ? "corper is" : "corpers are"} looking for a room</span>
+      <ChevronRight size={18} color="var(--muted)" />
+    </Link>
+  );
+}
+
+/** Home: a request saved while their account was under review, ready to send now they're verified. */
+export function SavedRequestCard({ style }: { style?: React.CSSProperties }) {
+  const [me] = useMe();
+  const [draft, setDraft] = useState<RequestDraft | null>(null);
+  useEffect(() => setDraft(loadDraft()), []);
+  if (!me?.profile.is_verified || !draft) return null;
+  return (
+    <Link href={`/request/${draft.listingId}/send`} className="card row" style={{ gap: 12, padding: 14, color: "var(--ink)", background: "var(--green-soft)", boxShadow: "none", ...style }}>
+      <span className="tile t-mint" style={{ background: "#fff" }}><Megaphone size={20} /></span>
+      <span className="stack" style={{ gap: 0, flex: 1, minWidth: 0 }}>
+        <b>Send your request to {draft.hostName}</b>
+        <span className="small">You&apos;re verified. It&apos;s ready to go.</span>
+      </span>
       <ChevronRight size={18} color="var(--muted)" />
     </Link>
   );

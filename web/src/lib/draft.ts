@@ -18,10 +18,10 @@ export function saveDraft(d: RequestDraft) {
   }
 }
 
-export function loadDraft(listingId: string): RequestDraft | null {
+export function loadDraft(listingId?: string): RequestDraft | null {
   try {
     const d = JSON.parse(window.localStorage.getItem(KEY) ?? "null") as RequestDraft | null;
-    return d && d.listingId === listingId ? d : null;
+    return d && (!listingId || d.listingId === listingId) ? d : null;
   } catch {
     return null;
   }

@@ -69,3 +69,8 @@ do $$ begin
   assert not exists (select 1 from private.verifications where user_id = '00000000-0000-0000-0000-0000000a0002' and status = 'pending'), 'nothing left waiting';
   assert not exists (select 1 from private.verifications where user_id = '00000000-0000-0000-0000-0000000a0002' and result ? 'nin'), 'NIN removed once decided';
 end $$;
+
+do $$ begin
+  assert exists (select 1 from private.jobs where payload ->> 'template' = 'verified'
+                 and payload ->> 'user_id' = '00000000-0000-0000-0000-0000000a0002'), 'told they are verified';
+end $$;

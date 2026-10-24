@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, SlidersHorizontal, Tent, Users, Video } from "lucide-react";
 import { ContinueHosting } from "@/components/ContinueHosting";
-import { LookingStrip, MyWantCard } from "@/components/Wants";
+import { LookingStrip, MyWantCard, SavedRequestCard } from "@/components/Wants";
 import { InstallCard } from "@/components/InstallPrompt";
 import { HomeRail } from "@/components/DesktopFrame";
 import { Filters, activeFilterCount } from "@/components/Filters";
@@ -180,6 +180,7 @@ export default function Explore() {
       <div className="body feed-body" style={{ padding: "4px 16px 24px", gap: 0 }}>
         <div className="feed-col">
         <ContinueHosting style={{ marginTop: 14 }} />
+        <SavedRequestCard style={{ marginTop: 14 }} />
         <MyWantCard style={{ marginTop: 14 }} invite={few} />
         <InstallCard style={{ marginTop: 14 }} />
         {inCamp && (
