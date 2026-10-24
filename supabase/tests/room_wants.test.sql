@@ -21,6 +21,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000007c1', 'someone-7c1@example.com', '{"first_name":"Chi"}');
 update public.profile_private set batch_id = '2026-B1' where user_id = '00000000-0000-0000-0000-0000000007a1';
 update public.settings set value = 'false' where key = 'require_verification_to_request';
+-- Hosts are verified before their rooms show in search.
+update public.profiles set is_verified = true where id = '00000000-0000-0000-0000-0000000007b1';
 insert into public.listings (id, host_id, status, area_name, area_lat, area_lng, room_kind, household, rent_monthly, allowed_to_share, published_at, monthly_total)
 values ('00000000-0000-0000-0000-0000000007d1', '00000000-0000-0000-0000-0000000007b1', 'live', 'Utako', 9.069, 7.435, 'own_room', 'mixed', 60000, true, now(), 60000),
        ('00000000-0000-0000-0000-0000000007d2', '00000000-0000-0000-0000-0000000007b1', 'draft', 'Utako', 9.069, 7.435, 'own_room', 'mixed', 60000, false, null, 60000);

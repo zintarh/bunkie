@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Award, BadgeCheck, Bath, Eye, Star, CalendarDays, ChevronLeft, Clock, Flag, Heart, Info, MessageCircle, Share2, Tent, Wallet } from "lucide-react";
 import { useToast } from "@/components/ui";
+import { VerifyGate } from "@/components/VerifyGate";
 import { errorText, useMe } from "@/lib/auth";
 import { openChat } from "@/lib/chat";
 import { qs } from "@/lib/url";
@@ -32,6 +33,8 @@ export function RoomView({ room }: { room: RoomDetail }) {
   const [toast, showToast] = useToast();
   const [me] = useMe();
   const [opening, setOpening] = useState(false);
+  // Messaging hosts needs a verified account: off to verify, or "under review".
+  const [needsVerify, setNeedsVerify] = useState(false);
   const isDemo = room.id.startsWith("demo-");
 
   // Opens the chat with this host (signed out: sign up first, then come back here).
@@ -42,6 +45,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
       router.push(`/inbox/${await openChat(room.id)}`);
     } catch (e) {
       setOpening(false);
+      if ((e as { details?: string }).details === "verify") return setNeedsVerify(true);
       showToast(errorText(e));
     }
   };
@@ -69,6 +73,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
     }
   };
 
+  if (needsVerify) return <VerifyGate here={`/rooms/${room.id}`} back={`/rooms/${room.id}`}>{null}</VerifyGate>;
   return (
     <main className="screen">
       <div className="body" style={{ padding: 0, gap: 0 }}>

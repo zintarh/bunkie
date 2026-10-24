@@ -78,9 +78,9 @@ begin
   );
 end $$;
 
--- No selfie (liveness) check for now: verified means phone, NIN and the call-up letter
--- (hosts: proof of address). Corpers who sent a PPA acceptance letter (they have their PPA)
--- need that passed too.
+-- No selfie (liveness) or phone code for now: verified means NIN and the call-up letter
+-- (hosts: proof of address); the phone number is kept on the profile without a code.
+-- Corpers who sent a PPA acceptance letter (they have their PPA) need that passed too.
 create or replace function public.sys_record_verification(
   p_user uuid, p_kind text, p_passed boolean, p_provider text, p_ref text,
   p_masked_name text default null, p_gender public.gender default null, p_result jsonb default '{}'
@@ -101,10 +101,10 @@ begin
   end if;
 
   select is_host into v_is_host from public.profiles where id = p_user;
-  v_needed := case when v_is_host then array['phone', 'nin', 'proof_of_address']
+  v_needed := case when v_is_host then array['nin', 'proof_of_address']
                    when exists (select 1 from private.verifications v where v.user_id = p_user and v.kind = 'ppa_letter')
-                     then array['phone', 'nin', 'call_up', 'ppa_letter']
-                   else array['phone', 'nin', 'call_up'] end;
+                     then array['nin', 'call_up', 'ppa_letter']
+                   else array['nin', 'call_up'] end;
   update public.profiles set is_verified = (
     select bool_and(exists (select 1 from private.verifications v
                             where v.user_id = p_user and v.kind = k and v.status = 'passed'))
@@ -118,10 +118,10 @@ end $$;
 -- Recount everyone under the new rule.
 update public.profiles p set is_verified = (
   select bool_and(exists (select 1 from private.verifications v where v.user_id = p.id and v.kind = k and v.status = 'passed'))
-  from unnest(case when p.is_host then array['phone', 'nin', 'proof_of_address']
+  from unnest(case when p.is_host then array['nin', 'proof_of_address']
                    when exists (select 1 from private.verifications v where v.user_id = p.id and v.kind = 'ppa_letter')
-                     then array['phone', 'nin', 'call_up', 'ppa_letter']
-                   else array['phone', 'nin', 'call_up'] end) k);
+                     then array['nin', 'call_up', 'ppa_letter']
+                   else array['nin', 'call_up'] end) k);
 
 -- Launch: hosts are verified before a room goes live ("every host is verified"), and corpers
 -- are verified as corp members before they request a room or post what they need.

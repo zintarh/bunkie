@@ -1,4 +1,5 @@
 // Verification steps. The app calls this with { action, ... } as the signed-in user.
+//   phone_number     { phone }                saves the number (no SMS code until a provider is connected)
 //   phone_confirmed  after Supabase Auth confirmed the phone (updateUser + verifyOtp 'phone_change')
 //   nin              { nin, dob }            -> masked name back; records NIN + gender from the NIN record
 //   nin_not_me       marks the NIN step failed so it can be redone
@@ -28,6 +29,14 @@ serve(async (req) => {
   const ownPath = (p: unknown) => typeof p === "string" && p.startsWith(`${user.id}/`) && !p.includes("..");
 
   switch (body.action) {
+    // No SMS provider yet: keep the number; it isn't one of the checks for now.
+    case "phone_number": {
+      const digits = String(body.phone ?? "").replace(/\D/g, "").replace(/^234/, "").replace(/^0/, "");
+      if (digits.length !== 10) throw new HttpError(400, "Enter your phone number.");
+      await admin.from("profile_private").update({ phone: `+234${digits}` }).eq("user_id", user.id);
+      return json({ ok: true });
+    }
+
     case "phone_confirmed": {
       if (!user.phone || !user.phone_confirmed_at) throw new HttpError(400, "Confirm the code sent to your phone first.");
       const phone = `+${user.phone.replace(/^\+/, "")}`;

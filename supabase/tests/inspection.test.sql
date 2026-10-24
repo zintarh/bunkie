@@ -20,6 +20,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000b8', 'corper-b8@example.com', '{"first_name":"Kola"}'),
   ('00000000-0000-0000-0000-0000000000b9', 'corper-b9@example.com', '{"first_name":"Uche"}');
 update public.settings set value = 'false' where key = 'require_verification_to_request';
+-- Hosts are verified before their rooms show in search.
+update public.profiles set is_verified = true where id = '00000000-0000-0000-0000-0000000000a9';
 insert into public.listings (id, host_id, status, area_name, room_kind, household, rent_monthly, deposit, allowed_to_share,
                              published_at, inspection_fee, monthly_total)
 values ('00000000-0000-0000-0000-0000000000c9', '00000000-0000-0000-0000-0000000000a9', 'live', 'Jabi', 'own_room', 'mixed',

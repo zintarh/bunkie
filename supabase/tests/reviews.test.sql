@@ -18,6 +18,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000d1', 'host-d1@example.com', '{"first_name":"Dayo"}'),
   ('00000000-0000-0000-0000-0000000000d2', 'corper-d2@example.com', '{"first_name":"Funmi"}'),
   ('00000000-0000-0000-0000-0000000000d3', 'other-d3@example.com', '{"first_name":"Gbenga"}');
+-- Hosts are verified before their rooms show in search.
+update public.profiles set is_verified = true where id = '00000000-0000-0000-0000-0000000000d1';
 insert into public.listings (id, host_id, status, area_name, room_kind, household, rent_monthly, allowed_to_share, published_at, monthly_total)
 values ('00000000-0000-0000-0000-0000000000d9', '00000000-0000-0000-0000-0000000000d1', 'live', 'Lugbe', 'own_room', 'mixed', 30000, true, now(), 30000);
 -- A stay that ended three days ago, and one still going.

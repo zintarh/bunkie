@@ -74,3 +74,16 @@ do $$ begin
   assert exists (select 1 from private.jobs where payload ->> 'template' = 'verified'
                  and payload ->> 'user_id' = '00000000-0000-0000-0000-0000000a0002'), 'told they are verified';
 end $$;
+
+-- No phone code for now: NIN and call-up letter passed is enough.
+insert into auth.users (id, email, raw_user_meta_data) values ('00000000-0000-0000-0000-0000000a0003', 'corper-mv3@example.com', '{"first_name":"Tobi"}');
+select public.sys_submit_verification('00000000-0000-0000-0000-0000000a0003', 'nin', 'manual', '{"nin":"10987654321","dob":"1999-05-06"}');
+select public.sys_submit_verification('00000000-0000-0000-0000-0000000a0003', 'call_up', 'manual', '{"path":"y/call.pdf"}');
+set role authenticated;
+select tmv.as_user('00000000-0000-0000-0000-0000000a0001');
+select public.admin_set_verification('00000000-0000-0000-0000-0000000a0003', 'nin', true, null, 'male');
+select public.admin_set_verification('00000000-0000-0000-0000-0000000a0003', 'call_up', true);
+reset role;
+do $$ begin
+  assert (select is_verified from public.profiles where id = '00000000-0000-0000-0000-0000000a0003'), 'verified without a phone code';
+end $$;

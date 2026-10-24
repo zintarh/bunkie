@@ -35,13 +35,15 @@ function Verify() {
     // Sent and waiting counts as done here: nobody is asked for the same thing twice.
     const sent = sentKinds(data as { kind: string; status: string }[] | null);
     const passed = new Set<StepKey>();
-    if (sent.has("phone")) passed.add("phone");
+    // The phone step is done once a number is on the profile (no SMS code for now).
+    const { data: own } = await db.from("profile_private").select("phone").eq("user_id", me?.user.id ?? "").maybeSingle();
+    if (sent.has("phone") || own?.phone) passed.add("phone");
     if (sent.has("nin")) passed.add("nin");
     if (sent.has("proof_of_address")) passed.add("address");
     if (sent.has("call_up") && (!hasPpa || sent.has("ppa_letter"))) passed.add("call_up");
     setDone(passed);
-  }, [hasPpa]);
-  useEffect(() => { if (prefsReady) void load(); }, [load, prefsReady]);
+  }, [hasPpa, me]);
+  useEffect(() => { if (prefsReady && me) void load(); }, [load, prefsReady, me]);
 
   const current = done ? steps.find((s) => !done.has(s)) : undefined;
   useEffect(() => {
@@ -75,33 +77,15 @@ function Privacy() {
 
 function PhoneStep({ onDone }: { onDone: () => void }) {
   const [phone, setPhone] = useState("");
-  const [sent, setSent] = useState(false);
-  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const digits = phone.replace(/\D/g, "").replace(/^0/, "");
-  const e164 = `+234${digits}`;
 
-  const send = async () => {
+  const save = async () => {
     setBusy(true);
     setError(null);
-    const { error } = (await supabaseBrowser()?.auth.updateUser({ phone: e164 })) ?? {};
-    setBusy(false);
-    if (error) return setError(errorText(error));
-    setSent(true);
-  };
-  const confirm = async (token: string) => {
-    const db = supabaseBrowser();
-    if (!db) return;
-    setBusy(true);
-    setError(null);
-    const { error } = await db.auth.verifyOtp({ phone: e164, token, type: "phone_change" });
-    if (error) {
-      setBusy(false);
-      return setError("That code is wrong or expired.");
-    }
     try {
-      await callFunction("verify", { action: "phone_confirmed" });
+      await callFunction("verify", { action: "phone_number", phone: digits });
       onDone();
     } catch (e) {
       setError(errorText(e));
@@ -113,32 +97,17 @@ function PhoneStep({ onDone }: { onDone: () => void }) {
   return (
     <>
       <div className="body open">
-        <h1 className="h1">{sent ? "Enter the code" : "Your phone number"}</h1>
-        {!sent ? (
-          <div className="stack">
-            <label className="lbl" htmlFor="phone">Phone number</label>
-            <label className="field"><span className="prefix">+234</span>
-              <input id="phone" inputMode="tel" autoComplete="tel-national" placeholder="803 000 0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </label>
-          </div>
-        ) : (
-          <div className="stack">
-            <span className="small" style={{ fontSize: 15 }}>Sent to {e164}</span>
-            <label className="field"><span className="sr-only">6-digit code</span>
-              <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} autoFocus
-                onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 6); setCode(v); if (v.length === 6) void confirm(v); }}
-                style={{ letterSpacing: ".4em", fontSize: 22, fontWeight: 700 }} />
-            </label>
-            <button className="link" style={{ alignSelf: "flex-start" }} onClick={send}>Resend code</button>
-          </div>
-        )}
+        <h1 className="h1">Your phone number</h1>
+        <div className="stack">
+          <label className="lbl" htmlFor="phone">Phone number</label>
+          <label className="field"><span className="prefix">+234</span>
+            <input id="phone" inputMode="tel" autoComplete="tel-national" placeholder="803 000 0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </label>
+        </div>
         {error && <p className="err" role="alert">{error}</p>}
         <Privacy />
       </div>
-      <div className="foot">
-        {!sent ? <button className="btn" disabled={digits.length !== 10 || busy} onClick={send}>{busy ? <span className="spin" /> : "Send code"}</button>
-          : <button className="btn" disabled={code.length !== 6 || busy} onClick={() => confirm(code)}>{busy ? <span className="spin" /> : "Continue"}</button>}
-      </div>
+      <div className="foot"><button className="btn" disabled={digits.length !== 10 || busy} onClick={save}>{busy ? <span className="spin" /> : "Continue"}</button></div>
     </>
   );
 }
