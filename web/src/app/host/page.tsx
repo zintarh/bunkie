@@ -41,7 +41,7 @@ export default function HostHome() {
 
   const start = async () => {
     const db = supabaseBrowser();
-    if (!me) return router.push("/signup?next=/host");
+    if (!me) return router.push("/login?next=/host");
     if (!db) return;
     if (!me.profile.corper_status) return router.push("/host/corper");
     setBusy(true);

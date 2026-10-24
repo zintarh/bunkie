@@ -58,7 +58,7 @@ function SideNav({ path, onSearch, searching }: { path: string; onSearch: () => 
       <div className="sidenav-items sidenav-bottom">
         {me
           ? item("/profile", me.profile.first_name || "Profile", <span className={`sidenav-avatar${is("/profile") ? " on" : ""}`}>{photo ? <img src={photo} alt="" /> : initial(me.profile.first_name)}</span>)
-          : <Link href="/signup" className="sidenav-signup"><span className="sidenav-label">Sign up</span><span className="sidenav-signup-short">Join</span></Link>}
+          : <Link href="/login" className="sidenav-signup"><span className="sidenav-label">Sign in</span><span className="sidenav-signup-short">Sign in</span></Link>}
       </div>
     </nav>
   );
@@ -106,7 +106,7 @@ export function HomeRail() {
           <span className="stack" style={{ gap: 0, minWidth: 0 }}><b>{me.profile.first_name || "You"}</b><span className="small" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{me.user.email}</span></span>
         </Link>
       ) : (
-        <div className="homerail-card"><b>Find your bunkie</b><span className="small">Sign up to message hosts and request rooms.</span><Link className="btn sm" href="/signup">Sign up</Link></div>
+        <div className="homerail-card"><b>Find your bunkie</b><span className="small">Sign in to message hosts and request rooms.</span><Link className="btn sm" href="/login">Sign in</Link></div>
       )}
       <Link href={prefs.stage === "in_camp" ? "/start" : "/ppa"} className="homerail-card">
         <span className="small" style={{ fontWeight: 700 }}>{prefs.stage === "in_camp" ? "In camp" : "Your PPA"}</span>

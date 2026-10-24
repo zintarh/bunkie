@@ -29,8 +29,9 @@ export default function Bookings() {
         <div className="hero phero" style={{ margin: "-4px -20px 0" }}><h1 className="h1">Bookings</h1></div>
         {!loading && !me ? (
           <div className="card stack" style={{ gap: 14 }}>
-            <span style={{ fontWeight: 700, fontSize: 17 }}>Sign up to see your bookings</span>
-            <Link className="btn" href="/signup?next=/bookings">Sign up</Link>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Sign in to see your bookings</span>
+            <Link className="btn" href="/login?next=/bookings">Sign in</Link>
+            <Link className="link" href="/signup?next=/bookings">New here? Create an account</Link>
           </div>
         ) : (
           <>

@@ -88,7 +88,7 @@ export function RequireAuth({ children }: { children: ReactNode; next?: string }
   useEffect(() => {
     // Come back to exactly this page, query string included.
     const here = window.location.pathname + window.location.search;
-    if (!loading && !me) router.replace(`/signup?next=${qs(here)}`);
+    if (!loading && !me) router.replace(`/login?next=${qs(here)}`);
   }, [loading, me, router]);
   if (!me) {
     return (

@@ -42,7 +42,7 @@ export default function Intro() {
         <Link href="/" className="wordmark" aria-label="Bunkie home" style={{ gap: 8, color: "var(--ink)" }}>
           <i style={{ background: "var(--green)", color: "var(--amber)", borderRadius: 8 }}><BunkMark /></i>bunkie
         </Link>
-        {last ? <Link className="link" href="/signup">Sign up</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
+        {last ? <Link className="link" href="/login">Sign in</Link> : <button className="link muted" onClick={() => go(SLIDES.length - 1)}>Skip</button>}
       </div>
 
       <div className={styles.viewport}

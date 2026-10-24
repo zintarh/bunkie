@@ -39,7 +39,7 @@ export function RoomView({ room }: { room: RoomDetail }) {
 
   // Opens the chat with this host (signed out: sign up first, then come back here).
   const message = async () => {
-    if (!me) return router.push(`/signup?next=${qs(`/rooms/${room.id}`)}`);
+    if (!me) return router.push(`/login?next=${qs(`/rooms/${room.id}`)}`);
     setOpening(true);
     try {
       router.push(`/inbox/${await openChat(room.id)}`);

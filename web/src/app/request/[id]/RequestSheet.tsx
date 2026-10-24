@@ -70,7 +70,7 @@ export function RequestSheet({ room }: { room: RoomDetail }) {
     saveDraft({ listingId: room.id, hostName: room.host_first_name, moveIn, months: m, weeks: short ? w : null, message,
       viewing: seeFirst && slots.length ? { mode: viewMode, slots } : null });
     const next = `/request/${room.id}/send`;
-    router.push(me ? next : `/signup?next=${qs(next)}`);
+    router.push(me ? next : `/login?next=${qs(next)}`);
   };
 
   return (
