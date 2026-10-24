@@ -13,7 +13,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { sentKinds } from "@/lib/verification";
 
 type StepKey = "phone" | "nin" | "liveness" | "call_up" | "address";
-const PRIVACY = "Hosts see your name, photo and a verified badge. Never your NIN, documents or phone number.";
+const PRIVACY = "We only use your details to verify you. We never share them with anyone.";
 
 function Verify() {
   const router = useRouter();
@@ -272,7 +272,7 @@ function CallUpStep({ userId, hasPpa, onDone }: { userId: string; hasPpa: boolea
         <DocPicker label="NYSC call-up letter" file={file} setFile={setFile} />
         {hasPpa && <DocPicker label="PPA acceptance letter" file={ppaFile} setFile={setPpaFile} />}
         {error && <p className="err" role="alert">{error}</p>}
-        <p className="note"><Lock size={16} style={{ flexShrink: 0, marginTop: 1 }} />Delete your data any time.</p>
+        <Privacy />
       </div>
       <div className="foot"><button className="btn" disabled={!valid || !file || (hasPpa && !ppaFile) || busy} onClick={submit}>{busy ? <span className="spin" /> : "Finish"}</button></div>
     </>
